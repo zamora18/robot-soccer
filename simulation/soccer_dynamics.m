@@ -88,14 +88,18 @@ sys = simsizes(sizes);
 % initialize the initial conditions
 %
 x0  = [...
+    % Continuous States
     P.home_team_initial_configurations;... % +x-axis to right, +y-axis up
     P.away_team_initial_configurations;... % +x-axis to left,  +y-axis down
     P.ball_initial_position;... % home team coordinate system
     P.ball_initial_velocity;... % home team coordinate system
+    
+    % Discrete States
     zeros(size(P.home_team_initial_configurations));
     zeros(size(P.away_team_initial_configurations));
     zeros(size(P.ball_initial_position));
     zeros(size(P.ball_initial_velocity));
+    
     0; 0; % initial score is zero-zero
     ];
 
@@ -165,7 +169,7 @@ function sys=mdlDerivatives(t,x,u, P)
         home_robotdot(:,i) = v;
     end
     
-    % home robot dynamics
+    % away robot dynamics
     for i=1:P.num_robots,
         R = [...
             cos(away_robot(3,i)), -sin(away_robot(3,i)), 0;...
