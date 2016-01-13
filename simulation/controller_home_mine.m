@@ -45,9 +45,7 @@ function v_c=controller_home_(uu,P)
     t      = uu(1+NN);
 
     %------------
-    % Choose the strategy to perform
-    
-    % TODO: Build strategy picker
+    % Choose the strategy to perform    
     
     v_c = strategy_strongOffense(robot,opponent,ball,P,t);
     
@@ -80,8 +78,8 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     ball_x = ball(1);
     bot1_x = robot(1,1);
     
-    %set some configuration variables
-    guard_at_x = -P.field_length/12; % After the ball and bot go past this point,
+    % set some configuration variables
+    guard_at_x = P.field_length/12; % After the ball and bot go past this point,
                     % the other bot switches into defense mode at that point
 
     % Predicates
@@ -102,8 +100,74 @@ end
 
 %-----------------------------------------
 % strategy: strong defense
-%   - do something
-%   - do something else
+%   - If ball is behind both bots and at least one opponent is on the right
+%   - have bot1 screen while bot2 goes to guard goal.
+%   - bot2 defend goal
+%   - 
+function v_c = strategy_strongDefense(robot, opponent, ball, P, t)
+
+    % Break out x variables for comparison
+    ball_x = ball(1);
+    bot1_x = robot(1,1);
+    bot2_x = robot(1,2);
+    opp1_x = opponent(1,1);
+    opp2_x = opponent(1,2);
+    
+    v1 = [0 0 0];
+    
+    v2 = play_guardGoal(robot(:,2), ball, P);
+    
+    v_c = [v1; v2];
+end
+
+%-----------------------------------------
+% strategy: switch roles
+%   - Robots switch between offense and defense roles if:
+%   	- ball has not moved for a while
+%       - bots have not moved for a while
+%       - if ball gets behind the offense (still in front of defender)
+%   - sub strategy: strong defense
+function v_c = strategy_switchRoles(robot, opponent, ball, P, t)
+
+    % Declare and initialize persistent variables
+    persistent bot_position_d1;
+    if (t == 0)
+        bot_position_d1 = robot;
+    end
+    
+    % At each time interval delta, compare robots locations to old data
+    delta = 1; % second
+    epsilon = 0.15; % meters
+    if (~mod(t,delta))
+        % calculate the distance between old and new positions
+        dist1 = utility_distanceOf(robot(:,1), bot_position_d1(:,1));
+        dist2 = utility_distanceOf(robot(:,2), bot_position_d1(:,2));
+        
+        % Check if either bot has changed by more than epislon
+        if (dist1 < epsilon && dist2 < epsilon)
+            % switch roles
+        end
+        
+        % update old data
+        bot_position_d1 = robot;
+    end
+    
+    % will the ball ever not move while the robots are still moving?
+    % Maybe if they have really good defense (screening)? It seems unlikely
+    
+    % If the ball gets behind the offense then switch roles
+    if (ball(1))
+        
+    end
+    
+    
+    
+    v1 = [0 0 0];
+    
+    v2 = [0 0 0];
+    
+    v_c = [v1; v2];
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plays %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -142,12 +206,6 @@ end
 %   - keep heading toward ball
 function v = play_guardGoal(robot, ball, P)
   
-%   % normal vector from ball to goal
-%   n = P.goal-ball;
-%   n = n/norm(n);
-%   % compute position 10cm behind ball, but aligned with goal.
-%   position = ball - 0.2*n;
-  
   % Set bounds of the segment (i.e., the goalie box)
   y_min = -P.field_width/3;
   y_max =  P.field_width/3;
@@ -156,12 +214,14 @@ function v = play_guardGoal(robot, ball, P)
   x_pos = -P.field_length/3;
   
   v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,ball,P);
-    
-%   if norm(position-robot(1:2))<.2025,
-%       v = skill_goToPoint(robot, P.goal, P);
-%   else
-%       v = skill_goToPoint(robot, position, P);
-%   end
+end
+
+%-----------------------------------------
+% play: screen
+%   - get in between ball and specified opponent bot
+%   - face the opponent
+%   - keep heading toward ball
+function v = play_screen(robot, ball, P)
 
 end
 
