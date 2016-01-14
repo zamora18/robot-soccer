@@ -31,10 +31,10 @@ function v_c=controller_away(uu,P)
     % current time
     t      = uu(1+NN);
     
-    %v_c = strategy_strong_offense(robot, opponent, ball, P, t);
+    v_c = strategy_strong_offense(robot, opponent, ball, P, t);
 %     v_c = strategy_switch_offense_and_defense(robot, opponent, ball, P, t);
 
-    v_c = [[0 0 0] [0 0 0]];
+%     v_c = [[0 0 0] [0 0 0]];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Strategies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

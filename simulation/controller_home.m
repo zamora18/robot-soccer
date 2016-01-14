@@ -34,8 +34,8 @@ function v_c=controller_home(uu,P)
 %     v_c = strategy_strong_offense(robot, opponent, ball, P, t);
     v_c = strategy_switch_offense_and_defense(robot, opponent, ball, P, t);
     
-    v_c(1:3) = play_rush_goal(robot(:,1), ball, P);
-    v_c(4:end) = [0 0 0];
+%     v_c(1:3) = play_rush_goal(robot(:,1), ball, P);
+%     v_c(4:end) = [0 0 0];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Strategies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
