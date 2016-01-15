@@ -11,10 +11,17 @@ class Roboclaw:
 	def drive_forward_m1(self,speed):
 		self.roboserial.send_command(self.addr, Cmd.M1FORWARD, speed)
 
-	# def M1Backward(addr,val):
-	# 	sendcommand(addr,1)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def drive_backward_m1(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.M1BACKWARD, speed)
+
+	def set_min_main_battery(self,voltage_mode):
+		self.roboserial.send_command(self.addr, Cmd.SETMINMB, voltage_mode)
+
+	def drive_forward_m2(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.M2FORWARD, speed)
+
+	def drive_backward_m2(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.M2BACKWARD, speed)
 
 	# def SetMinMainBattery(addr,val):
 	# 	sendcommand(addr,2)
@@ -591,6 +598,9 @@ class RoboSerial:
 
 		# Send the value
 		self.port.write(chr(val))
+
+		# And finally, the checksum!
+		self.port.write(chr(checksum))
 
 	def read_byte(self):
 		val = struct.unpack('>B',self.port.read(1))
