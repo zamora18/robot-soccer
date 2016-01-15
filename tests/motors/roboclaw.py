@@ -2,638 +2,518 @@ import serial
 import struct
 import time
 
-checksum = 0
-
-def sendcommand(address,command):
-	global checksum
-	checksum = address
-	port.write(chr(address));
-	checksum += command
-	port.write(chr(command));
-	return;
-
-def readbyte():
-	global checksum
-	val = struct.unpack('>B',port.read(1));
-	checksum += val[0]
-	return val[0];	
-def readsbyte():
-	global checksum
-	val = struct.unpack('>b',port.read(1));
-	checksum += val[0]
-	return val[0];	
-def readword():
-	global checksum
-	val = struct.unpack('>H',port.read(2));
-	checksum += (val[0]&0xFF)
-	checksum += (val[0]>>8)&0xFF
-	return val[0];	
-def readsword():
-	global checksum
-	val = struct.unpack('>h',port.read(2));
-	checksum += val[0]
-	checksum += (val[0]>>8)&0xFF
-	return val[0];	
-def readlong():
-	global checksum
-	val = struct.unpack('>L',port.read(4));
-	checksum += val[0]
-	checksum += (val[0]>>8)&0xFF
-	checksum += (val[0]>>16)&0xFF
-	checksum += (val[0]>>24)&0xFF
-	return val[0];	
-def readslong():
-	global checksum
-	val = struct.unpack('>l',port.read(4));
-	checksum += val[0]
-	checksum += (val[0]>>8)&0xFF
-	checksum += (val[0]>>16)&0xFF
-	checksum += (val[0]>>24)&0xFF
-	return val[0];	
-
-def writebyte(val):
-	global checksum
-	checksum += val
-	return port.write(struct.pack('>B',val));
-def writesbyte(val):
-	global checksum
-	checksum += val
-	return port.write(struct.pack('>b',val));
-def writeword(val):
-	global checksum
-	checksum += val
-	checksum += (val>>8)&0xFF
-	return port.write(struct.pack('>H',val));
-def writesword(val):
-	global checksum
-	checksum += val
-	checksum += (val>>8)&0xFF
-	return port.write(struct.pack('>h',val));
-def writelong(val):
-	global checksum
-	checksum += val
-	checksum += (val>>8)&0xFF
-	checksum += (val>>16)&0xFF
-	checksum += (val>>24)&0xFF
-	return port.write(struct.pack('>L',val));
-def writeslong(val):
-	global checksum
-	checksum += val
-	checksum += (val>>8)&0xFF
-	checksum += (val>>16)&0xFF
-	checksum += (val>>24)&0xFF
-	return port.write(struct.pack('>l',val));
-
-def M1Forward(addr,val):
-	sendcommand(addr,0)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def M1Backward(addr,val):
-	sendcommand(addr,1)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMinMainBattery(addr,val):
-	sendcommand(addr,2)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMaxMainBattery(addr,val):
-	sendcommand(addr,3)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def M2Forward(addr,val):
-	sendcommand(addr,4)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def M2Backward(addr,val):
-	sendcommand(addr,5)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def DriveM1(addr,val):
-	sendcommand(addr,6)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def DriveM2(addr,val):
-	sendcommand(addr,7)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def ForwardMixed(addr,val):
-	sendcommand(addr,8)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def BackwardMixed(addr,val):
-	sendcommand(addr,9)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def RightMixed(addr,val):
-	sendcommand(addr,10)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def LeftMixed(addr,val):
-	sendcommand(addr,11)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def DriveMixed(addr,val):
-	sendcommand(addr,12)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def TurnMixed(addr,val):
-	sendcommand(addr,13)
-	writebyte(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def readM1encoder(addr):
-	sendcommand(addr,16);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (enc,status);
-	return (-1,-1);
-
-def readM2encoder():
-	sendcommand(addr,17);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (enc,status);
-	return (-1,-1);
-
-def readM1speed(addr):
-	sendcommand(addr,18);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return enc
-	return -1;
-
-def readM2speed(addr):
-	sendcommand(addr,19);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return enc
-	return -1;
- 
-def ResetEncoderCnts(addr):
-	sendcommand(addr,20)
-	writebyte(checksum&0x7F);
-	return;
-
-def readversion(addr):
-	sendcommand(addr,21)
-	return port.read(32);
-
-def readmainbattery(addr):
-	sendcommand(addr,24);
-	val = readword()
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return val
-	return -1
-
-def readlogicbattery(addr):
-	sendcommand(addr,25);
-	val = readword()
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return val
-	return -1
-
-def SetM1pidq(addr,p,i,d,qpps):
-	sendcommand(addr,28)
-	writelong(d)
-	writelong(p)
-	writelong(i)
-	writelong(qpps)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2pidq(addr,p,i,d,qpps):
-	sendcommand(addr,29)
-	writelong(d)
-	writelong(p)
-	writelong(i)
-	writelong(qpps)
-	writebyte(checksum&0x7F);
-	return;
-
-def readM1instspeed(addr):
-	sendcommand(addr,30);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (enc,status);
-	return (-1,-1);
-
-def readM2instspeed(addr):
-	sendcommand(addr,31);
-	enc = readslong();
-	status = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (enc,status);
-	return (-1,-1);
-
-def SetM1Duty(addr,val):
-	sendcommand(addr,32)
-	writesword(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2Duty(addr,val):
-	sendcommand(addr,33)
-	writesword(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedDuty(addr,m1,m2):
-	sendcommand(addr,34)
-	writesword(m1)
-	writesword(m2)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM1Speed(addr,val):
-	sendcommand(addr,35)
-	writeslong(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2Speed(addr,val):
-	sendcommand(addr,36)
-	writeslong(val)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeed(addr,m1,m2):
-	sendcommand(addr,37)
-	writeslong(m1)
-	writeslong(m2)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM1SpeedAccel(addr,accel,speed):
-	sendcommand(addr,38)
-	writelong(accel)
-	writeslong(speed)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2SpeedAccel(addr,accel,speed):
-	sendcommand(addr,39)
-	writelong(accel)
-	writeslong(speed)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeedAccel(addr,accel,speed1,speed2):
-	sendcommand(addr,40)
-	writelong(accel)
-	writeslong(speed1)
-	writeslong(speed2)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM1SpeedDistance(addr,speed,distance,buffer):
-	sendcommand(addr,41)
-	writeslong(speed)
-	writelong(distance)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2SpeedDistance(addr,speed,distance,buffer):
-	sendcommand(addr,42)
-	writeslong(speed)
-	writelong(distance)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeedDistance(addr,speed1,distance1,speed2,distance2,buffer):
-	sendcommand(addr,43)
-	writeslong(speed1)
-	writelong(distance1)
-	writeslong(speed2)
-	writelong(distance2)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM1SpeedAccelDistance(addr,accel,speed,distance,buffer):
-	sendcommand(addr,44)
-	writelong(accel)
-	writeslong(speed)
-	writelong(distance)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2SpeedAccelDistance(addr,accel,speed,distance,buffer):
-	sendcommand(addr,45)
-	writelong(accel)
-	writeslong(speed)
-	writelong(distance)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeedAccelDistance(addr,accel,speed1,distance1,speed2,distance2,buffer):
-	sendcommand(addr,46)
-	writelong(accel)
-	writeslong(speed1)
-	writelong(distance1)
-	writeslong(speed2)
-	writelong(distance2)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def readbuffercnts():
-	sendcommand(128,47);
-	buffer1 = readbyte();
-	buffer2 = readbyte();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (buffer1,buffer2);
-	return (-1,-1);
-
-def readcurrents():
-	sendcommand(128,49);
-	motor1 = readword();
-	motor2 = readword();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (motor1,motor2);
-	return (-1,-1);
-
-def SetMixedSpeedIAccel(accel1,speed1,accel2,speed2):
-	sendcommand(128,50)
-	writelong(accel1)
-	writeslong(speed1)
-	writelong(accel2)
-	writeslong(speed2)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeedIAccelDistance(accel1,speed1,distance1,accel2,speed2,distance2,buffer):
-	sendcommand(128,51)
-	writelong(accel1)
-	writeslong(speed1)
-	writelong(distance1)
-	writelong(accel2)
-	writeslong(speed2)
-	writelong(distance2)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM1DutyAccel(accel,duty):
-	sendcommand(128,52)
-	writesword(duty)
-	writeword(accel)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2DutyAccel(accel,duty):
-	sendcommand(128,53)
-	writesword(duty)
-	writeword(accel)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedDutyAccel(accel1,duty1,accel2,duty2):
-	sendcommand(128,54)
-	writesword(duty1)
-	writeword(accel1)
-	writesword(duty2)
-	writeword(accel2)
-	writebyte(checksum&0x7F);
-	return;
-
-def readM1pidq(addr):
-	sendcommand(addr,55);
-	p = readlong();
-	i = readlong();
-	d = readlong();
-	qpps = readlong();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (p,i,d,qpps);
-	return (-1,-1,-1,-1)
-
-def readM2pidq(addr):
-	sendcommand(addr,56);
-	p = readlong();
-	i = readlong();
-	d = readlong();
-	qpps = readlong();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (p,i,d,qpps);
-	return (-1,-1,-1,-1)
-
-def readmainbatterysettings():
-	sendcommand(128,59);
-	min = readword();
-	max = readword();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (min,max);
-	return (-1,-1);
-
-def readlogicbatterysettings():
-	sendcommand(128,60);
-	min = readword();
-	max = readword();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (min,max);
-	return (-1,-1);
-
-def SetM1PositionConstants(kp,ki,kd,kimax,deadzone,min,max):
-	sendcommand(128,61)
-	writelong(kd)
-	writelong(kp)
-	writelong(ki)
-	writelong(kimax)
-	writelong(deadzone);
-	writelong(min);
-	writelong(max);
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2PositionConstants(kp,ki,kd,kimax,deadzone,min,max):
-	sendcommand(128,62)
-	writelong(kd)
-	writelong(kp)
-	writelong(ki)
-	writelong(kimax)
-	writelong(deadzone);
-	writelong(min);
-	writelong(max);
-	writebyte(checksum&0x7F);
-	return;
-
-def readM1PositionConstants():
-	sendcommand(128,63);
-	p = readlong();
-	i = readlong();
-	d = readlong();
-	imax = readlong();
-	deadzone = readlong();
-	min = readlong();
-	max = readlong();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (p,i,d,imax,deadzone,min,max);
-	return (-1,-1,-1,-1,-1,-1,-1)
-
-def readM2PositionConstants():
-	sendcommand(128,64);
-	p = readlong();
-	i = readlong();
-	d = readlong();
-	imax = readlong();
-	deadzone = readlong();
-	min = readlong();
-	max = readlong();
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return (p,i,d,imax,deadzone,min,max);
-	return (-1,-1,-1,-1,-1,-1,-1)
-
-def SetM1SpeedAccelDeccelPosition(accel,speed,deccel,position,buffer):
-	sendcommand(128,65)
-	writelong(accel)
-	writelong(speed)
-	writelong(deccel)
-	writelong(position)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetM2SpeedAccelDeccelPosition(accel,speed,deccel,position,buffer):
-	sendcommand(128,66)
-	writelong(accel)
-	writelong(speed)
-	writelong(deccel)
-	writelong(position)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def SetMixedSpeedAccelDeccelPosition(accel1,speed1,deccel1,position1,accel2,speed2,deccel2,position2,buffer):
-	sendcommand(128,67)
-	writelong(accel1)
-	writelong(speed1)
-	writelong(deccel1)
-	writelong(position1)
-	writelong(accel2)
-	writelong(speed2)
-	writelong(deccel2)
-	writelong(position2)
-	writebyte(buffer)
-	writebyte(checksum&0x7F);
-	return;
-
-def readtemperature():
-	sendcommand(128,82);
-	val = readword()
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return val
-	return -1
-
-def readerrorstate():
-	sendcommand(129,90);
-	val = readbyte()
-	crc = checksum&0x7F
-	if crc==readbyte()&0x7F:
-		return val
-	return -1
-	
-def readEncoderMode(addr):
-  sendcommand(addr,91)
-  mode1 = readbyte()
-  mode2 = readbyte()
-  crc = checksum&0x7F
-  if crc==readbyte()&0x7F:
-    return (mode1,mode2)
-  return (-1,-1)
-  
-def writeSettingsToMem(addr):
-  sendcommand(addr,94)
-  crc = checksum&0x7F
-  if crc==readbyte()&0x7F:
-    return 0
-  return -1
-
-def calibrateRoboclaws():
-    p = int(65536 * 4)
-    i = int(65536 * 2)
-    d = int(65536 * 6)
-    #last good calibration readings
-    voltage = 16.9 # 16.7   # 15.7   # 15.9   # 15.9   # 15.8   # 16.5   # 16.5   # 15.9   # 15.9   # 15.5   # 15.3   # 16.6   # 15.5
-    qqps_m1 = 142977 # 141606 # 118234 # 129122 # 136502 # 140181 # 146772 # 130185 # 146330 # 149353 # 137669 # 141136 # 148132 # 149287
-    qqps_m2 = 178091 # 187808 # 139632 # 159086 # 164265 # 164244 # 177244 # 180669 # 180616 # 166407 # 172434 # 165175 # 168984 # 169069
-    qqps_m3 = 195319 # 175863 # 130377 # 154211 # 171489 # 165285 # 183906 # 181536 # 175021 # 170281 # 159700 # 161999 # 165146 # 164071
-
-    read_v = readmainbattery() / 10.0
-    
-    scale = lambda x: int(x*voltage/read_v)
-    speedM1 = scale(qqps_m1)
-    speedM2 = scale(qqps_m2)
-    speedM3 = scale(qqps_m3)
-    
-    SetM1pidq(128,p,i,d,speedM1)
-    SetM2pidq(128,p,i,d,speedM2)
-    SetM1pidq(129,p,i,d,speedM3)
+class Roboclaw:
+
+	def __init__(self, addr, port, baudrate):
+		self.roboserial = RoboSerial(port, baudrate)
+		self.addr = addr
+
+	def drive_forward_m1(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.M1FORWARD, speed)
+
+	# def M1Backward(addr,val):
+	# 	sendcommand(addr,1)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMinMainBattery(addr,val):
+	# 	sendcommand(addr,2)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMaxMainBattery(addr,val):
+	# 	sendcommand(addr,3)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def M2Forward(addr,val):
+	# 	sendcommand(addr,4)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def M2Backward(addr,val):
+	# 	sendcommand(addr,5)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def DriveM1(addr,val):
+	# 	sendcommand(addr,6)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def DriveM2(addr,val):
+	# 	sendcommand(addr,7)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def ForwardMixed(addr,val):
+	# 	sendcommand(addr,8)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def BackwardMixed(addr,val):
+	# 	sendcommand(addr,9)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def RightMixed(addr,val):
+	# 	sendcommand(addr,10)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def LeftMixed(addr,val):
+	# 	sendcommand(addr,11)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def DriveMixed(addr,val):
+	# 	sendcommand(addr,12)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def TurnMixed(addr,val):
+	# 	sendcommand(addr,13)
+	# 	writebyte(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def readM1encoder(addr):
+	# 	sendcommand(addr,16)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (enc,status)
+	# 	return (-1,-1)
+
+	# def readM2encoder():
+	# 	sendcommand(addr,17)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (enc,status)
+	# 	return (-1,-1)
+
+	# def readM1speed(addr):
+	# 	sendcommand(addr,18)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return enc
+	# 	return -1
+
+	# def readM2speed(addr):
+	# 	sendcommand(addr,19)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return enc
+	# 	return -1
+	 
+	# def ResetEncoderCnts(addr):
+	# 	sendcommand(addr,20)
+	# 	writebyte(checksum&0x7F)
+
+	# def readversion(addr):
+	# 	sendcommand(addr,21)
+	# 	return port.read(32)
+
+	# def readmainbattery(addr):
+	# 	sendcommand(addr,24)
+	# 	val = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return val
+	# 	return -1
+
+	# def readlogicbattery(addr):
+	# 	sendcommand(addr,25)
+	# 	val = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return val
+	# 	return -1
+
+	# def SetM1pidq(addr,p,i,d,qpps):
+	# 	sendcommand(addr,28)
+	# 	writelong(d)
+	# 	writelong(p)
+	# 	writelong(i)
+	# 	writelong(qpps)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2pidq(addr,p,i,d,qpps):
+	# 	sendcommand(addr,29)
+	# 	writelong(d)
+	# 	writelong(p)
+	# 	writelong(i)
+	# 	writelong(qpps)
+	# 	writebyte(checksum&0x7F)
+
+	# def readM1instspeed(addr):
+	# 	sendcommand(addr,30)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (enc,status)
+	# 	return (-1,-1)
+
+	# def readM2instspeed(addr):
+	# 	sendcommand(addr,31)
+	# 	enc = readslong()
+	# 	status = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (enc,status)
+	# 	return (-1,-1)
+
+	# def SetM1Duty(addr,val):
+	# 	sendcommand(addr,32)
+	# 	writesword(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2Duty(addr,val):
+	# 	sendcommand(addr,33)
+	# 	writesword(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedDuty(addr,m1,m2):
+	# 	sendcommand(addr,34)
+	# 	writesword(m1)
+	# 	writesword(m2)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM1Speed(addr,val):
+	# 	sendcommand(addr,35)
+	# 	writeslong(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2Speed(addr,val):
+	# 	sendcommand(addr,36)
+	# 	writeslong(val)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeed(addr,m1,m2):
+	# 	sendcommand(addr,37)
+	# 	writeslong(m1)
+	# 	writeslong(m2)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM1SpeedAccel(addr,accel,speed):
+	# 	sendcommand(addr,38)
+	# 	writelong(accel)
+	# 	writeslong(speed)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2SpeedAccel(addr,accel,speed):
+	# 	sendcommand(addr,39)
+	# 	writelong(accel)
+	# 	writeslong(speed)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeedAccel(addr,accel,speed1,speed2):
+	# 	sendcommand(addr,40)
+	# 	writelong(accel)
+	# 	writeslong(speed1)
+	# 	writeslong(speed2)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM1SpeedDistance(addr,speed,distance,buffer):
+	# 	sendcommand(addr,41)
+	# 	writeslong(speed)
+	# 	writelong(distance)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2SpeedDistance(addr,speed,distance,buffer):
+	# 	sendcommand(addr,42)
+	# 	writeslong(speed)
+	# 	writelong(distance)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeedDistance(addr,speed1,distance1,speed2,distance2,buffer):
+	# 	sendcommand(addr,43)
+	# 	writeslong(speed1)
+	# 	writelong(distance1)
+	# 	writeslong(speed2)
+	# 	writelong(distance2)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM1SpeedAccelDistance(addr,accel,speed,distance,buffer):
+	# 	sendcommand(addr,44)
+	# 	writelong(accel)
+	# 	writeslong(speed)
+	# 	writelong(distance)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2SpeedAccelDistance(addr,accel,speed,distance,buffer):
+	# 	sendcommand(addr,45)
+	# 	writelong(accel)
+	# 	writeslong(speed)
+	# 	writelong(distance)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeedAccelDistance(addr,accel,speed1,distance1,speed2,distance2,buffer):
+	# 	sendcommand(addr,46)
+	# 	writelong(accel)
+	# 	writeslong(speed1)
+	# 	writelong(distance1)
+	# 	writeslong(speed2)
+	# 	writelong(distance2)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def readbuffercnts():
+	# 	sendcommand(128,47)
+	# 	buffer1 = readbyte()
+	# 	buffer2 = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (buffer1,buffer2)
+	# 	return (-1,-1)
+
+	# def readcurrents():
+	# 	sendcommand(128,49)
+	# 	motor1 = readword()
+	# 	motor2 = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (motor1,motor2)
+	# 	return (-1,-1)
+
+	# def SetMixedSpeedIAccel(accel1,speed1,accel2,speed2):
+	# 	sendcommand(128,50)
+	# 	writelong(accel1)
+	# 	writeslong(speed1)
+	# 	writelong(accel2)
+	# 	writeslong(speed2)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeedIAccelDistance(accel1,speed1,distance1,accel2,speed2,distance2,buffer):
+	# 	sendcommand(128,51)
+	# 	writelong(accel1)
+	# 	writeslong(speed1)
+	# 	writelong(distance1)
+	# 	writelong(accel2)
+	# 	writeslong(speed2)
+	# 	writelong(distance2)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM1DutyAccel(accel,duty):
+	# 	sendcommand(128,52)
+	# 	writesword(duty)
+	# 	writeword(accel)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2DutyAccel(accel,duty):
+	# 	sendcommand(128,53)
+	# 	writesword(duty)
+	# 	writeword(accel)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedDutyAccel(accel1,duty1,accel2,duty2):
+	# 	sendcommand(128,54)
+	# 	writesword(duty1)
+	# 	writeword(accel1)
+	# 	writesword(duty2)
+	# 	writeword(accel2)
+	# 	writebyte(checksum&0x7F)
+
+	# def readM1pidq(addr):
+	# 	sendcommand(addr,55)
+	# 	p = readlong()
+	# 	i = readlong()
+	# 	d = readlong()
+	# 	qpps = readlong()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (p,i,d,qpps)
+	# 	return (-1,-1,-1,-1)
+
+	# def readM2pidq(addr):
+	# 	sendcommand(addr,56)
+	# 	p = readlong()
+	# 	i = readlong()
+	# 	d = readlong()
+	# 	qpps = readlong()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (p,i,d,qpps)
+	# 	return (-1,-1,-1,-1)
+
+	# def readmainbatterysettings():
+	# 	sendcommand(128,59)
+	# 	min = readword()
+	# 	max = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (min,max)
+	# 	return (-1,-1)
+
+	# def readlogicbatterysettings():
+	# 	sendcommand(128,60)
+	# 	min = readword()
+	# 	max = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (min,max)
+	# 	return (-1,-1)
+
+	# def SetM1PositionConstants(kp,ki,kd,kimax,deadzone,min,max):
+	# 	sendcommand(128,61)
+	# 	writelong(kd)
+	# 	writelong(kp)
+	# 	writelong(ki)
+	# 	writelong(kimax)
+	# 	writelong(deadzone)
+	# 	writelong(min)
+	# 	writelong(max)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2PositionConstants(kp,ki,kd,kimax,deadzone,min,max):
+	# 	sendcommand(128,62)
+	# 	writelong(kd)
+	# 	writelong(kp)
+	# 	writelong(ki)
+	# 	writelong(kimax)
+	# 	writelong(deadzone)
+	# 	writelong(min)
+	# 	writelong(max)
+	# 	writebyte(checksum&0x7F)
+
+	# def readM1PositionConstants():
+	# 	sendcommand(128,63)
+	# 	p = readlong()
+	# 	i = readlong()
+	# 	d = readlong()
+	# 	imax = readlong()
+	# 	deadzone = readlong()
+	# 	min = readlong()
+	# 	max = readlong()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (p,i,d,imax,deadzone,min,max)
+	# 	return (-1,-1,-1,-1,-1,-1,-1)
+
+	# def readM2PositionConstants():
+	# 	sendcommand(128,64)
+	# 	p = readlong()
+	# 	i = readlong()
+	# 	d = readlong()
+	# 	imax = readlong()
+	# 	deadzone = readlong()
+	# 	min = readlong()
+	# 	max = readlong()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return (p,i,d,imax,deadzone,min,max)
+	# 	return (-1,-1,-1,-1,-1,-1,-1)
+
+	# def SetM1SpeedAccelDeccelPosition(accel,speed,deccel,position,buffer):
+	# 	sendcommand(128,65)
+	# 	writelong(accel)
+	# 	writelong(speed)
+	# 	writelong(deccel)
+	# 	writelong(position)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetM2SpeedAccelDeccelPosition(accel,speed,deccel,position,buffer):
+	# 	sendcommand(128,66)
+	# 	writelong(accel)
+	# 	writelong(speed)
+	# 	writelong(deccel)
+	# 	writelong(position)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def SetMixedSpeedAccelDeccelPosition(accel1,speed1,deccel1,position1,accel2,speed2,deccel2,position2,buffer):
+	# 	sendcommand(128,67)
+	# 	writelong(accel1)
+	# 	writelong(speed1)
+	# 	writelong(deccel1)
+	# 	writelong(position1)
+	# 	writelong(accel2)
+	# 	writelong(speed2)
+	# 	writelong(deccel2)
+	# 	writelong(position2)
+	# 	writebyte(buffer)
+	# 	writebyte(checksum&0x7F)
+
+	# def readtemperature():
+	# 	sendcommand(128,82)
+	# 	val = readword()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return val
+	# 	return -1
+
+	# def readerrorstate():
+	# 	sendcommand(129,90)
+	# 	val = readbyte()
+	# 	crc = checksum&0x7F
+	# 	if crc==readbyte()&0x7F:
+	# 		return val
+	# 	return -1
+		
+	# def readEncoderMode(addr):
+	#   sendcommand(addr,91)
+	#   mode1 = readbyte()
+	#   mode2 = readbyte()
+	#   crc = checksum&0x7F
+	#   if crc==readbyte()&0x7F:
+	#     return (mode1,mode2)
+	#   return (-1,-1)
+	  
+	# def writeSettingsToMem(addr):
+	#   sendcommand(addr,94)
+	#   crc = checksum&0x7F
+	#   if crc==readbyte()&0x7F:
+	#     return 0
+	#   return -1
+
+	# def calibrateRoboclaws():
+	#     p = int(65536 * 4)
+	#     i = int(65536 * 2)
+	#     d = int(65536 * 6)
+	#     #last good calibration readings
+	#     voltage = 16.9 # 16.7   # 15.7   # 15.9   # 15.9   # 15.8   # 16.5   # 16.5   # 15.9   # 15.9   # 15.5   # 15.3   # 16.6   # 15.5
+	#     qqps_m1 = 142977 # 141606 # 118234 # 129122 # 136502 # 140181 # 146772 # 130185 # 146330 # 149353 # 137669 # 141136 # 148132 # 149287
+	#     qqps_m2 = 178091 # 187808 # 139632 # 159086 # 164265 # 164244 # 177244 # 180669 # 180616 # 166407 # 172434 # 165175 # 168984 # 169069
+	#     qqps_m3 = 195319 # 175863 # 130377 # 154211 # 171489 # 165285 # 183906 # 181536 # 175021 # 170281 # 159700 # 161999 # 165146 # 164071
+
+	#     read_v = readmainbattery() / 10.0
+	    
+	#     scale = lambda x: int(x*voltage/read_v)
+	#     speedM1 = scale(qqps_m1)
+	#     speedM2 = scale(qqps_m2)
+	#     speedM3 = scale(qqps_m3)
+	    
+	#     SetM1pidq(128,p,i,d,speedM1)
+	#     SetM2pidq(128,p,i,d,speedM2)
+	#     SetM1pidq(129,p,i,d,speedM3)
 
 #print "Roboclaw Example 1\r\n"
 
 #Rasberry Pi/Linux Serial instance example
-port = serial.Serial("/dev/ttySAC0", baudrate=2400, timeout=1.0)
+# port = serial.Serial("/dev/ttySAC0", baudrate=2400, timeout=1.0)
 
-#Windows Serial instance example
-#port = serial.Serial("COM126", baudrate=38400, timeout=1)
-M1Forward(129,64)
-#M1Forward(0)
-#Get version string
-sendcommand(129,21)
-rcv = port.read(32)
-print repr(rcv)
+# #Windows Serial instance example
+# #port = serial.Serial("COM126", baudrate=38400, timeout=1)
+# M1Forward(129,64)
+# #M1Forward(0)
+# #Get version string
+# sendcommand(129,21)
+# rcv = port.read(32)
+# print repr(rcv)
 
 #sendcommand(129,90)
 #rcv = port.read(1)
@@ -652,7 +532,7 @@ print repr(rcv)
 	
 #	print "Logic Battery:",readlogicbattery()/10.0
 
-#	m1cur, m2cur = readcurrents();
+#	m1cur, m2cur = readcurrents()
 #	print "Current M1: ",m1cur/100.0," M2: ",m2cur/100.0
 #	
 #	min, max = readlogicbatterysettings()
@@ -675,15 +555,203 @@ print repr(rcv)
 #
 #	SetM1DutyAccel(1500,1500)
 #	SetM2DutyAccel(1500,-1500)
-#	M1Forward(127);
-#	M2Backward(127);
+#	M1Forward(127)
+#	M2Backward(127)
 #	time.sleep(2)
 #	SetM1DutyAccel(1500,-1500)
 #	SetM2DutyAccel(1500,1500)
-#	M1Forward(0);
-#	M2Backward(0);
-#	time.sleep(10);
+#	M1Forward(0)
+#	M2Backward(0)
+#	time.sleep(10)
 #	M1Backward(127)
-#	M2Forward(127);
+#	M2Forward(127)
 #	time.sleep(2)
 
+class RoboSerial:
+
+	def __init__(self, port, baudrate):
+		self.port = None;
+		self.comm_port = port;
+		self.baudrate = baudrate;
+		self._open();
+
+	def _open(self):
+		self.port = serial.Serial(
+			self.comm_port, baudrate=self.baudrate, timeout=1.0)
+
+	def send_command(self,addr,command,val):
+		# Create the checksum
+		checksum = ((addr+command+val)&0x7F)
+
+		# Send the address
+		self.port.write(chr(addr))
+
+		# Send the command number (p28)
+		self.port.write(chr(command))
+
+		# Send the value
+		self.port.write(chr(val))
+
+	def read_byte(self):
+		val = struct.unpack('>B',self.port.read(1))
+		self.checksum += val[0]
+		return val[0]
+
+	def read_signed_byte(self):
+		val = struct.unpack('>b',self.port.read(1))
+		self.checksum += val[0]
+		return val[0]
+
+	def read_word(self):
+		val = struct.unpack('>H',self.port.read(2))
+		self.checksum += (val[0]&0xFF)
+		cself.hecksum += (val[0]>>8)&0xFF
+		return val[0]
+
+	def read_signed_word(self):
+		val = struct.unpack('>h',self.port.read(2))
+		self.checksum += val[0]
+		self.hecksum += (val[0]>>8)&0xFF
+		return val[0]
+
+	def read_long(self):
+		val = struct.unpack('>L',self.port.read(4))
+		self.checksum += val[0]
+		self.checksum += (val[0]>>8)&0xFF
+		self.checksum += (val[0]>>16)&0xFF
+		self.checksum += (val[0]>>24)&0xFF
+		return val[0]
+
+	def read_signed_long(self):
+		val = struct.unpack('>l',self.port.read(4))
+		self.checksum += val[0]
+		self.checksum += (val[0]>>8)&0xFF
+		self.checksum += (val[0]>>16)&0xFF
+		self.checksum += (val[0]>>24)&0xFF
+		return val[0]
+
+	def write_byte(self,val):
+		self.checksum += val
+		return self.port.write(struct.pack('>B',val))
+
+	def write_signed_byte(self,val):
+		self.checksum += val
+		return self.port.write(struct.pack('>b',val))
+
+	def write_word(self,val):
+		self.checksum += val
+		self.checksum += (val>>8)&0xFF
+		return self.port.write(struct.pack('>H',val))
+
+	def write_signed_word(self,val):
+		self.checksum += val
+		self.checksum += (val>>8)&0xFF
+		return self.port.write(struct.pack('>h',val))
+
+	def write_long(self,val):
+		self.checksum += val
+		self.checksum += (val>>8)&0xFF
+		self.checksum += (val>>16)&0xFF
+		self.checksum += (val>>24)&0xFF
+		return self.port.write(struct.pack('>L',val))
+
+	def write_signed_long(self,val):
+		self.checksum += val
+		self.checksum += (val>>8)&0xFF
+		self.checksum += (val>>16)&0xFF
+		self.checksum += (val>>24)&0xFF
+		return self.port.write(struct.pack('>l',val))
+
+# Command Enums
+
+class Cmd():
+	M1FORWARD = 0
+	M1BACKWARD = 1
+	SETMINMB = 2
+	SETMAXMB = 3
+	M2FORWARD = 4
+	M2BACKWARD = 5
+	M17BIT = 6
+	M27BIT = 7
+	MIXEDFORWARD = 8
+	MIXEDBACKWARD = 9
+	MIXEDRIGHT = 10
+	MIXEDLEFT = 11
+	MIXEDFB = 12
+	MIXEDLR = 13
+	GETM1ENC = 16
+	GETM2ENC = 17
+	GETM1SPEED = 18
+	GETM2SPEED = 19
+	RESETENC = 20
+	GETVERSION = 21
+	SETM1ENCCOUNT = 22
+	SETM2ENCCOUNT = 23
+	GETMBATT = 24
+	GETLBATT = 25
+	SETMINLB = 26
+	SETMAXLB = 27
+	SETM1PID = 28
+	SETM2PID = 29
+	GETM1ISPEED = 30
+	GETM2ISPEED = 31
+	M1DUTY = 32
+	M2DUTY = 33
+	MIXEDDUTY = 34
+	M1SPEED = 35
+	M2SPEED = 36
+	MIXEDSPEED = 37
+	M1SPEEDACCEL = 38
+	M2SPEEDACCEL = 39
+	MIXEDSPEEDACCEL = 40
+	M1SPEEDDIST = 41
+	M2SPEEDDIST = 42
+	MIXEDSPEEDDIST = 43
+	M1SPEEDACCELDIST = 44
+	M2SPEEDACCELDIST = 45
+	MIXEDSPEEDACCELDIST = 46
+	GETBUFFERS = 47
+	GETPWMS = 48
+	GETCURRENTS = 49
+	MIXEDSPEED2ACCEL = 50
+	MIXEDSPEED2ACCELDIST = 51
+	M1DUTYACCEL = 52
+	M2DUTYACCEL = 53
+	MIXEDDUTYACCEL = 54
+	READM1PID = 55
+	READM2PID = 56
+	SETMAINVOLTAGES = 57
+	SETLOGICVOLTAGES = 58
+	GETMINMAXMAINVOLTAGES = 59
+	GETMINMAXLOGICVOLTAGES = 60
+	SETM1POSPID = 61
+	SETM2POSPID = 62
+	READM1POSPID = 63
+	READM2POSPID = 64
+	M1SPEEDACCELDECCELPOS = 65
+	M2SPEEDACCELDECCELPOS = 66
+	MIXEDSPEEDACCELDECCELPOS = 67
+	SETM1DEFAULTACCEL = 68
+	SETM2DEFAULTACCEL = 69
+	SETPINFUNCTIONS = 74
+	GETPINFUNCTIONS = 75
+	SETDEADBAND = 76
+	GETDEADBAND = 77
+	RESTOREDEFAULTS = 80
+	GETTEMP = 82
+	GETTEMP2 = 83
+	GETERROR = 90
+	GETENCODERMODE = 91
+	SETM1ENCODERMODE = 92
+	SETM2ENCODERMODE = 93
+	WRITENVM = 94
+	READNVM = 95
+	SETCONFIG = 98
+	GETCONFIG = 99
+	SETM1MAXCURRENT = 133
+	SETM2MAXCURRENT = 134
+	GETM1MAXCURRENT = 135
+	GETM2MAXCURRENT = 136
+	SETPWMMODE = 148
+	GETPWMMODE = 149
+	FLAGBOOTLOADER = 255
