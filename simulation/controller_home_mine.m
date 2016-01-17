@@ -200,8 +200,8 @@ function v_c = strategy_switchRoles(robot, opponent, ball, P, t, flag)
     if (offense)
         v_attacker = play_rushGoal(attacker, ball, P);
         if (be_aggressive)
-%             v_defender = play_rushGoal(defender, ball, P);
-            v_defender = play_screen(defender, opponent(:,1), ball, P);
+            v_defender = play_rushGoal(defender, ball, P);
+%             v_defender = play_screen(defender, opponent(:,1), ball, P);
         else
             v_defender = skill_followBallOnLine(defender, ball, P.field_width/12, P);
         end
