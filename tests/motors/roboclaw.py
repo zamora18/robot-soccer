@@ -728,12 +728,12 @@ class RoboSerial:
 		# Send the command number (p28)
 		self.port.write(chr(command))
 
-		# Send the value (if there is one)
 		if val is not None:
+			# Send the value (if there is one)
 			self.port.write(chr(value))
 
-		# And finally, the checksum!
-		self.port.write(chr(checksum))
+			# And finally, the checksum!
+			self.port.write(chr(checksum))
 
 	def read_byte(self):
 		val = struct.unpack('>B',self.port.read(1))
