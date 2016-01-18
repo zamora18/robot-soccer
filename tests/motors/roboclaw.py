@@ -8,6 +8,11 @@ class RoboClaw:
 		self.roboserial = RoboSerial(port, baudrate)
 		self.addr = addr
 
+	def _checksums_match(self):
+		recvd_checksum = self.roboserial.get_recvd_checksum()
+		checksum = self.roboserial.create_checksum()
+		return (recvd_checksum == checksum)
+
 	def drive_forward_m1(self,speed):
 		"""Drive motor 1 forward.
 
@@ -120,43 +125,32 @@ class RoboClaw:
 		M2Cur = self.roboserial.read_word()
 
 		# Checksum
-		recvd_checksum = self.roboserial.get_recvd_checksum()
-		checksum = self.roboserial.create_checksum()
-		return (M1Cur,M2Cur,recvd_checksum,checksum)
+		if not self._checksums_match():
+			return (-1, -1)
 
-		# def readM1pidq(addr):
-		# 	sendcommand(addr,55)
-		# 	p = readlong()
-		# 	i = readlong()
-		# 	d = readlong()
-		# 	qpps = readlong()
-		# 	crc = checksum&0x7F
-		# 	if crc==readbyte()&0x7F:
-		# 		return (p,i,d,qpps)
-		# 	return (-1,-1,-1,-1)
+		return (M1Cur,M2Cur)
 
 	def read_m1_velocity_PID_QPPS(self):
-		self.roboserial.send_command(self.addr, Cmd.READM1PID)
+		return self._read_velocity_PID_QPPS(M1=True)
+
+	def read_m2_velocity_PID_QPPS(self):
+		return self._read_velocity_PID_QPPS(M2=True)
+
+	def _read_velocity_PID_QPPS(self,M1=False,M2=False):
+		cmd = Cmd.READM2PID if M2 else Cmd.READM1PID
+		self.roboserial.send_command(self.addr, cmd)
 
 		# Receive Payload
-		kp = self.roboserial.read_long()
-		ki = self.roboserial.read_long()
-		kd = self.roboserial.read_long()
+		kp = self.roboserial.read_long(True)
+		ki = self.roboserial.read_long(True)
+		kd = self.roboserial.read_long(True)
 		QPPS = self.roboserial.read_long()
 
 		# Checksum
-		recvd_checksum = self.roboserial.get_recvd_checksum()
-		checksum = self.roboserial.create_checksum()
+		if not self._checksums_match():
+			return (-1, -1, -1, -1)
 
-		# Binary scaling
-		kp = kp/65536.0
-		ki = ki/65536.0
-		kd = kd/65536.0
-
-		return (kp,ki,kd,QPPS,recvd_checksum,checksum)
-
-	def read_m2_velocity_PID_QPPS(self):
-		pass
+		return (kp,ki,kd,QPPS)
 
 	def set_main_bat_voltage(self):
 		pass
@@ -171,13 +165,41 @@ class RoboClaw:
 		pass
 
 	def read_m1_pos_PID(self):
-		pass
+		return self._read_pos_PID(M1=True)
 
 	def read_m2_pos_PID(self):
-		pass
+		return self._read_pos_PID(M2=True)
+
+	def _read_pos_PID(self,M1=False,M2=False):
+		cmd = Cmd.READM2POSPID if M2 else Cmd.READM1POSPID
+		self.roboserial.send_command(self.addr, cmd)
+
+		# Receive Payload
+		kp = self.roboserial.read_long(True)
+		ki = self.roboserial.read_long(True)
+		kd = self.roboserial.read_long(True)
+		maxi = self.roboserial.read_long(True)
+		deadzone = self.roboserial.read_long(True)
+		minpos = self.roboserial.read_long(True)
+		maxpos = self.roboserial.read_long(True)
+
+		# Checksum
+		if not self._checksums_match():
+			return (-1, -1, -1, -1, -1, -1, -1)
+
+		return (kp,ki,kd,maxi,deadzone,minpos,maxpos)
 
 	def read_temp(self):
-		pass
+		self.roboserial.send_command(self.addr, Cmd.GETTEMP)
+
+		# Receive Payload
+		temp = self.roboserial.read_word(True)
+
+		# Checksum
+		if not self._checksums_match():
+			return -1
+
+		return temp
 
 	def read_error_status(self):
 		pass
@@ -740,10 +762,14 @@ class RoboSerial:
 		self.checksum += val[0]
 		return val[0]
 
-	def read_word(self):
+	def read_word(self,unscale=False):
 		val = struct.unpack('>H',self.port.read(2))
 		self.checksum += (val[0]&0xFF)
 		self.checksum += (val[0]>>8)&0xFF
+
+		if unscale:
+			return val[0]/65536.0
+			
 		return val[0]
 
 	def read_signed_word(self):
@@ -752,12 +778,17 @@ class RoboSerial:
 		self.checksum += (val[0]>>8)&0xFF
 		return val[0]
 
-	def read_long(self):
+	def read_long(self,unscale=False):
 		val = struct.unpack('>L',self.port.read(4))
 		self.checksum += val[0]
 		self.checksum += (val[0]>>8)&0xFF
 		self.checksum += (val[0]>>16)&0xFF
 		self.checksum += (val[0]>>24)&0xFF
+
+		if unscale:
+			# Perform binary unscaling to get back to a float
+			return val[0]/65536.0
+
 		return val[0]
 
 	def read_signed_long(self):
