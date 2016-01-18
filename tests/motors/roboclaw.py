@@ -113,6 +113,8 @@ class RoboClaw:
 		pass
 
 	def read_motor_currents(self):
+		self.roboserial.send_command(self.addr, Cmd.GETCURRENTS)
+		
 		M1Cur_b1 = self.roboserial.read_byte()
 		M1Cur_b0 = self.roboserial.read_byte()
 		M2Cur_b1 = self.roboserial.read_byte()
