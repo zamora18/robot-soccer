@@ -700,8 +700,8 @@ class RoboSerial:
 		return self.port.read(size)
 
 	def send_command(self,addr,command,val=None):
-		value = 0 if val is None else val
-
+		value = 0 if val == None else val
+		
 		# Create the checksum
 		checksum = ((addr+command+value)&0x7F)
 
@@ -712,7 +712,7 @@ class RoboSerial:
 		self.port.write(chr(command))
 
 		# Send the value (if there is one)
-		if val:
+		if val is not None:
 			self.port.write(chr(value))
 
 		# And finally, the checksum!

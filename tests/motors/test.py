@@ -1,4 +1,12 @@
 import roboclaw as rc
 
-roboclaw = rc.Roboclaw(128, '/dev/ttySAC0', 2400)
-roboclaw.drive_forward_m1(64)
+roboclaw = rc.RoboClaw(128, '/dev/ttySAC0', 2400)
+
+
+def forward(speed):
+	roboclaw.drive_forward_m1(speed)
+	roboclaw.drive_forward_m2(speed)
+
+def stop():
+	roboclaw.drive_forward_m1(0)
+	roboclaw.drive_forward_m2(0)
