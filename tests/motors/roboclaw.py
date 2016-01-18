@@ -2,20 +2,55 @@ import serial
 import struct
 import time
 
-class Roboclaw:
+class RoboClaw:
 
 	def __init__(self, addr, port, baudrate):
 		self.roboserial = RoboSerial(port, baudrate)
 		self.addr = addr
 
 	def drive_forward_m1(self,speed):
+		"""Drive motor 1 forward.
+
+		Valid data range is 0-127. 0 = full stop. 127 = full speed forward.
+		"""
 		self.roboserial.send_command(self.addr, Cmd.M1FORWARD, speed)
 
 	def drive_backward_m1(self,speed):
+		"""Drive motor 1 backward.
+
+		Valid data range is 0-127. 0 = full stop. 127 = full speed backward.
+		"""
 		self.roboserial.send_command(self.addr, Cmd.M1BACKWARD, speed)
 
-	def set_min_main_battery(self,voltage_mode):
-		self.roboserial.send_command(self.addr, Cmd.SETMINMB, voltage_mode)
+	def set_min_main_voltage(self,value):
+		"""Sets main battery (B- / B+) minimum voltage level.
+
+		If the battery voltage drops below the set voltage level RoboClaw
+		will shut down. The value is cleared at start up and must be set
+		after each power up. The voltage is set in .2 volt increments. A
+		value of 0 sets minimum voltage allowed, which is 6V.
+
+		Valid data range is 0-120 (6V-30V).
+
+		value = (Desired Volts - 6) x 5
+		"""
+		self.roboserial.send_command(self.addr, Cmd.SETMINMB, value)
+
+	def set_max_main_voltage(self,value):
+		"""Sets main battery (B- / B+) maximum voltage level.
+
+		If you are using a battery of any type you can ignore this setting.
+		During regenerative breaking a back voltage is applied to charge
+		the battery. When using an ATX type power supply if it senses
+		anything over 16V it will shut down. By setting the maximum voltage
+		level, RoboClaw before exceeding it will go into hard breaking mode
+		until the voltage drops below the maximum value set.
+
+		Valid data range is 0-154 (0V-30V).
+
+		value = Desired Volts x 5.12
+		"""
+		self.roboserial.send_command(self.addr, Cmd.SETMAXMB,value)
 
 	def drive_forward_m2(self,speed):
 		self.roboserial.send_command(self.addr, Cmd.M2FORWARD, speed)
@@ -23,65 +58,52 @@ class Roboclaw:
 	def drive_backward_m2(self,speed):
 		self.roboserial.send_command(self.addr, Cmd.M2BACKWARD, speed)
 
-	# def SetMinMainBattery(addr,val):
-	# 	sendcommand(addr,2)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def drive_m1(self,value):
+		self.roboserial.send_command(self.addr, Cmd.M17BIT, value)
 
-	# def SetMaxMainBattery(addr,val):
-	# 	sendcommand(addr,3)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def drive_m2(self,value):
+		self.roboserial.send_command(self.addr, Cmd.M27BIT, value)
 
-	# def M2Forward(addr,val):
-	# 	sendcommand(addr,4)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	###################################
+	# Mix Mode Commands
+	###################################
+	# The following commands are mix mode commands and used to control speed
+	# and turn. Before a command is executed valid drive and turn data is 
+	# required. You only need to send both data packets once. After receiving
+	# both valid drive and turn data RoboClaw will begin to operate. At this
+	# point you only need to update turn or drive data.
+	###################################
 
-	# def M2Backward(addr,val):
-	# 	sendcommand(addr,5)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_drive_forward(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDFORWARD, speed)
 
-	# def DriveM1(addr,val):
-	# 	sendcommand(addr,6)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_drive_backwards(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDBACKWARD, speed)
 
-	# def DriveM2(addr,val):
-	# 	sendcommand(addr,7)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_turn_right(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDRIGHT, speed)
 
-	# def ForwardMixed(addr,val):
-	# 	sendcommand(addr,8)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_turn_left(self,speed):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDLEFT, speed)
 
-	# def BackwardMixed(addr,val):
-	# 	sendcommand(addr,9)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_drive(self,value):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDFB, value)
 
-	# def RightMixed(addr,val):
-	# 	sendcommand(addr,10)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def mixed_turn(self,value):
+		self.roboserial.send_command(self.addr, Cmd.MIXEDLR, value)
 
-	# def LeftMixed(addr,val):
-	# 	sendcommand(addr,11)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	###################################
+	# Advanced Packet Serial Commands
+	###################################
 
-	# def DriveMixed(addr,val):
-	# 	sendcommand(addr,12)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+	def read_firmware_version(self):
+		self.roboserial.send_command(self.addr, Cmd.GETVERSION)
+		return self.roboserial.port.read(32)
 
-	# def TurnMixed(addr,val):
-	# 	sendcommand(addr,13)
-	# 	writebyte(val)
-	# 	writebyte(checksum&0x7F)
+
+		# def readversion(addr):
+		# 	sendcommand(addr,21)
+		# 	return port.read(32)
 
 	# def readM1encoder(addr):
 	# 	sendcommand(addr,16)
@@ -586,9 +608,11 @@ class RoboSerial:
 		self.port = serial.Serial(
 			self.comm_port, baudrate=self.baudrate, timeout=1.0)
 
-	def send_command(self,addr,command,val):
+	def send_command(self,addr,command,val=None):
+		value = 0 if not val else val
+
 		# Create the checksum
-		checksum = ((addr+command+val)&0x7F)
+		checksum = ((addr+command+value)&0x7F)
 
 		# Send the address
 		self.port.write(chr(addr))
@@ -596,8 +620,9 @@ class RoboSerial:
 		# Send the command number (p28)
 		self.port.write(chr(command))
 
-		# Send the value
-		self.port.write(chr(val))
+		# Send the value (if there is one)
+		if val:
+			self.port.write(chr(value))
 
 		# And finally, the checksum!
 		self.port.write(chr(checksum))
