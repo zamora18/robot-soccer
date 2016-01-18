@@ -100,10 +100,107 @@ class RoboClaw:
 		self.roboserial.send_command(self.addr, Cmd.GETVERSION)
 		return self.roboserial.read(size=32)
 
+	def read_main_bat_voltage(self):
+		pass
 
-		# def readversion(addr):
-		# 	sendcommand(addr,21)
-		# 	return port.read(32)
+	def read_logic_bat_voltage(self):
+		pass
+
+	def set_min_logic_voltage_level(self,voltage):
+		pass
+
+	def set_max_logic_voltage_level(self,voltage):
+		pass
+
+	def read_motor_currents(self):
+		pass
+
+		# def readM1pidq(addr):
+		# 	sendcommand(addr,55)
+		# 	p = readlong()
+		# 	i = readlong()
+		# 	d = readlong()
+		# 	qpps = readlong()
+		# 	crc = checksum&0x7F
+		# 	if crc==readbyte()&0x7F:
+		# 		return (p,i,d,qpps)
+		# 	return (-1,-1,-1,-1)
+
+	def read_m1_velocity_PID_QPPS(self):
+		self.roboserial.send_command(self.addr, Cmd.READM1PID)
+
+		# Receive Payload
+		kp = self.roboserial.read_long()
+		ki = self.roboserial.read_long()
+		kd = self.roboserial.read_long()
+		QPPS = self.roboserial.read_long()
+
+		# Checksum
+		recvd_checksum = (self.roboserial.read_byte()&0x7F)
+		checksum = (kp+ki+kd+QPPS)&0x7F
+		return (kp,ki,kd,QPPS,recvd_checksum,checksum)
+
+
+
+
+	def read_m2_velocity_PID_QPPS(self):
+		pass
+
+	def set_main_bat_voltage(self):
+		pass
+
+	def set_logic_bat_voltage(self):
+		pass
+
+	def read_main_bat_settings(self):
+		pass
+
+	def read_logic_bat_settings(self):
+		pass
+
+	def read_m1_pos_PID(self):
+		pass
+
+	def read_m2_pos_PID(self):
+		pass
+
+	def read_temp(self):
+		pass
+
+	def read_error_status(self):
+		pass
+
+	def read_encoder_mode(self):
+		pass
+
+	def set_m1_encoder_mode(self):
+		pass
+
+	def set_m2_encoder_mode(self):
+		pass
+
+	def write_to_EEPROM(self):
+		pass
+
+
+	###################################
+	# Quadrature Decoding
+	###################################
+
+	def read_m1_encoder(self):
+		pass
+
+	def read_m2_encoder(self):
+		pass
+
+	def read_m1_speed(self):
+		pass
+
+	def read_m2_speed(self):
+		pass
+
+	def reset_encoder_counts(self):
+		pass
 
 	# def readM1encoder(addr):
 	# 	sendcommand(addr,16)
@@ -145,10 +242,6 @@ class RoboClaw:
 	# 	sendcommand(addr,20)
 	# 	writebyte(checksum&0x7F)
 
-	# def readversion(addr):
-	# 	sendcommand(addr,21)
-	# 	return port.read(32)
-
 	# def readmainbattery(addr):
 	# 	sendcommand(addr,24)
 	# 	val = readword()
@@ -164,6 +257,11 @@ class RoboClaw:
 	# 	if crc==readbyte()&0x7F:
 	# 		return val
 	# 	return -1
+
+
+	###################################
+	# Advanced Motor Control
+	###################################
 
 	# def SetM1pidq(addr,p,i,d,qpps):
 	# 	sendcommand(addr,28)
@@ -355,17 +453,6 @@ class RoboClaw:
 	# 	writesword(duty2)
 	# 	writeword(accel2)
 	# 	writebyte(checksum&0x7F)
-
-	# def readM1pidq(addr):
-	# 	sendcommand(addr,55)
-	# 	p = readlong()
-	# 	i = readlong()
-	# 	d = readlong()
-	# 	qpps = readlong()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return (p,i,d,qpps)
-	# 	return (-1,-1,-1,-1)
 
 	# def readM2pidq(addr):
 	# 	sendcommand(addr,56)
@@ -609,7 +696,7 @@ class RoboSerial:
 			self.comm_port, baudrate=self.baudrate, timeout=1.0)
 
 	def read(self,size=1):
-		return self.to_str(self.port.read(size))
+		return self.port.read(size)
 
 	def send_command(self,addr,command,val=None):
 		value = 0 if not val else val
@@ -699,13 +786,6 @@ class RoboSerial:
 		self.checksum += (val>>16)&0xFF
 		self.checksum += (val>>24)&0xFF
 		return self.port.write(struct.pack('>l',val))
-
-	def to_str(s):
-	   end = s.find('\0', 1)
-	   if end != -1:
-	      return s[:end]
-	   else:
-	      return s[:]
 
 # Command Enums
 
