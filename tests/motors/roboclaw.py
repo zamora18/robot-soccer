@@ -113,7 +113,19 @@ class RoboClaw:
 		pass
 
 	def read_motor_currents(self):
-		pass
+		M1Cur_b1 = self.roboserial.read_byte()
+		M1Cur_b0 = self.roboserial.read_byte()
+		M2Cur_b1 = self.roboserial.read_byte()
+		M2Cur_b0 = self.roboserial.read_byte()
+
+		# Create data
+		M1Cur = (M1Cur_b1<<8)&M1Cur_b0
+		M2Cur = (M2Cur_b1<<8)&M2Cur_b0
+
+		# Checksum
+		recvd_checksum = self.roboserial.read_byte()&0x7F
+		checksum = 0
+		return ()
 
 		# def readM1pidq(addr):
 		# 	sendcommand(addr,55)
@@ -134,6 +146,11 @@ class RoboClaw:
 		ki = self.roboserial.read_long()
 		kd = self.roboserial.read_long()
 		QPPS = self.roboserial.read_long()
+
+		# Binary scaling
+		kp = kp/65536.0
+		ki = ki/65536.0
+		kd = kd/65536.0
 
 		# Checksum
 		recvd_checksum = (self.roboserial.read_byte()&0x7F)
