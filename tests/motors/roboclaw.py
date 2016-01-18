@@ -804,10 +804,10 @@ class RoboSerial:
 		self.checksum += (val>>24)&0xFF
 		return self.port.write(struct.pack('>l',val))
 
-	def clear_checksum():
+	def clear_checksum(self):
 		self.checksum = 0
 
-	def get_checksum():
+	def get_checksum(self):
 		return self.checksum
 
 # Command Enums
