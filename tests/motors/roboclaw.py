@@ -142,23 +142,22 @@ class RoboClaw:
 		self.roboserial.send_command(self.addr, Cmd.READM1PID)
 
 		# Receive Payload
+		self.roboserial.clear_checksum()
 		kp = self.roboserial.read_long()
 		ki = self.roboserial.read_long()
 		kd = self.roboserial.read_long()
 		QPPS = self.roboserial.read_long()
+
+		# Checksum
+		recvd_checksum = (self.roboserial.read_byte()&0x7F)
+		checksum = self.roboserial.get_checksum()&0x7F
 
 		# Binary scaling
 		kp = kp/65536.0
 		ki = ki/65536.0
 		kd = kd/65536.0
 
-		# Checksum
-		recvd_checksum = (self.roboserial.read_byte()&0x7F)
-		checksum = (kp+ki+kd+QPPS)&0x7F
 		return (kp,ki,kd,QPPS,recvd_checksum,checksum)
-
-
-
 
 	def read_m2_velocity_PID_QPPS(self):
 		pass
@@ -804,6 +803,12 @@ class RoboSerial:
 		self.checksum += (val>>16)&0xFF
 		self.checksum += (val>>24)&0xFF
 		return self.port.write(struct.pack('>l',val))
+
+	def clear_checksum():
+		self.checksum = 0
+
+	def get_checksum():
+		return self.checksum
 
 # Command Enums
 
