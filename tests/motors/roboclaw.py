@@ -124,8 +124,8 @@ class RoboClaw:
 
 		# Checksum
 		recvd_checksum = self.roboserial.read_byte()&0x7F
-		checksum = 0
-		return ()
+		checksum = self.roboserial.get_checksum()&0x7F
+		return (M1Cur,M2Cur,recvd_checksum,checksum)
 
 		# def readM1pidq(addr):
 		# 	sendcommand(addr,55)
@@ -148,7 +148,7 @@ class RoboClaw:
 		QPPS = self.roboserial.read_long()
 
 		# Checksum
-		recvd_checksum = (self.roboserial.read_byte()&0x7F)
+		recvd_checksum = self.roboserial.read_byte()&0x7F
 		checksum = self.roboserial.get_checksum()&0x7F
 
 		# Binary scaling
@@ -731,7 +731,7 @@ class RoboSerial:
 			self.port.write(chr(value))
 
 			# And finally, the checksum!
-			self.port.write(chr(checksum&0x7F))
+			self.port.write(chr(self.checksum&0x7F))
 
 	def read_byte(self):
 		val = struct.unpack('>B',self.port.read(1))
