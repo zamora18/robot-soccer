@@ -686,6 +686,7 @@ class RoboClaw:
 class RoboSerial:
 
 	def __init__(self, port, baudrate):
+		self.checksum = 0
 		self.port = None;
 		self.comm_port = port;
 		self.baudrate = baudrate;
