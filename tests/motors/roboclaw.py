@@ -142,7 +142,6 @@ class RoboClaw:
 		self.roboserial.send_command(self.addr, Cmd.READM1PID)
 
 		# Receive Payload
-		self.roboserial.clear_checksum()
 		kp = self.roboserial.read_long()
 		ki = self.roboserial.read_long()
 		kd = self.roboserial.read_long()
@@ -719,7 +718,7 @@ class RoboSerial:
 		value = 0 if val == None else val
 		
 		# Create the checksum
-		checksum = ((addr+command+value)&0x7F)
+		self.checksum = (addr+command+value)
 
 		# Send the address
 		self.port.write(chr(addr))
@@ -732,7 +731,7 @@ class RoboSerial:
 			self.port.write(chr(value))
 
 			# And finally, the checksum!
-			self.port.write(chr(checksum))
+			self.port.write(chr(checksum&0x7F))
 
 	def read_byte(self):
 		val = struct.unpack('>B',self.port.read(1))
