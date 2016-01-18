@@ -114,15 +114,10 @@ class RoboClaw:
 
 	def read_motor_currents(self):
 		self.roboserial.send_command(self.addr, Cmd.GETCURRENTS)
-		
-		M1Cur_b1 = self.roboserial.read_byte()
-		M1Cur_b0 = self.roboserial.read_byte()
-		M2Cur_b1 = self.roboserial.read_byte()
-		M2Cur_b0 = self.roboserial.read_byte()
 
-		# Create data
-		M1Cur = (M1Cur_b1<<8)&M1Cur_b0
-		M2Cur = (M2Cur_b1<<8)&M2Cur_b0
+		# Receive Payload
+		M1Cur = self.roboserial.read_word()
+		M2Cur = self.roboserial.read_word()
 
 		# Checksum
 		recvd_checksum = self.roboserial.read_byte()&0x7F
