@@ -98,7 +98,7 @@ class RoboClaw:
 
 	def read_firmware_version(self):
 		self.roboserial.send_command(self.addr, Cmd.GETVERSION)
-		return self.roboserial.port.read(32)
+		return self.roboserial.read(size=32)
 
 
 		# def readversion(addr):
@@ -608,6 +608,9 @@ class RoboSerial:
 		self.port = serial.Serial(
 			self.comm_port, baudrate=self.baudrate, timeout=1.0)
 
+	def read(self,size=1):
+		return self.to_str(self.port.read(size))
+
 	def send_command(self,addr,command,val=None):
 		value = 0 if not val else val
 
@@ -640,13 +643,13 @@ class RoboSerial:
 	def read_word(self):
 		val = struct.unpack('>H',self.port.read(2))
 		self.checksum += (val[0]&0xFF)
-		cself.hecksum += (val[0]>>8)&0xFF
+		self.checksum += (val[0]>>8)&0xFF
 		return val[0]
 
 	def read_signed_word(self):
 		val = struct.unpack('>h',self.port.read(2))
 		self.checksum += val[0]
-		self.hecksum += (val[0]>>8)&0xFF
+		self.checksum += (val[0]>>8)&0xFF
 		return val[0]
 
 	def read_long(self):
@@ -696,6 +699,13 @@ class RoboSerial:
 		self.checksum += (val>>16)&0xFF
 		self.checksum += (val>>24)&0xFF
 		return self.port.write(struct.pack('>l',val))
+
+	def to_str(s):
+	   end = s.find('\0', 1)
+	   if end != -1:
+	      return s[:end]
+	   else:
+	      return s[:]
 
 # Command Enums
 
