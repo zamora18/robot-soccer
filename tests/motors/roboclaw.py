@@ -120,8 +120,8 @@ class RoboClaw:
 		M2Cur = self.roboserial.read_word()
 
 		# Checksum
-		recvd_checksum = self.roboserial.read_byte()&0x7F
-		checksum = self.roboserial.get_checksum()&0x7F
+		recvd_checksum = self.roboserial.get_recvd_checksum()
+		checksum = self.roboserial.create_checksum()
 		return (M1Cur,M2Cur,recvd_checksum,checksum)
 
 		# def readM1pidq(addr):
@@ -145,8 +145,8 @@ class RoboClaw:
 		QPPS = self.roboserial.read_long()
 
 		# Checksum
-		recvd_checksum = self.roboserial.read_byte()&0x7F
-		checksum = self.roboserial.get_checksum()&0x7F
+		recvd_checksum = self.roboserial.get_recvd_checksum()
+		checksum = self.roboserial.create_checksum()
 
 		# Binary scaling
 		kp = kp/65536.0
@@ -800,11 +800,12 @@ class RoboSerial:
 		self.checksum += (val>>24)&0xFF
 		return self.port.write(struct.pack('>l',val))
 
-	def clear_checksum(self):
-		self.checksum = 0
+	def get_recvd_checksum(self):
+		val = struct.unpack('>B',self.port.read(1))
+		return val[0]&0x7F
 
-	def get_checksum(self):
-		return self.checksum
+	def create_checksum(self):
+		return self.checksum&0x7F
 
 # Command Enums
 
