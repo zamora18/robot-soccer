@@ -47,8 +47,8 @@ function v_c=controller_home_(uu,P)
     %------------
     % Choose the strategy to perform    
     
-% %     v_c = strategy_strongOffense(robot,opponent,ball,P,t);
-    v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
+     v_c = strategy_strongOffense(robot,opponent,ball,P,t);
+    %v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
     
 %     v_c(1:3) = skill_followBallOnLine(robot(:,1), ball, -P.field_length/3, P);
 %     v_c(4:6) = skill_followBallOnSegment(robot(:,2),ball,-P.field_length/4,-P.field_width/3,P.field_width/3,ball,P);
@@ -83,6 +83,7 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     % set some configuration variables
     guard_at_x = P.field_length/12; % After the ball and bot go past this point,
                     % the other bot switches into defense mode at that point
+                    % (Past 1/12 on their half of the field)
 
     % Predicates
     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
