@@ -288,6 +288,44 @@ class RoboClaw:
 	# Advanced Motor Control
 	###################################
 
+	def set_m1_velocity_PID_QPPS(self, kp, ki, kd, QPPS):
+		pass
+
+	def set_m2_velocity_PID_QPPS(self, kp, ki, kd, QPPS):
+		pass
+
+	def _set_velocity_PID_QPPS(self, kp, ki, kd, QPPS, M1=False, M2=False):
+		"""Set PID Constants
+
+		Defaults:
+			QPPS = 44000
+			P = 0x00010000
+			I = 0x00008000
+			D = 0x00004000
+
+		QPPS (quadrature pulses per second) is the speed of the encoder
+		when the motor when the motors is at 100 percent power. P, I, D
+		are the default values used after a reset.
+		"""
+		pass
+
+	def read_m1_current_speed(self):
+		pass
+
+	def read_m2_current_speed(self):
+		pass
+
+	def _read_current_speed(self,M1=False,M2=False):
+		"""Read Current Speed
+
+		Read the current pulse per 125th of a second. This is a high
+		resolution version of _read_speed(). This can be used to make
+		an independent PID routine. The resolution of this command
+		is required to create PID controllers using any microcontroller
+		or PC used to drive the RoboClaw.
+		"""
+		pass
+
 	# def SetM1pidq(addr,p,i,d,qpps):
 	# 	sendcommand(addr,28)
 	# 	writelong(d)
