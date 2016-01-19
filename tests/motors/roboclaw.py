@@ -222,76 +222,64 @@ class RoboClaw:
 	###################################
 
 	def read_m1_encoder(self):
-		pass
+		return self._read_encoder(M1=True)
 
 	def read_m2_encoder(self):
-		pass
+		return self._read_encoder(M2=True)
+
+	def _read_encoder(self,M1=False,M2=False):
+		"""Read encoder value
+
+		Each pulse from the quadrature encoder will increment or decrement
+		the counter depending on the direction of motion.
+
+		status:
+		 Bit0: Counter underflow
+		 Bit1: 0-forward, 1=backward
+		 Bit2: Counter overflow
+		"""
+		cmd = Cmd.GETM2ENC if M2 else Cmd.GETM1ENC
+		self.roboserial.send_command(self.addr, cmd)
+
+		# receive payload
+		count = self.roboserial.read_long()
+		status = self.roboserial.read_byte()
+
+		# Checksum
+		if not self._checksums_match():
+			return (-1, -1)
+
+		return (count, status)
 
 	def read_m1_speed(self):
-		pass
+		return self._read_speed(M1=True)
 
 	def read_m2_speed(self):
-		pass
+		return self._read_speed(M2=True)
+
+	def _read_speed(self,M1=False,M2=False):
+		"""Read counter speed.
+
+		Returned value is in pulses per second. RoboClaw keeps track of
+		how many pulses received per second for both decoder channels.
+
+		status: 0-forward, 1-backward
+		"""
+		cmd = Cmd.GETM2SPEED if M2 else Cmd.GETM1SPEED
+		self.roboserial.send_command(self.addr, cmd)
+
+		# receive payload
+		speed = self.roboserial.read_long()
+		status = self.roboserial.read_byte()
+
+		# Checksum
+		if not self._checksums_match():
+			return (-1, -1)
+
+		return (speed, status)
 
 	def reset_encoder_counts(self):
-		pass
-
-	# def readM1encoder(addr):
-	# 	sendcommand(addr,16)
-	# 	enc = readslong()
-	# 	status = readbyte()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return (enc,status)
-	# 	return (-1,-1)
-
-	# def readM2encoder():
-	# 	sendcommand(addr,17)
-	# 	enc = readslong()
-	# 	status = readbyte()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return (enc,status)
-	# 	return (-1,-1)
-
-	# def readM1speed(addr):
-	# 	sendcommand(addr,18)
-	# 	enc = readslong()
-	# 	status = readbyte()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return enc
-	# 	return -1
-
-	# def readM2speed(addr):
-	# 	sendcommand(addr,19)
-	# 	enc = readslong()
-	# 	status = readbyte()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return enc
-	# 	return -1
-	 
-	# def ResetEncoderCnts(addr):
-	# 	sendcommand(addr,20)
-	# 	writebyte(checksum&0x7F)
-
-	# def readmainbattery(addr):
-	# 	sendcommand(addr,24)
-	# 	val = readword()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return val
-	# 	return -1
-
-	# def readlogicbattery(addr):
-	# 	sendcommand(addr,25)
-	# 	val = readword()
-	# 	crc = checksum&0x7F
-	# 	if crc==readbyte()&0x7F:
-	# 		return val
-	# 	return -1
-
+		self.roboserial.send_command(self.addr, Cmd.RESETENC)
 
 	###################################
 	# Advanced Motor Control
@@ -768,8 +756,8 @@ class RoboSerial:
 		self.checksum += (val[0]>>8)&0xFF
 
 		if unscale:
-			return val[0]/65536.0
-			
+			return val[0]/256.0 # I don't think this is right
+
 		return val[0]
 
 	def read_signed_word(self):
