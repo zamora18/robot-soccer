@@ -5,7 +5,7 @@ import time
 class RoboClaw:
 
 	def __init__(self, addr, port, baudrate):
-		self.roboserial = RoboSerial(port, baudrate)
+		self.roboserial = RoboSerial(addr, port, baudrate)
 		self.addr = addr
 
 	def _checksums_match(self):
@@ -18,14 +18,14 @@ class RoboClaw:
 
 		Valid data range is 0-127. 0 = full stop. 127 = full speed forward.
 		"""
-		self.roboserial.send_command(self.addr, Cmd.M1FORWARD, speed)
+		self.roboserial.send_command(Cmd.M1FORWARD, speed)
 
 	def drive_backward_m1(self,speed):
 		"""Drive motor 1 backward.
 
 		Valid data range is 0-127. 0 = full stop. 127 = full speed backward.
 		"""
-		self.roboserial.send_command(self.addr, Cmd.M1BACKWARD, speed)
+		self.roboserial.send_command(Cmd.M1BACKWARD, speed)
 
 	def set_min_main_voltage(self,value):
 		"""Sets main battery (B- / B+) minimum voltage level.
@@ -39,7 +39,7 @@ class RoboClaw:
 
 		value = (Desired Volts - 6) x 5
 		"""
-		self.roboserial.send_command(self.addr, Cmd.SETMINMB, value)
+		self.roboserial.send_command(Cmd.SETMINMB, value)
 
 	def set_max_main_voltage(self,value):
 		"""Sets main battery (B- / B+) maximum voltage level.
@@ -55,19 +55,19 @@ class RoboClaw:
 
 		value = Desired Volts x 5.12
 		"""
-		self.roboserial.send_command(self.addr, Cmd.SETMAXMB,value)
+		self.roboserial.send_command(Cmd.SETMAXMB,value)
 
 	def drive_forward_m2(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.M2FORWARD, speed)
+		self.roboserial.send_command(Cmd.M2FORWARD, speed)
 
 	def drive_backward_m2(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.M2BACKWARD, speed)
+		self.roboserial.send_command(Cmd.M2BACKWARD, speed)
 
 	def drive_m1(self,value):
-		self.roboserial.send_command(self.addr, Cmd.M17BIT, value)
+		self.roboserial.send_command(Cmd.M17BIT, value)
 
 	def drive_m2(self,value):
-		self.roboserial.send_command(self.addr, Cmd.M27BIT, value)
+		self.roboserial.send_command(Cmd.M27BIT, value)
 
 	###################################
 	# Mix Mode Commands
@@ -80,29 +80,29 @@ class RoboClaw:
 	###################################
 
 	def mixed_drive_forward(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDFORWARD, speed)
+		self.roboserial.send_command(Cmd.MIXEDFORWARD, speed)
 
 	def mixed_drive_backwards(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDBACKWARD, speed)
+		self.roboserial.send_command(Cmd.MIXEDBACKWARD, speed)
 
 	def mixed_turn_right(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDRIGHT, speed)
+		self.roboserial.send_command(Cmd.MIXEDRIGHT, speed)
 
 	def mixed_turn_left(self,speed):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDLEFT, speed)
+		self.roboserial.send_command(Cmd.MIXEDLEFT, speed)
 
 	def mixed_drive(self,value):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDFB, value)
+		self.roboserial.send_command(Cmd.MIXEDFB, value)
 
 	def mixed_turn(self,value):
-		self.roboserial.send_command(self.addr, Cmd.MIXEDLR, value)
+		self.roboserial.send_command(Cmd.MIXEDLR, value)
 
 	###################################
 	# Advanced Packet Serial Commands
 	###################################
 
 	def read_firmware_version(self):
-		self.roboserial.send_command(self.addr, Cmd.GETVERSION)
+		self.roboserial.send_command(Cmd.GETVERSION)
 		return self.roboserial.read(size=32)
 
 	def read_main_bat_voltage(self):
@@ -118,7 +118,7 @@ class RoboClaw:
 		pass
 
 	def read_motor_currents(self):
-		self.roboserial.send_command(self.addr, Cmd.GETCURRENTS)
+		self.roboserial.send_command(Cmd.GETCURRENTS)
 
 		# Receive Payload
 		M1Cur = self.roboserial.read_word()
@@ -138,7 +138,7 @@ class RoboClaw:
 
 	def _read_velocity_PID_QPPS(self,M1=False,M2=False):
 		cmd = Cmd.READM2PID if M2 else Cmd.READM1PID
-		self.roboserial.send_command(self.addr, cmd)
+		self.roboserial.send_command(cmd)
 
 		# Receive Payload
 		kp = self.roboserial.read_long(True)
@@ -172,7 +172,7 @@ class RoboClaw:
 
 	def _read_pos_PID(self,M1=False,M2=False):
 		cmd = Cmd.READM2POSPID if M2 else Cmd.READM1POSPID
-		self.roboserial.send_command(self.addr, cmd)
+		self.roboserial.send_command(cmd)
 
 		# Receive Payload
 		kp = self.roboserial.read_long(True)
@@ -190,7 +190,7 @@ class RoboClaw:
 		return (kp,ki,kd,maxi,deadzone,minpos,maxpos)
 
 	def read_temp(self):
-		self.roboserial.send_command(self.addr, Cmd.GETTEMP)
+		self.roboserial.send_command(Cmd.GETTEMP)
 
 		# Receive Payload
 		temp = self.roboserial.read_word(True)
@@ -239,7 +239,7 @@ class RoboClaw:
 		 Bit2: Counter overflow
 		"""
 		cmd = Cmd.GETM2ENC if M2 else Cmd.GETM1ENC
-		self.roboserial.send_command(self.addr, cmd)
+		self.roboserial.send_command(cmd)
 
 		# receive payload
 		count = self.roboserial.read_signed_long()
@@ -269,7 +269,7 @@ class RoboClaw:
 		status: 0-forward, 1-backward
 		"""
 		cmd = Cmd.GETM2SPEED if M2 else Cmd.GETM1SPEED
-		self.roboserial.send_command(self.addr, cmd)
+		self.roboserial.send_command(cmd)
 
 		# receive payload
 		speed = self.roboserial.read_signed_long()
@@ -282,7 +282,7 @@ class RoboClaw:
 		return (speed, status)
 
 	def reset_encoder_counts(self):
-		self.roboserial.send_command(self.addr, Cmd.RESETENC)
+		self.roboserial.send_command(Cmd.RESETENC, force_checksum=True)
 
 	###################################
 	# Advanced Motor Control
@@ -710,8 +710,9 @@ class RoboClaw:
 
 class RoboSerial:
 
-	def __init__(self, port, baudrate):
+	def __init__(self, addr, port, baudrate):
 		self.checksum = 0
+		self.addr = addr
 		self.port = None;
 		self.comm_port = port;
 		self.baudrate = baudrate;
@@ -724,14 +725,14 @@ class RoboSerial:
 	def read(self,size=1):
 		return self.port.read(size)
 
-	def send_command(self,addr,command,val=None):
+	def send_command(self,command,val=None,force_checksum=False):
 		value = 0 if val == None else val
 		
 		# Create the checksum
-		self.checksum = (addr+command+value)
+		self.checksum = (self.addr+command+value)
 
 		# Send the address
-		self.port.write(chr(addr))
+		self.port.write(chr(self.addr))
 
 		# Send the command number (p28)
 		self.port.write(chr(command))
@@ -740,6 +741,7 @@ class RoboSerial:
 			# Send the value (if there is one)
 			self.port.write(chr(value))
 
+		if val is not None or force_checksum:
 			# And finally, the checksum!
 			self.port.write(chr(self.checksum&0x7F))
 
