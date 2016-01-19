@@ -242,8 +242,11 @@ class RoboClaw:
 		self.roboserial.send_command(self.addr, cmd)
 
 		# receive payload
-		count = self.roboserial.read_long()
+		count = self.roboserial.read_signed_long()
 		status = self.roboserial.read_byte()
+
+		# Since only the lower 3 bits matter
+		status = status&0x03
 
 		# Checksum
 		if not self._checksums_match():
@@ -269,7 +272,7 @@ class RoboClaw:
 		self.roboserial.send_command(self.addr, cmd)
 
 		# receive payload
-		speed = self.roboserial.read_long()
+		speed = self.roboserial.read_signed_long()
 		status = self.roboserial.read_byte()
 
 		# Checksum
