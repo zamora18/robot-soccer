@@ -9,8 +9,8 @@
 P.num_robots = 2;
 
 % field characteristics
-P.field_length  = 3.048; % meters (5 ft)
-P.field_width   = 1.52; % meters (10 ft)
+P.field_length  = 3.048; % meters (10 ft)
+P.field_width   = 1.52; % meters  (5 ft)
 P.field_color = [16,92,1]/256;
 P.home_team_color = 'b';
 P.away_team_color = 'g';
@@ -22,7 +22,7 @@ P.display_rate = 0.1;
 % constants that govern ball dynamics
 P.ball_radius = 0.03;
 P.ball_mu = 0.1;  % coefficient of friction for ball
-P.ball_spring = 500;% spring constant that models wall and robot interactions
+P.ball_spring = 500;% spring constant that models wall/robot interactions
 
 % robot parameters and geometry
 P.wheel_radius = 0.03; % m (this is a guess)
