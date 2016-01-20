@@ -107,8 +107,8 @@ function v = offense(robot, allOtherRobots, ball, pos, P, minX, maxX)
         v(1) = 0;
     end
     v(3) = rotateToAngle(robot, rotateAngle, P);
-    %persistent labelHandle;
-    %labelHandle = drawLabel(robot(1:2),labelHandle, action);
+%     persistent labelHandle;
+%     labelHandle = drawLabel(robot(1:2,1),labelHandle, action);
 end
 
 function v=goalie(robot, allOtherRobots, ball, x_pos, P)

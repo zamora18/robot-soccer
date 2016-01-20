@@ -81,7 +81,7 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     bot1_x = robot(1,1);
     
     % set some configuration variables
-    guard_at_x = P.field_length/12; % After the ball and bot go past this point,
+    guard_at_x = P.field_length*3/4; % After the ball and bot go past this point,
                     % the other bot switches into defense mode at that point
                     % (Past 1/12 on their half of the field)
 
@@ -90,14 +90,17 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
                     
     % Bot1 rushes goal
     v1 = play_rushGoal(robot(:,1), ball, P);
+%     
+%     % Bot2 depends on the time_to_guard predicate
+%     if (time_to_guard)
+%         v2 = skill_followBallOnLine(robot(:,2), ball, guard_at_x, P);
+%     else
+%         v2 = play_rushGoal(robot(:,2), ball, P);
+%     end
     
-    % Bot2 depends on the time_to_guard predicate
-    if (time_to_guard)
-        v2 = skill_followBallOnLine(robot(:,2), ball, guard_at_x, P);
-    else
-        v2 = play_rushGoal(robot(:,2), ball, P);
-    end
-
+    % Always goalie
+    v2 = play_guardGoal(robot(:,2), ball, P);
+    
     v_c = [v1; v2];
 end
 
