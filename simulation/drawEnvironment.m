@@ -149,7 +149,7 @@ function drawField(P)
     L = P.field_length;
     G = P.goal_width;
     D = L/10;
-    B = L/20; % border  width
+    B = L/25; % border  width
     phi = [0:.1:2*pi,0];
 
     % field and display characteristics
