@@ -164,6 +164,9 @@ function v_c = skillFetchBall(robot, allOtherRobots, ball, P, i)
     end
     position = predictBall(ball, timeToFetch);
     
+%     persistent labelHandle;
+%     labelHandle = drawLabel(position,labelHandle, 'b');
+    
     %If ball is behind robot, go around it, not through it!
     persistent needToGoBehind;
     if isempty(needToGoBehind), needToGoBehind = 0; end

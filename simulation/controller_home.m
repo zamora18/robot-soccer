@@ -23,7 +23,6 @@ end
 
 % main control function
 function v_c=controller_home_(uu,P)
-
     % process inputs to function
     % robots - own team
     for i=1:P.num_robots,
@@ -36,6 +35,7 @@ function v_c=controller_home_(uu,P)
     end
     NN = NN + 3*P.num_robots;
     % ball
+    
     ball = [uu(1+NN); uu(2+NN)];
     NN = NN + 2;
     % score: own team is score(1), opponent is score(2)
@@ -48,7 +48,7 @@ function v_c=controller_home_(uu,P)
     % Choose the strategy to perform    
     
      v_c = strategy_strongOffense(robot,opponent,ball,P,t);
-    %v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
+%     v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
     
 %     v_c(1:3) = skill_followBallOnLine(robot(:,1), ball, -P.field_length/3, P);
 %     v_c(4:6) = skill_followBallOnSegment(robot(:,2),ball,-P.field_length/4,-P.field_width/3,P.field_width/3,ball,P);
@@ -81,23 +81,22 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     bot1_x = robot(1,1);
     
     % set some configuration variables
-    guard_at_x = P.field_length*3/4; % After the ball and bot go past this point,
+    guard_at_x = -P.field_length*3/8; % After the ball and bot go past this point,
                     % the other bot switches into defense mode at that point
                     % (Past 1/12 on their half of the field)
 
     % Predicates
-    time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
-                    
-    % Bot1 rushes goal
-    v1 = play_rushGoal(robot(:,1), ball, P);
-%     
-%     % Bot2 depends on the time_to_guard predicate
-%     if (time_to_guard)
-%         v2 = skill_followBallOnLine(robot(:,2), ball, guard_at_x, P);
-%     else
-%         v2 = play_rushGoal(robot(:,2), ball, P);
-%     end
+%     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
+%     time_to_guard = (ball_x < guard_at_x);
+    time_to_guard = false;
     
+    % Bot1 depends on the time_to_guard predicate
+    if (time_to_guard)
+        v1 = skill_followBallOnLine(robot(:,1), ball, guard_at_x, P);
+    else
+        v1 = play_rushGoal(robot(:,1), ball, P);
+    end
+
     % Always goalie
     v2 = play_guardGoal(robot(:,2), ball, P);
     
@@ -355,7 +354,11 @@ function v=skill_goToPointFaceTarget(robot, point, target, P)
 
     % control angle to point toward goal
     theta_d = atan2(target(2)-robot(2), target(1)-robot(1));
-    omega = -P.control_k_phi*(robot(3) - theta_d); 
+    omega = -P.control_k_phi*(robot(3) - theta_d);
+    
+    vmax = utility_maximizeVelocity([vx vy], P);
+    vx = vmax(1);
+    vy = vmax(2);
     
     v = [vx; vy; omega];
 end
@@ -365,13 +368,24 @@ end
 %------------------------------------------
 % utility: saturate velocity
 %   - saturate the commanded velocity 
+% function v = utility_saturateVelocity(v,P)
+%     if v(1) >  P.robot_max_vx,    v(1) =  P.robot_max_vx;    end
+%     if v(1) < -P.robot_max_vx,    v(1) = -P.robot_max_vx;    end
+%     if v(2) >  P.robot_max_vy,    v(2) =  P.robot_max_vy;    end
+%     if v(2) < -P.robot_max_vy,    v(2) = -P.robot_max_vy;    end
+%     if v(3) >  P.robot_max_omega, v(3) =  P.robot_max_omega; end
+%     if v(3) < -P.robot_max_omega, v(3) = -P.robot_max_omega; end
+% end
 function v = utility_saturateVelocity(v,P)
-    if v(1) >  P.robot_max_vx,    v(1) =  P.robot_max_vx;    end
-    if v(1) < -P.robot_max_vx,    v(1) = -P.robot_max_vx;    end
-    if v(2) >  P.robot_max_vy,    v(2) =  P.robot_max_vy;    end
-    if v(2) < -P.robot_max_vy,    v(2) = -P.robot_max_vy;    end
-    if v(3) >  P.robot_max_omega, v(3) =  P.robot_max_omega; end
-    if v(3) < -P.robot_max_omega, v(3) = -P.robot_max_omega; end
+    if abs(v(1)) > P.robot_max_vx
+        v(1:2) = v(1:2) / abs(v(1)) * P.robot_max_vx;
+    end
+    if abs(v(2)) > P.robot_max_vy
+        v(1:2) = v(1:2) / abs(v(2)) * P.robot_max_vy;
+    end
+    if abs(v(3)) > P.robot_max_omega
+        v(3) = v(3) / abs(v(3)) * P.robot_max_omega;
+    end
 end
 
 %------------------------------------------
@@ -386,4 +400,19 @@ end
 %   - find the distance between two points
 function p = utility_midpointOf(p1, p2)
     p = [(p1(1)+p2(1))/2 (p1(2)+p2(2))/2];
+end
+
+%------------------------------------------
+% utility: maximize velocity
+%   - 
+function v = utility_maximizeVelocity(v, P)
+    % Avoid division by zero
+    if v(1) == 0 && v(2) == 0, return; end
+    
+    % If normalized vx is faster than normalized vy
+    if abs(v(1)) / P.robot_max_vx > abs(v(2)) / P.robot_max_vy
+        v = v / abs(v(1)) * P.robot_max_vx;
+    else
+        v = v / abs(v(2)) * P.robot_max_vy;
+    end
 end
