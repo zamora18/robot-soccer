@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/ecestudent/dev/lusk/ros/catkin_ws/devel/setup.sh
+    local-name: /root/dev/lusk/repo/ros/catkin_ws/devel/setup.sh
