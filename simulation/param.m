@@ -16,6 +16,7 @@ P.home_team_color = 'b';
 P.away_team_color = 'g';
 P.ball_color = 'y';
 P.goal_width = P.field_width/3;
+P.goal_box_length = P.field_length/10;
 P.goal_color = [252 148 3]/256;
 P.display_rate = 0.1;
 
