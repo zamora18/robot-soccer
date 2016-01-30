@@ -1,15 +1,20 @@
-import roboclaw as rc
+import rcv3.roboclaw as r
 
-roboclaw = rc.RoboClaw(128, '/dev/ttySAC0', 2400)
-
-
-def forward(speed):
-	roboclaw.drive_forward_m1(speed)
-	roboclaw.drive_forward_m2(speed)
-
-def stop():
-	roboclaw.drive_forward_m1(0)
-	roboclaw.drive_forward_m2(0)
+r.Open('/dev/ttySAC0', 38400)
 
 def readPIDQ():
-    print roboclaw.read_m1_velocity_PID_QPPS()
+	pid
+
+def spin(speed):
+	r.SpeedM1(0x80, speed)
+	r.SpeedM2(0x80, speed)
+	r.SpeedM1(0x81, speed)
+
+def forward(speed):
+	r.SpeedM1(0x80, speed)
+	r.SpeedM2(0x80, speed)
+
+def stop():
+	r.ForwardM1(0x80, 0)
+	r.ForwardM2(0x80, 0)
+	r.ForwardM1(0x81, 0)
