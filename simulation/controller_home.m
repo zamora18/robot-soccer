@@ -10,6 +10,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 % this first function catches simulink errors and displays the line number
 function v_c=controller_home(uu,P)
     try
@@ -20,6 +21,7 @@ function v_c=controller_home(uu,P)
         rethrow(e);
     end
 end
+
 
 % main control function
 function v_c=controller_home_(uu,P)
@@ -48,7 +50,9 @@ function v_c=controller_home_(uu,P)
     % Choose the strategy to perform    
     
      v_c = strategy_strongOffense(robot,opponent,ball,P,t);
-%     v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
+%       v_c = strategy_mediumOffense
+%       v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0); 
+%       ^^I don't know if switchRoles is necessarily a 'strategy'
     
 %     v_c(1:3) = skill_followBallOnLine(robot(:,1), ball, -P.field_length/3, P);
 %     v_c(4:6) = skill_followBallOnSegment(robot(:,2),ball,-P.field_length/4,-P.field_width/3,P.field_width/3,ball,P);
@@ -77,22 +81,27 @@ end
 %       are to the goal.
 function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     % Break out variables into something that makes sense
-    ball_x = ball(1);
-    bot1_x = robot(1,1);
+    ball_x = ball(1); 
+    bot1_x = robot(1,1); 
     
     % set some configuration variables
-    guard_at_x = -P.field_length*3/8; % After the ball and bot go past this point,
+    line_of_defense = -P.field_length*3/8;  % After the ball and bot go past this point,
                     % the other bot switches into defense mode at that point
                     % (Past 1/12 on their half of the field)
 
     % Predicates
-%     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
-%     time_to_guard = (ball_x < guard_at_x);
-    time_to_guard = false;
+%     time_to_defend = (ball_x < line_of_defense) && (bot1_x > line_of_defense);
     
-    % Bot1 depends on the time_to_guard predicate
-    if (time_to_guard)
-        v1 = skill_followBallOnLine(robot(:,1), ball, guard_at_x, P);
+    % Defense is needed when the ball is close to the goal. Always?
+    time_to_defend = (ball_x < line_of_defense);
+    
+    % Bot1 depends on the time_to_defend predicate
+    if (time_to_defend)
+        %Depending on where the ball is, we would need to go around the ball and deflect it away from the goal. 
+        % I think we should skip OnLine function and go with on OnSegment
+        v1 = skill_followBallOnLine(robot(:, 1), ball, line_of_defense, P);%-----------------------------------------------------------------------------
+%         v1 = skill_followBallOnSegment(robot,ball,x_pos,P.goal,P); 
+
     else
         v1 = play_rushGoal(robot(:,1), ball, P);
     end
@@ -268,8 +277,13 @@ function v = play_guardGoal(robot, ball, P)
   y_min = -P.field_width/3;
   y_max =  P.field_width/3;
   
+  %theta needed for angle ball is compared to center of goal.
+  theta = atan2(ball(2)-P.goal(2), ball(1)-P.goal(1));
+  theta = theta*180/pi;
+  
   % set x position to stay at
-  x_pos = -(P.field_length/2)*23/24;
+%   x_pos = -(P.field_length/2)*23/24;
+  x_pos = -(P.field_length/2)+P.goal_box_length*cos(theta);
   
   v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,ball,P);
 end
@@ -293,11 +307,11 @@ end
 % skill: follow ball on line
 %   - follows the y-position of the ball, while maintaining x-position at
 %     x_pos.  Angle always faces the goal.
-function v=skill_followBallOnLine(robot, ball, x_pos, P)
+function v=skill_followBallOnLine(robot, ball, x_pos, P) %--------------------------------------------------------------------------------
     y_min = -P.field_width/2;
     y_max =  P.field_width/2;
 
-    v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,P.goal,P);
+    v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,P.goal,P); %skill_followBallOnLine(robot(:, 1), ball, line_of_defense, P)
 end
 
 %-----------------------------------------
