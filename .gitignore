@@ -2,3 +2,6 @@
 *.*~
 *.asv
 *.autosave
+
+# Python
+*.pyc
