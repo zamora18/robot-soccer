@@ -4,7 +4,7 @@
 
 import rospy
 from playground.msg import coords
-
+from rcv3 import roboclaw as r
 import velchange as v
 
 _x = 0
@@ -14,6 +14,14 @@ _theta = 0
 
 
 _state = 'SPIN' # 'SQUARE', 'HOME'
+
+
+def spin(speed):
+	r.Open('/dev/ttySAC0',38400)
+	r.SpeedM1(0x80, speed)
+	r.SpeedM2(0x80, -speed)
+	r.SpeedM1(0x81, speed)
+
 
 def callback(data):
     #rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.robot_x,data.robot_y,data.robot_theta)
@@ -52,11 +60,15 @@ def listener():
 
         counter = counter+1
 
+	print _state
+
         if _state == 'SPIN':
-            v.goXYOmega(0,0,7)
+            if counter == 0:
+            	spin(50000)
 
             if counter == 300:
                 counter = 0
+		spin(0)
                 _state = 'SLEEP1'
 
         elif _state == 'SLEEP1':
@@ -109,7 +121,7 @@ def listener():
         elif _state == 'HOME':
             if not _isClose(_theta, 0):
                 print "going to 0 theta"
-                v.goXYOmega(0, 0, 2.5)
+                v.goXYOmega(0, 0, 3)
         
             elif not _isClose(_x, 0) or not _isClose(_y, 0):
                 print "going home"

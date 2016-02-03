@@ -30,9 +30,9 @@ def goXYOmega(x,y,omega,limit=False):
   s1 = radianToQpps(v1)
   s2 = radianToQpps(v2)
   s3 = radianToQpps(v3)
-  SetM1Speed(128,s1)
-  SetM1Speed(129,s2)
-  SetM2Speed(128,s3)
+  SetM2Speed(128,s1)
+  SetM1Speed(128,s2)
+  SetM1Speed(129,s3)
 
 def goXYOmegaTheta(x,y,omega,theta,limit=False):
   if limit:
