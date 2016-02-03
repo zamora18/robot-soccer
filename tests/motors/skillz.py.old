@@ -1,0 +1,16 @@
+import motion
+
+def main():
+	# Kick off the motion loop. This loop will keep track of 
+	# where we currently are, and where we are supposed to be
+	# going.
+	motion.start(hz=1)
+
+	# Spin the robot, counter-clockwise at 50% speed
+	spin(speed_percentage=50, ccw=True)
+
+def spin(speed_percentage=50, ccw=False):
+	motion.rotate(0)
+
+if __name__ == "__main__":
+	main()
