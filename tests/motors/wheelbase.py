@@ -6,10 +6,9 @@ MOTOR_COUNT = 3
 _SPEED_MAX = 127
 _SPEED_MIN = 0
 
-class Motors():
-	M1 = 0
-	M2 = 1
-	M3 = 2
+M1 = 0
+M2 = 1
+M3 = 2
 
 _RC = [
 		{ 'addr': 0x80, 'motor': 'M1' },
