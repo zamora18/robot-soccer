@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
 
 	// cap;
-	cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
+	cap.open("http://192.168.1.36:8080/stream?topic=/image&dummy=param.mjpg");
 
 	/*if(!cap.isOpened())
 	{
@@ -334,11 +334,17 @@ Vec3f findCenterCircle(Mat img)
 
 	vector<Vec3f> circles;
 
-	do
-	{	//cout << "robot location = (" << p2.x << "," << p2.y << ")" << "orientation = " << angle << endl;
-		HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
 
-	} while (circles.size() != 1);
+	HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
+	
+	while(circles.size() != 1)
+	{
+		cap.read(img);
+
+		cvtColor(img, img, CV_BGR2GRAY);
+
+		HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
+	}
 
 	for( size_t i = 0; i < circles.size(); i++ )
 	{
