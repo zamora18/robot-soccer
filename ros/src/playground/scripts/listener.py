@@ -22,7 +22,7 @@ def callback(data):
 
 
 def _isClose(x, val):
-    TOLERANCE = 2.0
+    TOLERANCE = 20.0
     return ( abs(x-val) <= TOLERANCE )
 
 
@@ -41,10 +41,19 @@ def listener():
     while not rospy.is_shutdown():
 
         if not _isClose(_theta, 0):
-            v.goXYOmega(0, 0, 1.75)
+            v.goXYOmega(0, 0, 2.5)
     
         elif not _isClose(_x, 0) or not _isClose(_y, 0):
-            v.goXYOmega(x, y, 0)
+            sign_x = -1 if x<0 else 1
+            sign_y = -1 if y<0 else 1
+
+            vx = x/x if abs(x)>abs(y) else abs(x)/abs(y)
+            vy = y/y if abs(y)>abs(x) else abs(y)/abs(x)
+
+            vx = -1*sign_x*vx
+            vy = -1*sign_y*vy
+
+            v.goXYOmega(vx, vy, 0)
 
         else:
             v.goXYOmega(0, 0, 0)
