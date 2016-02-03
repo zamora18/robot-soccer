@@ -43,7 +43,7 @@ def listener():
         if not _isClose(_theta, 0):
             v.goXYOmega(0, 0, 1.75)
     
-        else if not _isClose(_x, 0) or not _isClose(_y, 0):
+        elif not _isClose(_x, 0) or not _isClose(_y, 0):
             v.goXYOmega(x, y, 0)
 
         else:
