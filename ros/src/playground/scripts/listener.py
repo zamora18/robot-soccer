@@ -44,11 +44,13 @@ def listener():
             v.goXYOmega(0, 0, 2.5)
     
         elif not _isClose(_x, 0) or not _isClose(_y, 0):
-            sign_x = -1 if x<0 else 1
-            sign_y = -1 if y<0 else 1
+            print "going to 0 theta"
 
-            vx = x/x if abs(x)>abs(y) else abs(x)/abs(y)
-            vy = y/y if abs(y)>abs(x) else abs(y)/abs(x)
+            sign_x = -1 if _x<0 else 1
+            sign_y = -1 if _y<0 else 1
+
+            vx = 1 if abs(_x)>abs(_y) else abs(_x)/abs(_y)
+            vy = 1 if abs(_y)>abs(_x) else abs(_y)/abs(_x)
 
             vx = -1*sign_x*vx
             vy = -1*sign_y*vy
