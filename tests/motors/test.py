@@ -24,7 +24,7 @@ def consistentPIDQ(m):
 def spin(speed):
 	r.SpeedM1(0x80, speed)
 	r.SpeedM2(0x80, -speed)
-#	r.SpeedM1(0x81, speed)
+	r.SpeedM1(0x81, speed)
 
 def forward(speed):
 	r.SpeedM1(0x80, speed)
