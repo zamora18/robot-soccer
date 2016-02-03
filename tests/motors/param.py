@@ -14,7 +14,7 @@ class Vector(object):
 
 
 R = .0282977488817 # radius of wheel
-r = .08 # radius from robot center to each wheel
+r = .075 # radius from robot center to each wheel
 
 # r_k is a vector that points from center of robot to center of each wheel
 r1 = Vector(r,theta=0)

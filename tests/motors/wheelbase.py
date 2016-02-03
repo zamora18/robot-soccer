@@ -13,7 +13,7 @@ M3 = 2
 _RC = [
 		{ 'addr': 0x80, 'motor': 'M1' },
 		{ 'addr': 0x80, 'motor': 'M2' },
-		{ 'addr': 0x81, 'motor': 'M3' },
+		{ 'addr': 0x81, 'motor': 'M1' },
 	 ]
 
 def _getFunction(func_str, motor_id):
@@ -75,3 +75,6 @@ def init():
 	r.Open('/dev/ttySAC0', 38400)
 
 	# PID stuff here?
+	SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
+	SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
+	SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
