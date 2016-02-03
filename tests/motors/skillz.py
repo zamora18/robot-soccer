@@ -12,16 +12,16 @@ def spin():
 	motion.stop()
 
 def square():
-	motion.drive(1, 0, 0)
+	motion.drive(.5, 0, 0)
 	time.sleep(1)
 
-	motion.drive(0, 1, 0)
+	motion.drive(0, .5, 0)
 	time.sleep(1)
 
-	motion.drive(-1, 0, 0)
+	motion.drive(-.5, 0, 0)
 	time.sleep(1)
 
-	motion.drive(0, -1, 0)
+	motion.drive(0, -.5, 0)
 	time.sleep(1)
 
 	motion.stop()

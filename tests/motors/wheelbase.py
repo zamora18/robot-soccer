@@ -65,7 +65,7 @@ def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
 	return func()
 
-def Kill():
+def kill():
 	for motor_id in range(MOTOR_COUNT):
 		Forward(motor_id, 0)
 		Speed(motor_id, 0)
