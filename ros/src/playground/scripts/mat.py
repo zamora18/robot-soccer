@@ -3,11 +3,8 @@ from numpy import matrix
 from numpy import linalg
 import math
 
-#define s1,s2,s3
-
-realWorldOffset = 1 #1.698
 s = .0282977488817 #radius of wheel
-r = .08 #radius from center to center of wheel
+r = .075 #radius from center to center of wheel
 
 r1theta = -math.pi/3.0
 r1x = math.cos(r1theta)*r
@@ -49,7 +46,7 @@ mSub = matrix( [[s1x,s1y,(s1y*r1x - s1x*r1y)],
                 
 #print mSub
 
-M = realWorldOffset*(1.0/s)*mSub
+M = (1.0/s)*mSub
 
 R = lambda theta: matrix( [[math.cos(theta),math.sin(theta),0.0],
              [-math.sin(theta),math.cos(theta),0.0],

@@ -31,8 +31,8 @@ def goXYOmega(x,y,omega,limit=False):
   s2 = radianToQpps(v2)
   s3 = radianToQpps(v3)
   SetM1Speed(128,s1)
-  SetM2Speed(128,s2)
-  SetM1Speed(129,s3)
+  SetM1Speed(129,s2)
+  SetM2Speed(128,s3)
 
 def goXYOmegaTheta(x,y,omega,theta,limit=False):
   if limit:
@@ -46,8 +46,8 @@ def goXYOmegaTheta(x,y,omega,theta,limit=False):
   s2 = radianToQpps(v2)
   s3 = radianToQpps(v3)
   SetM1Speed(128,s1)
-  SetM2Speed(128,s2)
-  SetM1Speed(129,s3)
+  SetM1Speed(129,s2)
+  SetM2Speed(128,s3)
   
 def goXYOmegaAccel(x,y,theta,time=1):
   v1,v2,v3 = mat.getWheelVel(x,y,theta)
@@ -55,15 +55,15 @@ def goXYOmegaAccel(x,y,theta,time=1):
   s2 = radianToQpps(v2)
   s3 = radianToQpps(v3)
   r1 = readM1speed(128)
-  r2 = readM2speed(128)
-  r3 = readM1speed(129)
+  r2 = readM1speed(129)
+  r3 = readM2speed(128)
   if DEBUG:
     print r1
     print r2
     print r3
   SetM1SpeedAccel(128,int(abs(r1-s1)/time),s1)
-  SetM2SpeedAccel(128,int(abs(r2-s2)/time),s2)
-  SetM1SpeedAccel(129,int(abs(r3-s3)/time),s3)
+  SetM1SpeedAccel(129,int(abs(r2-s2)/time),s2)
+  SetM2SpeedAccel(128,int(abs(r3-s3)/time),s3)
   s1_prev=s1
   s2_prev=s2
   s3_prev=s3
@@ -73,23 +73,23 @@ def smoothStop(v1_1,v2_1,v3_1,v1_2,v2_2,v3_2):
   s2 = radianToQpps(v2_1)
   s3 = radianToQpps(v3_1)
   SetM1SpeedAccel(128,abs(s1*3),s1)
-  SetM2SpeedAccel(128,abs(s2*3),s2)
-  SetM1SpeedAccel(129,abs(s3*3),s3)
+  SetM1SpeedAccel(129,abs(s2*3),s2)
+  SetM2SpeedAccel(128,abs(s3*3),s3)
   time.sleep(.5)
   SetM1SpeedAccel(128,abs(s1*3),0)
-  SetM2SpeedAccel(128,abs(s2*3),0)
-  SetM1SpeedAccel(129,abs(s3*3),0)
+  SetM1SpeedAccel(129,abs(s2*3),0)
+  SetM2SpeedAccel(128,abs(s3*3),0)
   time.sleep(.5)
   s1 = radianToQpps(v1_2)
   s2 = radianToQpps(v2_2)
   s3 = radianToQpps(v3_2)
   SetM1SpeedAccel(128,abs(s1*3),s1)
-  SetM2SpeedAccel(128,abs(s2*3),s2)
-  SetM1SpeedAccel(129,abs(s3*3),s3)
+  SetM1SpeedAccel(129,abs(s2*3),s2)
+  SetM2SpeedAccel(128,abs(s3*3),s3)
   time.sleep(.5)
   SetM1SpeedAccel(128,abs(s1*3),0)
-  SetM2SpeedAccel(128,abs(s2*3),0)
-  SetM1SpeedAccel(129,abs(s3*3),0)
+  SetM1SpeedAccel(129,abs(s2*3),0)
+  SetM2SpeedAccel(128,abs(s3*3),0)
   time.sleep(.5)
   
 def leftTurnMomentum():
@@ -111,8 +111,8 @@ def leftTurn():
   
 def printState():
   r1 = readM1speed(128)
-  r2 = readM2speed(128)
-  r3 = readM1speed(129)
+  r2 = readM1speed(129)
+  r3 = readM2speed(128)
   v1 = qppsToRadian(r1)
   v2 = qppsToRadian(r2)
   v3 = qppsToRadian(r3)
