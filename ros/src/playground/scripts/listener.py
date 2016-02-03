@@ -45,9 +45,10 @@ def listener():
 
     counter = 0
 
+    global _state
+
     rate = rospy.Rate(100) # 100hz
     while not rospy.is_shutdown():
-
 
         counter = counter+1
 
@@ -71,28 +72,28 @@ def listener():
 
 
         elif _state == 'SQUARE1':
-            velchange.goXYOmega(.5,0,0)
+            v.goXYOmega(.5,0,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE2'
 
         elif _state == 'SQUARE2':
-            velchange.goXYOmega(0,.5,0)
+            v.goXYOmega(0,.5,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE3'
 
         elif _state == 'SQUARE3':
-            velchange.goXYOmega(-0.5,0,0)
+            v.goXYOmega(-0.5,0,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE4'
 
         elif _state == 'SQUARE4':
-            velchange.goXYOmega(0,-.5,0)
+            v.goXYOmega(0,-.5,0)
 
             if counter == 100:
                 counter = 0
