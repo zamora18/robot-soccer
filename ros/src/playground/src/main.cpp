@@ -183,13 +183,15 @@ int main(int argc, char *argv[])
 			break;
 		}
 
+		Point2d origin = imageToFieldTransform(center, center);
+
 		// -------------------------------------
 		playground::coords msg;
 		msg.robot_x = robot.getLocation().x;
 		msg.robot_y = robot.getLocation().y;
 		msg.robot_theta = robot.getOrientation();
-		msg.center_x = center.x;
-		msg.center_y = center.y;
+		msg.center_x = origin.x;
+		msg.center_y = origin.y;
 
 		pub.publish(msg);
 		ros::spinOnce();
