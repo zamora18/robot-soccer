@@ -17,9 +17,9 @@ R = .0282977488817 # radius of wheel
 r = .075 # radius from robot center to each wheel
 
 # r_k is a vector that points from center of robot to center of each wheel
-r1 = Vector(r,theta=0)
+r1 = Vector(r,theta=np.pi/3)
 r2 = Vector(r,theta=np.pi)
-r3 = Vector(r,theta=3*np.pi/2)
+r3 = Vector(r,theta=5*np.pi/3)
 
 # s_k is a unit vector that points in the direction of spin
 s1 = Vector(1,theta=(r1.theta + np.pi/2))
