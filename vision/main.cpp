@@ -2,36 +2,54 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <math.h>
+#include "visionobject.h"
+#include "robot.h"
+
+#define CIRCLE_DIAMETER_IN_CM 49.35
 
 using namespace cv;
 using namespace std;
 
-vector<vector<Point> > getContours(Mat img);
+double scalingfactor;
+Point2d center;
+VideoCapture cap;
+
+vector<vector<Point> >  getContours(Mat contourOutput);
+
+bool initializeRobot(Robot* robot1, Mat img);
+
+double findAngleTwoPoints(Point2d p1, Point2d p2);
+
+void erodeDilate(Mat img);
+
+Vec3f findCenterCircle(Mat img);
+
+Point2d imageToFieldTransform(Point2d center, Point2d p);
+
+Point2d fieldToImageTransform(Point2d center, Point2d p);
 
 int main(int argc, char *argv[])
 {
-	VideoCapture cap;
+	cap;
 
-	vector<vector<Point> > contours;
-
-	cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
+	cap.open("http://192.168.1.36:8080/stream?topic=/image&dummy=param.mjpg");
 
 	/*if(!cap.isOpened())
 	{
-		cout << "cap is opened" << endl;
+		cout << "cap is closed" << endl;
 		return -1;
-	}*/
+	}//*/
 
 	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
-	int iLowH = 171;//43;
-	int iHighH = 179;//63;
+	int iLowH = 80;
+	int iHighH = 100;
 
-	int iLowS = 136;//77;
-	int iHighS = 255;//255;
+	int iLowS = 47;
+	int iHighS = 241;
 
-	int iLowV = 208;//175;
-	int iHighV = 255;//255;
+	int iLowV = 0;
+	int iHighV = 255;
 
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
@@ -46,17 +64,30 @@ int main(int argc, char *argv[])
 	Mat imgTemp;
 	cap.read(imgTemp);
 
-	Mat imgLines = Mat::zeros(imgTemp.size(), CV_8UC3);
+	Mat centercircle = imgTemp.clone();
+
+	Vec3f centercirc;
+
+	centercirc = findCenterCircle(centercircle);
+
+	center = Point2d(centercirc[0], centercirc[1]);
+
+	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
 
 
-	//used to store the position of the object from the previous frame
-	int iPrevX = -1;
-	int iPrevY = -1;
+	cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
-	Point center;
+	Robot robot = Robot();
 
-	center.x = imgTemp.size().width/2;
-	center.y = imgTemp.size().height/2;
+	//thresh hold the image
+	inRange(imgTemp, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgTemp);
+
+
+	erodeDilate(imgTemp);
+
+	initializeRobot(&robot, imgTemp);
+
+	//Mat imgLines = Mat::zeros(imgTemp.size(), CV_8UC3);
 
 	cout << "initialized" << endl;
 
@@ -75,6 +106,9 @@ int main(int argc, char *argv[])
 			break;
 		}
 
+
+		//blur(imgOriginal, imgOriginal, Size(3,3));
+
 		Mat imgHSV;
 
 		//convert from the input image to a HSV image
@@ -83,83 +117,54 @@ int main(int argc, char *argv[])
 
 		Mat imgThresholded, imgBW;
 
-		//cvtColor(imgOriginal, imgThresholded, COLOR_RGB2GRAY);
+		centercircle = imgOriginal.clone();
 
-		blur(imgThresholded, imgThresholded, Size(3,3));
+
 
 		//thresh hold the image
 		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
 
+
+
+
+
+		//cvtColor(imgHSV, imgBW, COLOR_BGR2GRAY);
+
 		//otsu thresholding
-		//threshold(imgThresholded, imgThresholded, 0, 255, THRESH_BINARY | THRESH_OTSU);
+		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
+		erodeDilate(imgThresholded);
 
-		//averages pixels in ovals to get rid of background noise
-		//morphological opening (remove small objects from the foreground)
-		erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_RECT, Size(5, 5)) );
-		dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_RECT, Size(5, 5)) );
+		initializeRobot(&robot, imgThresholded);		
 
-		//morphological closing (fill small holes in the foreground)
-		dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-		erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+		Point2d robotlocation = fieldToImageTransform(center, robot.getLocation());
+		Point2d end;
 
+		double angle = robot.getOrientation();
 
+		double sinx = (cos(angle * M_PI/180));
+		double siny = (sin(angle * M_PI/180));
 
-//		//Find the moments in the thresholded image
-//		Moments oMoments = moments(imgThresholded);
+		siny *= -1;
 
-//		//
-//		double dM01 = oMoments.m01;
-//		double dM10 = oMoments.m10;
-//		double dArea = oMoments.m00;
-
-//		//if the area is <=10000, its just noise
-//		if(dArea > 10000)
-//		{
-//			/* calculate pos of image
-//			 * the x coordinate is m10/m00
-//			 * y is m01/m00
-//			 */
-//			int posX = (dM10/dArea) - center.x;
-//			int posY = center.y - (dM01/dArea);
-
-//			//check to make sure they are valid points
-//			/*if(iPrevX >= 0 && iPrevY >= 0 && posX >= 0 && posY >= 0)
-//			{
-//				//draw a line from the previous point to new point
-//				line(imgLines,Point(posX, posY), Point(iPrevX, iPrevY), Scalar(0,0,255), 3);
-//			}*/
-
-//			//update the previous point to the new point
-//			iPrevX = posX;
-//			iPrevY = posY;
-//		}
-//		//int distanceFromCenter = (int)sqrt(pow(center.x - iPrevX, 2) + pow(center.y - iPrevY, 2));
-//		//cout << "distance from center = " << distanceFromCenter << endl;
-
-//		cout << "(" << iPrevX << "," << iPrevY << ")" << endl;
-
-
-		contours = getContours(imgThresholded);
-
-
-		for(int i = 0; i < contours.size(); i++)
-		{
-			Scalar color = Scalar(255,255,0);
-			drawContours(imgOriginal, contours, i, color, 3);
-		}
+		end.x = robotlocation.x + 50 * sinx;
+		end.y = robotlocation.y + 50 * siny;
 
 
 
 
-
+		line(imgOriginal, robotlocation, end, Scalar(0,0,255), 2);
 
 
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		imshow("BW", imgThresholded);
+		imshow("thresh", imgThresholded);
+
+
+
+		//imshow("BWOTSU", imgBW);
 
 
 
@@ -167,36 +172,179 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-
 	}
 	return 0;
 }
 
 
-vector<vector<Point> > getContours(Mat img)
+vector<vector<Point> >  getContours(Mat contourOutput)
 {
-	Mat contourOutput;
-	vector<vector<Point> > contours;
-	vector<Vec4i> hierarchy;
 
+	vector<vector<Point> > contours;
 
 	//detect edges
-	Canny(img, contourOutput, 0,255, 3);
+	//Canny(contourOutput, contourOutput, 0,255,3);
 
-	//find the contors based on contours
-	findContours(contourOutput, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
-	//double area = contourArea(contourOutput);
-
-	//cout << "contourarea = " << area << endl;
+	//find countours
+	findContours(contourOutput, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 	return contours;
+
+}
+
+bool initializeRobot(Robot *robot, Mat img)
+{
+
+	Mat contourOutput;
+
+	contourOutput = img.clone();
+
+	vector<vector<Point> > contours = getContours(contourOutput);
+
+
+	for(int i = 0; i < contours.size(); i++)
+	{
+		drawContours(img, contours, i, Scalar(0,0,255), 2);
+	}
+
+	vector<Moments> contourmoments = vector<Moments>();
+
+
+
+
+	for(int i = 0; i < contours.size(); i++)
+	{
+		//if(contourArea(contours[i]) > 100)
+		//{
+			contourmoments.push_back(moments(contours[i]));
+		//}
+
+	}
+
+	vector<Point2d> objects = vector<Point2d>();
+
+	for(int i = 0; i < contourmoments.size(); i++)
+	{
+		double x = (contourmoments[i].m10)/(contourmoments[i].m00);
+		double y = (contourmoments[i].m01)/(contourmoments[i].m00);
+		objects.push_back(Point2d(x,y));
+
+		circle(img, objects[i], 5, Scalar(0,0,0), 2,8, 0);
+	}
+
+	Point2d p1, p2;
+
+	if(objects.size() < 2)
+	{
+		return false;
+	}
+
+	if(contourmoments[0].m00 < contourmoments[1].m00)
+	{
+		p1 = objects[0];
+		p2 = objects[1];
+	}
+	else
+	{
+		p2 = objects[0];
+		p1 = objects[1];
+	}
+
+	double angle = findAngleTwoPoints(p1, p2);
+
+	stringstream ss;
+
+	ss << "angle = " << angle;
+
+	line(img, p1, p2, Scalar(0,255,255), 2);
+	line(img, p1, Point(img.size().width, p1.y), Scalar(0,255,255), 2);
+	putText(img, ss.str(), Point(p1.x+50,p1.y-50), FONT_HERSHEY_PLAIN, 1, Scalar(255,255,255),2);
+
+
+	robot->setOrientation(angle);
+	robot->setLocation(imageToFieldTransform(center, p2));
+
+
 }
 
 
 
 
+double findAngleTwoPoints(Point2d p1, Point2d p2)
+{
 
+	double angle;
+	angle = atan2(p2.y - p1.y, p2.x - p1.x)*180/M_PI;
+
+	if (angle < 0)
+		angle +=360;
+
+	angle = 360 - angle;
+
+	return angle;
+}
+
+
+void erodeDilate(Mat img)
+{
+	//averages pixels in ovals to get rid of background noise
+//	morphological opening (remove small objects from the foreground)
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+	//morphological closing (fill small holes in the foreground)
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+}
+
+
+Vec3f findCenterCircle(Mat img)
+{
+	Mat imgclone = img.clone();
+
+	cvtColor(img, img, CV_BGR2GRAY);
+
+	//blur to avoid false detection
+	//blur(img, img, Size(3,3));
+
+	vector<Vec3f> circles;
+
+	do
+	{	//cout << "robot location = (" << p2.x << "," << p2.y << ")" << "orientation = " << angle << endl;
+		HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
+
+	} while (circles.size() != 1);
+
+	for( size_t i = 0; i < circles.size(); i++ )
+	{
+		 Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+		 int radius = cvRound(circles[i][2]);
+		 // circle center
+		 circle( imgclone, center, 3, Scalar(0,255,0), -1, 8, 0 );
+		 // circle outline
+		 circle( imgclone, center, radius, Scalar(0,0,255), 3, 8, 0 );
+	}
+
+	imshow("circles!", imgclone);
+
+	return circles[0];
+
+}
+
+Point2d imageToFieldTransform(Point2d center, Point2d p)
+{
+	p.x =  (p.x - center.x)*scalingfactor;
+	p.y =  (center.y - p.y)*scalingfactor;
+	return p;
+}
+
+Point2d fieldToImageTransform(Point2d center, Point2d p)
+{
+	p.x = (p.x/scalingfactor) + center.x;
+	p.y = center.y - (p.y/scalingfactor) ;
+	return p;
+}
 
 
 
