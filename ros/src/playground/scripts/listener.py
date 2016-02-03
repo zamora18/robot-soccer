@@ -49,8 +49,6 @@ def listener():
         else:
             v.goXYOmega(0, 0, 0)
             
-
-        rospy.spinOnce()
         rate.sleep()
 
     # spin() simply keeps python from exiting until this node is stopped
