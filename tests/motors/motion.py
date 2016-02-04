@@ -19,13 +19,9 @@ def drive(vx,vy,omega):
     s3 = int(OMEGA3*PULSES_PER_RADIAN)
 
     # Drive the motors
-    # w.Speed(w.M1, s1)
-    # w.Speed(w.M2, s2)
-    # w.Speed(w.M3, s3)
-
-    w.r.SpeedM1(0x80,s1)
-    w.r.SpeedM1(0x81,s2)
-    w.r.SpeedM2(0x80,s3)
+    w.Speed(w.M1, s1)
+    w.Speed(w.M2, s2)
+    w.Speed(w.M3, s3)
 
 def stop():
     w.kill()
