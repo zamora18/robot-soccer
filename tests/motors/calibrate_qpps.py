@@ -1,6 +1,3 @@
-from motor_control.roboclaw import *
-from motor_control import velchange
-
 import wheelbase as w
 
 
@@ -11,17 +8,17 @@ q  = 308419
 
 def print_stats():
   print w.ReadMainBatteryVoltage()
-  p1,i1,d1,q1 = w.ReadVelocityPID(w.M1)
+  s,p1,i1,d1,q1 = w.ReadVelocityPID(w.M1)
   print "M1 P=%.2f" % p1
   print "M1 I=%.2f" % i1
   print "M1 D=%.2f" % d1
   print "M1 QPPS=",q1
-  p2,i2,d2,q2 = w.ReadVelocityPID(w.M2)
+  s,p2,i2,d2,q2 = w.ReadVelocityPID(w.M2)
   print "M2 P=%.2f" % p2
   print "M2 I=%.2f" % i2
   print "M2 D=%.2f" % d2
   print "M2 QPPS=",q2
-  p3,i3,d3,q3 = w.ReadVelocityPID(w.M3)
+  s,p3,i3,d3,q3 = w.ReadVelocityPID(w.M3)
   print "M3 P=%.2f" % p3
   print "M3 I=%.2f" % i3
   print "M3 D=%.2f" % d3
@@ -33,9 +30,9 @@ def read(motor_id):
   for i in range(0, samples):
     sample = 0
     if motor == 1:
-      sample = w.ReadSpeed(motor_id)
+      s,sample,a = w.ReadSpeed(motor_id)
     elif motor == 2:
-      sample = w.ReadSpeed(motor_id)
+      s,sample,a = w.ReadSpeed(motor_id)
     #print sample
     result = result + sample
   result = result/samples
