@@ -137,8 +137,8 @@ speedM1 = (speedM1Forward - speedM1Backward)/2
 speedM2 = (speedM2Forward - speedM2Backward)/2
 speedM3 = (speedM3Forward - speedM3Backward)/2
 
-w.SetVelocityPID(w.M1,p,i,d,speedM1)
-w.SetVelocityPID(w.M2,p,i,d,speedM2)
-w.SetVelocityPID(w.M3,p,i,d,speedM3)
+w.SetVelocityPID(w.M1,kp,ki,kd,speedM1)
+w.SetVelocityPID(w.M2,kp,ki,kd,speedM2)
+w.SetVelocityPID(w.M3,kp,ki,kd,speedM3)
 
 print_stats()
