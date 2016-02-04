@@ -53,6 +53,10 @@ def Speed(motor_id, speed):
 	func = _getFunction('Speed{}', motor_id)
 	return func(speed)
 
+def ReadSpeed(motor_id):
+	func = _getFunction('ReadSpeed{}', motor_id)
+	return func()
+
 def ReadVelocityPID(motor_id):
 	func = _getFunction('Read{}VelocityPID', motor_id)
 	return func()
@@ -63,6 +67,12 @@ def SetVelocityPID(motor_id, p, i, d, q):
 
 def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
+	return func()
+
+def ReadMainBatteryVoltage():
+	motor_id = M1 	# This doesn't matter since both RoboClaws
+					# are connected to the same battery
+	func = _getFunction('ReadMainBatteryVoltage', motor_id)
 	return func()
 
 def kill():
