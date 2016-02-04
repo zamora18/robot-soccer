@@ -1,4 +1,5 @@
 import wheelbase as w
+import time
 
 
 kp = 3.991973876953125
@@ -29,10 +30,7 @@ def read(motor_id):
   result = 0
   for i in range(0, samples):
     sample = 0
-    if motor == 1:
-      s,sample,a = w.ReadSpeed(motor_id)
-    elif motor == 2:
-      s,sample,a = w.ReadSpeed(motor_id)
+    s,sample,a = w.ReadSpeed(motor_id)
     #print sample
     result = result + sample
   result = result/samples
