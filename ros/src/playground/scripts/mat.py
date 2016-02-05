@@ -23,7 +23,7 @@ r3y = math.sin(r3theta)*r
 #print r3x
 #print r3y
 
-s1theta = r1theta - math.pi/2
+s1theta = r1theta + math.pi/2
 s1x = math.cos(s1theta)
 s1y = math.sin(s1theta)
 

@@ -24,7 +24,7 @@ r3 = Vector(r,theta=5*np.pi/3)
 # s_k is a unit vector that points in the direction of spin
 s1 = Vector(1,theta=(r1.theta + np.pi/2))
 s2 = Vector(1,theta=(r2.theta + np.pi/2))
-s3 = Vector(1,theta=(r3.theta - np.pi/2))
+s3 = Vector(1,theta=(r3.theta + np.pi/2))
 
 # Create the M matrix that relates body and world coordinates
 mSub = np.matrix([ [s1.x, s1.y, (s1.y*r1.x - s1.x*r1.y)],
