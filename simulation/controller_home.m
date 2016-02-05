@@ -11,6 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+
 % this first function catches simulink errors and displays the line number
 function v_c=controller_home(uu,P)
     try
@@ -98,7 +99,6 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     % Bot1 depends on the time_to_defend predicate
     if (time_to_defend)
         %Depending on where the ball is, we would need to go around the ball and deflect it away from the goal. 
-        % I think we should skip OnLine function and go with on OnSegment
         v1 = skill_followBallOnLine(robot(:, 1), ball, line_of_defense, P);%-----------------------------------------------------------------------------
 %         v1 = skill_followBallOnSegment(robot,ball,x_pos,P.goal,P); 
 
@@ -273,19 +273,32 @@ end
 %   - keep heading toward ball
 function v = play_guardGoal(robot, ball, P)
   
-  % Set bounds of the segment (i.e., the goalie box)
-  y_min = -P.field_width/3;
-  y_max =  P.field_width/3;
+%   % Set bounds of the segment (i.e., the goalie box)
+%   y_min = -P.field_width/3;
+%   y_max =  P.field_width/3;
+%   
+%   %theta needed for angle ball is compared to center of goal.
+%   theta = atan2(ball(2)-P.goal(2), ball(1)-P.goal(1));
+%   %theta = theta*180/pi;
+%   
+%   % set x position to stay at
+% %   x_pos = -(P.field_length/2)*23/24;
+%   x_pos = -(P.field_length/2)+(P.field_width/3)*cos(theta);
+%   
+%   v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,ball,P);
   
-  %theta needed for angle ball is compared to center of goal.
-  theta = atan2(ball(2)-P.goal(2), ball(1)-P.goal(1));
-  theta = theta*180/pi;
   
-  % set x position to stay at
-%   x_pos = -(P.field_length/2)*23/24;
-  x_pos = -(P.field_length/2)+P.goal_box_length*cos(theta);
+  theta = atan2(ball(2)+P.goal(2), ball(1)+P.goal(1));
+  x_pos = -P.field_length/2 + P.goal_box_length*cos(theta);
+  y_pos = P.goal_box_length*sin(theta);
+
+  vx = -P.control_k_vx*(robot(1) - x_pos);
+  vy = -P.control_k_vy*(robot(2) - y_pos);
+  omega = -P.control_k_phi*(robot(3) - theta);
   
-  v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,ball,P);
+  
+  v = [vx; vy; omega];
+  
 end
 
 %-----------------------------------------
@@ -311,7 +324,7 @@ function v=skill_followBallOnLine(robot, ball, x_pos, P) %----------------------
     y_min = -P.field_width/2;
     y_max =  P.field_width/2;
 
-    v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,P.goal,P); %skill_followBallOnLine(robot(:, 1), ball, line_of_defense, P)
+    v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,P.goal,P);
 end
 
 %-----------------------------------------
