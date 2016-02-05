@@ -27,7 +27,7 @@ def print_stats():
   print "\n\n"
 
 def read(motor_id):
-  samples = 4
+  samples = 2
   result = 0
   for i in range(0, samples):
     sample = 0
@@ -45,6 +45,9 @@ speedM3Forward=0
 speedM3Backward=0
 
 speed = 48
+timeBetweenDrives = 2
+
+w.init()
 
 w.kill()
 print_stats()
@@ -56,7 +59,7 @@ print_stats()
 # Forward
 w.Backward(w.M1,speed) # M1 backward sample 1
 w.Forward(w.M3,speed)  # M3 forward sample 1
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM1Backward = speedM1Backward + read(w.M1)
 speedM3Forward  = speedM3Forward  + read(w.M3)
@@ -67,7 +70,7 @@ time.sleep(1)
 # Backward
 w.Forward(w.M1,speed)  # M1 forward sample 1
 w.Backward(w.M3,speed) # M3 backward sample 1
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM1Forward  = speedM1Forward  + read(w.M1)
 speedM3Backward = speedM3Backward + read(w.M3)
@@ -78,7 +81,7 @@ time.sleep(1)
 # Left back
 w.Backward(w.M3,speed) # M3 backward sample 2 
 w.Forward(w.M2,speed)  # M2 forward sample 1
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM3Backward = speedM3Backward + read(w.M3)
 speedM3Backward = speedM3Backward/2
@@ -90,7 +93,7 @@ time.sleep(1);
 # Left forward
 w.Forward(w.M3,speed); # M3 forward sample 2
 w.Backward(w.M2,speed); # M2 backward sample 1
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM3Forward  = speedM3Forward + read(w.M3)
 speedM3Forward  = speedM3Forward/2
@@ -102,7 +105,7 @@ time.sleep(1);
 # RightBack
 w.Forward(w.M1,speed);  # M1 forward sample 2
 w.Backward(w.M2,speed); # M2 backward sample 2
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM1Forward  = speedM1Forward + read(w.M1)
 speedM1Forward  = speedM1Forward/2
@@ -115,7 +118,7 @@ time.sleep(1);
 # Right Forward
 w.Backward(w.M1,speed); # M1 backward sample 2
 w.Forward(w.M2,speed);  # M2 forward sample 2
-time.sleep(2)
+time.sleep(timeBetweenDrives)
 
 speedM1Backward = speedM1Backward + read(w.M1)
 speedM1Backward = speedM1Backward/2
