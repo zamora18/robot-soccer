@@ -69,6 +69,10 @@ def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
 	return func()
 
+def ReadEnc(motor_id):
+	func = _getFunction('ReadEnc{}', motor_id)
+	return func()
+
 def ReadMainBatteryVoltage():
 	motor_id = M1 	# This doesn't matter since both RoboClaws
 					# are connected to the same battery

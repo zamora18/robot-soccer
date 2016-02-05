@@ -24,6 +24,7 @@ def print_stats():
   print "M3 I=%.2f" % i3
   print "M3 D=%.2f" % d3
   print "M3 QPPS=",q3
+  print "\n\n"
 
 def read(motor_id):
   samples = 4
@@ -48,6 +49,10 @@ speed = 48
 w.kill()
 print_stats()
 
+# Krum 1 == Our 1
+# Krum 2 == Our 3
+# Krum 3 == Our 2
+
 # Forward
 w.Backward(w.M1,speed) # M1 backward sample 1
 w.Forward(w.M3,speed)  # M3 forward sample 1
@@ -60,78 +65,79 @@ w.kill()
 time.sleep(1)
 
 # Backward
-w.Forward(w.M1,speed) #M1 forward sample 1
-w.Backward(w.M3,speed) #M2 backward sample 1
+w.Forward(w.M1,speed)  # M1 forward sample 1
+w.Backward(w.M3,speed) # M3 backward sample 1
 time.sleep(2)
 
 speedM1Forward  = speedM1Forward  + read(w.M1)
-speedM2Backward = speedM2Backward + read(w.M3)
+speedM3Backward = speedM3Backward + read(w.M3)
 
 w.kill()
 time.sleep(1)
 
-# # Left back
-# M2Backward(128,speed) #M2 backward sample 2 
-# M1Forward(129,speed)  #M3 forward sample 1
-# time.sleep(2)
+# Left back
+w.Backward(w.M3,speed) # M3 backward sample 2 
+w.Forward(w.M2,speed)  # M2 forward sample 1
+time.sleep(2)
 
-# speedM2Backward=speedM2Backward+read(128,2)
-# speedM2Backward=speedM2Backward/2
-# speedM3Forward=speedM3Forward+read(129,1)
+speedM3Backward = speedM3Backward + read(w.M3)
+speedM3Backward = speedM3Backward/2
+speedM2Forward  = speedM2Forward + read(w.M2)
 
-# w.kill();
-# time.sleep(1);
+w.kill();
+time.sleep(1);
 
-# #Left forward
-# M2Forward(128,speed); #M2 forward sample 2
-# M1Backward(129,speed); #M3 backward sample 1
-# time.sleep(2)
+# Left forward
+w.Forward(w.M3,speed); # M3 forward sample 2
+w.Backward(w.M2,speed); # M2 backward sample 1
+time.sleep(2)
 
-# speedM2Forward=speedM2Forward+read(128,2)
-# speedM2Forward=speedM2Forward/2
-# speedM3Backward=speedM3Backward+read(129,1)
+speedM3Forward  = speedM3Forward + read(w.M3)
+speedM3Forward  = speedM3Forward/2
+speedM2Backward = speedM2Backward + read(w.M2)
 
-# w.kill();
-# time.sleep(1);
+w.kill();
+time.sleep(1);
 
-# # RightBack
-# M1Forward(128,speed); #M1 forward sample 2
-# M1Backward(129,speed); #M3 backward sample 2
-# time.sleep(2)
+# RightBack
+w.Forward(w.M1,speed);  # M1 forward sample 2
+w.Backward(w.M2,speed); # M2 backward sample 2
+time.sleep(2)
 
-# speedM1Forward=speedM1Forward+read(128,1)
-# speedM1Forward=speedM1Forward/2
-# speedM3Backward=speedM3Backward+read(129,1)
-# speedM3Backward=speedM3Backward/2
+speedM1Forward  = speedM1Forward + read(w.M1)
+speedM1Forward  = speedM1Forward/2
+speedM2Backward = speedM2Backward + read(w.M2)
+speedM2Backward = speedM2Backward/2
 
-# w.kill();
-# time.sleep(1);
+w.kill();
+time.sleep(1);
 
-# # Right Forward
-# M1Backward(128,speed); #M1 backward sample 2
-# M1Forward(129,speed); #M3 forward sample 2
-# time.sleep(2)
+# Right Forward
+w.Backward(w.M1,speed); # M1 backward sample 2
+w.Forward(w.M2,speed);  # M2 forward sample 2
+time.sleep(2)
 
-# speedM1Backward=speedM1Backward+read(128,1)
-# speedM1Backward=speedM1Backward/2
-# speedM3Forward=speedM3Forward+read(129,1)
-# speedM3Forward=speedM3Forward/2
+speedM1Backward = speedM1Backward + read(w.M1)
+speedM1Backward = speedM1Backward/2
+speedM2Forward  = speedM2Forward + read(w.M2)
+speedM2Forward  = speedM2Forward/2
 
-# w.kill();
+w.kill();
 
-# speedM1Forward=(speedM1Forward*127)/speed
-# speedM1Backward=(speedM1Backward*127)/speed
-# speedM2Forward=(speedM2Forward*127)/speed
-# speedM2Backward=(speedM2Backward*127)/speed
-# speedM3Forward=(speedM3Forward*127)/speed
-# speedM3Backward=(speedM3Backward*127)/speed
+speedM1Forward  = (speedM1Forward*127)/speed
+speedM1Backward = (speedM1Backward*127)/speed
+speedM2Forward  = (speedM2Forward*127)/speed
+speedM2Backward = (speedM2Backward*127)/speed
+speedM3Forward  = (speedM3Forward*127)/speed
+speedM3Backward = (speedM3Backward*127)/speed
 
-# #print speedM1Forward;
-# #print speedM1Backward;
-# #print speedM2Forward;
-# #print speedM2Backward;
-# #print speedM3Forward;
-# #print speedM3Backward;
+print "All speeds:"
+print "\t{}".format(speedM1Forward)
+print "\t{}".format(speedM1Backward)
+print "\t{}".format(speedM2Forward)
+print "\t{}".format(speedM2Backward)
+print "\t{}".format(speedM3Forward)
+print "\t{}".format(speedM3Backward)
 
 speedM1 = (speedM1Forward - speedM1Backward)/2
 speedM2 = (speedM2Forward - speedM2Backward)/2
