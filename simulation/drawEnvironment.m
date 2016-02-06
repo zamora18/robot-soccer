@@ -6,7 +6,6 @@
 %   1/4/2016  - Jacob White
 %
 function drawEnvironment(uu,P)
-
     % process inputs to function
     % robots for home team  (shooting left to right)
     for i=1:P.num_robots,
@@ -37,12 +36,29 @@ function drawEnvironment(uu,P)
     persistent ball_handle;      % figure handle for ball
     persistent score_handle;     % figure handle for scores
     persistent score_old;        % old score handle
+    persistent home_name;
+    persistent away_name;
+
     
     % first time function is called, initialize plot and persistent vars
     if t==0,
+        % Get the function name from Simulink
+        fcn_name = get_param('robot_soccer_sim/controller Home Team/controller  assumes full state info.', 'MATLABFcn');
+        pos = strfind(fcn_name,'_');
+        pos = pos(end); % could do pos(1), but if there are multiple _'s,
+                        % then the title may be too long
+        home_name = fcn_name(pos+1:end-5); % -5 for the (u,P)
+        
+        fcn_name = get_param('robot_soccer_sim/controller Away Team/controller  assumes full state info.', 'MATLABFcn');
+        pos = strfind(fcn_name,'_');
+        pos = pos(end); % could do pos(1), but if there are multiple _'s,
+                        % then the title may be too long
+        away_name = fcn_name(pos+1:end-5); % -5 for the (u,P)
+        
+        
         figure(1), clf
         drawField(P);
-        score_handle = drawScore(0,0,[],P);
+        score_handle = drawScore(0,home_name,0,away_name,[],P);
         score_old = score;
         for i=1:P.num_robots,
             rob_home_handle(i) = drawRobotHome(rob_home(i),[],P);
@@ -61,7 +77,7 @@ function drawEnvironment(uu,P)
 %        drawStateEstimate(xhat,S,xhat_handle,P);
         if norm(score-score_old)~=0,
             score_old = score;
-            drawScore(score(1),score(2),score_handle,P);
+            drawScore(score(1),home_name,score(2),away_name,score_handle,P);
         end
     end
     drawnow;
@@ -113,14 +129,17 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Display Score
-function handle = drawScore(homescore, awayscore,handle,P)
+function handle = drawScore(homescore,home_name, awayscore,away_name, handle,P)
+
+    home = strcat(home_name, ': %d');
+    away = strcat(away_name, ': %d');
 
     if isempty(handle),
-        handle(1)=text(-P.field_length/4,P.field_width/2+P.field_width/6,sprintf('Home: %d',homescore),'FontSize',24);
-        handle(2)=text(P.field_length/4,P.field_width/2+P.field_width/6,sprintf('Away: %d',awayscore),'FontSize',24);
+        handle(1)=text(-P.field_length/4,P.field_width/2+P.field_width/6,sprintf(home,homescore),'FontSize',24,'Color',P.home_team_color);
+        handle(2)=text(P.field_length/4,P.field_width/2+P.field_width/6,sprintf(away,awayscore),'FontSize',24,'Color',P.away_team_color);
     else
-        set(handle(1),'String',sprintf('Home: %d',homescore));
-        set(handle(2),'String',sprintf('Away: %d',awayscore));
+        set(handle(1),'String',sprintf(home,homescore));
+        set(handle(2),'String',sprintf(away,awayscore));
     end
 end 
 
