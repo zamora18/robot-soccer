@@ -107,10 +107,11 @@ class MotorCalibrator(object):
         samples = 2
         result = 0
         for i in range(0, samples):
-        sample = 0
-        s,sample,a = w.ReadSpeed(motor_id)
-        #print sample
-        result = result + sample
+            sample = 0
+            s,sample,a = w.ReadSpeed(motor_id)
+            #print sample
+            result = result + sample
+        
         result = result/samples
         return result
 
@@ -127,15 +128,15 @@ class MotorCalibrator(object):
         self.wheelbase_configured = True
 
         w.kill()
-        _print_stats()
+        self._print_stats()
 
         # Forward
         w.Backward(w.M1,speed) # M1 backward sample 1
         w.Forward(w.M3,speed)  # M3 forward sample 1
         time.sleep(sleep_time)
 
-        speedM1Backward = speedM1Backward + _read(w.M1)
-        speedM3Forward  = speedM3Forward  + _read(w.M3)
+        speedM1Backward = speedM1Backward + self._read(w.M1)
+        speedM3Forward  = speedM3Forward  + self._read(w.M3)
 
         w.kill()
         time.sleep(1)
@@ -145,8 +146,8 @@ class MotorCalibrator(object):
         w.Backward(w.M3,speed) # M3 backward sample 1
         time.sleep(sleep_time)
 
-        speedM1Forward  = speedM1Forward  + _read(w.M1)
-        speedM3Backward = speedM3Backward + _read(w.M3)
+        speedM1Forward  = speedM1Forward  + self._read(w.M1)
+        speedM3Backward = speedM3Backward + self._read(w.M3)
 
         w.kill()
         time.sleep(1)
@@ -156,9 +157,9 @@ class MotorCalibrator(object):
         w.Forward(w.M2,speed)  # M2 forward sample 1
         time.sleep(sleep_time)
 
-        speedM3Backward = speedM3Backward + _read(w.M3)
+        speedM3Backward = speedM3Backward + self._read(w.M3)
         speedM3Backward = speedM3Backward/2
-        speedM2Forward  = speedM2Forward + _read(w.M2)
+        speedM2Forward  = speedM2Forward + self._read(w.M2)
 
         w.kill();
         time.sleep(1);
@@ -168,9 +169,9 @@ class MotorCalibrator(object):
         w.Backward(w.M2,speed); # M2 backward sample 1
         time.sleep(sleep_time)
 
-        speedM3Forward  = speedM3Forward + _read(w.M3)
+        speedM3Forward  = speedM3Forward + self._read(w.M3)
         speedM3Forward  = speedM3Forward/2
-        speedM2Backward = speedM2Backward + _read(w.M2)
+        speedM2Backward = speedM2Backward + self._read(w.M2)
 
         w.kill();
         time.sleep(1);
@@ -180,9 +181,9 @@ class MotorCalibrator(object):
         w.Backward(w.M2,speed); # M2 backward sample 2
         time.sleep(sleep_time)
 
-        speedM1Forward  = speedM1Forward + _read(w.M1)
+        speedM1Forward  = speedM1Forward + self._read(w.M1)
         speedM1Forward  = speedM1Forward/2
-        speedM2Backward = speedM2Backward + _read(w.M2)
+        speedM2Backward = speedM2Backward + self._read(w.M2)
         speedM2Backward = speedM2Backward/2
 
         w.kill();
@@ -193,19 +194,19 @@ class MotorCalibrator(object):
         w.Forward(w.M2,speed);  # M2 forward sample 2
         time.sleep(sleep_time)
 
-        speedM1Backward = speedM1Backward + _read(w.M1)
+        speedM1Backward = speedM1Backward + self._read(w.M1)
         speedM1Backward = speedM1Backward/2
-        speedM2Forward  = speedM2Forward + _read(w.M2)
+        speedM2Forward  = speedM2Forward + self._read(w.M2)
         speedM2Forward  = speedM2Forward/2
 
         w.kill();
 
-        speedM1Forward  = (speedM1Forward*MAX_PWM)/speed
-        speedM1Backward = (speedM1Backward*MAX_PWM)/speed
-        speedM2Forward  = (speedM2Forward*MAX_PWM)/speed
-        speedM2Backward = (speedM2Backward*MAX_PWM)/speed
-        speedM3Forward  = (speedM3Forward*MAX_PWM)/speed
-        speedM3Backward = (speedM3Backward*MAX_PWM)/speed
+        speedM1Forward  = (speedM1Forward*self.MAX_PWM)/speed
+        speedM1Backward = (speedM1Backward*self.MAX_PWM)/speed
+        speedM2Forward  = (speedM2Forward*self.MAX_PWM)/speed
+        speedM2Backward = (speedM2Backward*self.MAX_PWM)/speed
+        speedM3Forward  = (speedM3Forward*self.MAX_PWM)/speed
+        speedM3Backward = (speedM3Backward*self.MAX_PWM)/speed
 
         self.speedM1 = (speedM1Forward - speedM1Backward)/2
         self.speedM2 = (speedM2Forward - speedM2Backward)/2
@@ -215,9 +216,9 @@ class MotorCalibrator(object):
         w.SetVelocityPID(w.M2,self.kp,self.ki,self.kd,self.speedM2)
         w.SetVelocityPID(w.M3,self.kp,self.ki,self.kd,self.speedM3)
 
-        _print_stats()
+        self._print_stats()
 
-    def test_calibration(self,velocity=0.3,sleep_time=1,
+    def test_calibration(self,velocity=0.6,sleep_time=1.5,
                         M1QPPS=None,M2QPPS=None,M3QPPS=None):
 
         # Make sure everything is init'd
