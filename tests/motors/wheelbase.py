@@ -11,9 +11,9 @@ M2 = 1
 M3 = 2
 
 _RC = [
-		{ 'addr': 0x80, 'motor': 'M1' },
-		{ 'addr': 0x81, 'motor': 'M1' },
-		{ 'addr': 0x80, 'motor': 'M2' },
+		{ 'addr': 0x80, 'motor': 'M1' }, # M1
+		{ 'addr': 0x81, 'motor': 'M1' }, # M2
+		{ 'addr': 0x80, 'motor': 'M2' }, # M3
 	 ]
 
 def _getFunction(func_str, motor_id):
@@ -69,6 +69,10 @@ def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
 	return func()
 
+def ReadEnc(motor_id):
+	func = _getFunction('ReadEnc{}', motor_id)
+	return func()
+
 def ReadMainBatteryVoltage():
 	motor_id = M1 	# This doesn't matter since both RoboClaws
 					# are connected to the same battery
@@ -84,7 +88,11 @@ def kill():
 def init():
 	r.Open('/dev/ttySAC0', 38400)
 
+	M1QPPS = 12764
+	M2QPPS = 12764
+	M3QPPS = 12764
+
 	# PID stuff here?
-	SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
-	SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
-	SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, 308420)
+	SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M1QPPS)
+	SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M2QPPS)
+	SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M3QPPS)
