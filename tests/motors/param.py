@@ -33,7 +33,7 @@ mSub = np.matrix([ [s1.x, s1.y, (s1.y*r1.x - s1.x*r1.y)],
                  ])
 M = (1.0/R)*mSub
 
-def Rot(theta):
+def rot(theta):
     """Rotation matrix
     """
     return np.matrix([ [ np.cos(theta),np.sin(theta),0.0],
@@ -42,8 +42,8 @@ def Rot(theta):
                      ])
 
 
-def get_wheels_angular_velocity(vx, vy, omega, theta):
-    result = M*Rot(theta)*np.matrix([ [vx],[vy],[omega] ])
+def world_to_wheel_speeds(vx, vy, omega, theta):
+    result = M*rot(theta)*np.matrix([ [vx],[vy],[omega] ])
     tmp = (result.getA()[0][0], result.getA()[1][0], result.getA()[2][0])
     return tmp
 
