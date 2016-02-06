@@ -11,9 +11,9 @@ M2 = 1
 M3 = 2
 
 _RC = [
-		{ 'addr': 0x80, 'motor': 'M1' },
-		{ 'addr': 0x81, 'motor': 'M1' },
-		{ 'addr': 0x80, 'motor': 'M2' },
+		{ 'addr': 0x80, 'motor': 'M1' }, # M1
+		{ 'addr': 0x81, 'motor': 'M1' }, # M2
+		{ 'addr': 0x80, 'motor': 'M2' }, # M3
 	 ]
 
 def _getFunction(func_str, motor_id):
