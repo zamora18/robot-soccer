@@ -24,4 +24,10 @@ def drive(vx,vy,omega):
     w.Speed(w.M3, s3)
 
 def stop():
+    drive(0,0,0)
+
+def kill():
+    """Kill
+    Call this only if you don't care about how the bot stops
+    """
     w.kill()
