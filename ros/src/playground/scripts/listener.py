@@ -22,6 +22,7 @@ _state = 'SPIN' # 'SQUARE', 'HOME'
 
 
 def spin(speed):
+    print "spinning!"
     motion.drive(0,0,speed)
 	# r.Open('/dev/ttySAC0',38400)
 	# r.SpeedM1(0x80, speed)
@@ -41,9 +42,8 @@ def callback(data):
     _theta = data.robot_theta
 
 
-def _isClose(x, val):
-    TOLERANCE = 20.0
-    return ( abs(x-val) <= TOLERANCE )
+def _isClose(x, val, tolerance=15):
+    return ( abs(x-val) <= tolerance )
 
 
 def listener():
@@ -72,7 +72,7 @@ def listener():
 	print _state
 
         if _state == 'SPIN':
-            if counter == 0:
+            if counter == 1:
             	spin(2*np.pi)
 
             if counter == 300:
@@ -95,29 +95,30 @@ def listener():
         elif _state == 'SQUARE1':
             motion.drive(.5,0,0)
 
-            if counter == 100:
+            if counter == 200:
                 counter = 0
                 _state = 'SQUARE2'
 
         elif _state == 'SQUARE2':
             motion.drive(0,.5,0)
 
-            if counter == 100:
+            if counter == 200:
                 counter = 0
                 _state = 'SQUARE3'
 
         elif _state == 'SQUARE3':
             motion.drive(-0.5,0,0)
 
-            if counter == 100:
+            if counter == 200:
                 counter = 0
                 _state = 'SQUARE4'
 
         elif _state == 'SQUARE4':
             motion.drive(0,-.5,0)
 
-            if counter == 100:
+            if counter == 200:
                 counter = 0
+		motion.stop()
                 _state = 'SLEEP2'
 
         # ---------------------------
@@ -128,7 +129,7 @@ def listener():
                 _state = 'HOME'
             
         elif _state == 'HOME':
-            if not _isClose(_theta, 0):
+            if not _isClose(_theta, 180, tolerance=60):
                 print "going to 0 theta"
                 motion.drive(0,0,np.pi)
                 # v.goXYOmega(0, 0, 3)
@@ -144,12 +145,15 @@ def listener():
                 vx = -1*sign_x*vx
                 vy = -1*sign_y*vy
 
+		scale = 0.5
+
                 # v.goXYOmega(vx, vy, 0)
-                motion.drive(vx,vy,0)
+                motion.drive(-vx/scale,-vy/scale,0)
 
             else:
                 # v.goXYOmega(0, 0, 0)
                 motion.stop()
+		break
             
         rate.sleep()
 
