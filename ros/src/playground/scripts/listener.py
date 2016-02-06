@@ -4,8 +4,13 @@
 
 import rospy
 from playground.msg import coords
-from rcv3 import roboclaw as r
-import velchange as v
+# from rcv3 import roboclaw as r
+# import velchange as v
+
+import motion
+import wheelbase as w
+
+import numpy as np
 
 _x = 0
 _y = 0
@@ -17,10 +22,11 @@ _state = 'SPIN' # 'SQUARE', 'HOME'
 
 
 def spin(speed):
-	r.Open('/dev/ttySAC0',38400)
-	r.SpeedM1(0x80, speed)
-	r.SpeedM2(0x80, -speed)
-	r.SpeedM1(0x81, speed)
+    motion.drive(0,0,speed)
+	# r.Open('/dev/ttySAC0',38400)
+	# r.SpeedM1(0x80, speed)
+	# r.SpeedM2(0x80, -speed)
+	# r.SpeedM1(0x81, speed)
 
 
 def callback(data):
@@ -55,6 +61,9 @@ def listener():
 
     global _state
 
+    # init wheelbase
+    w.init()
+
     rate = rospy.Rate(100) # 100hz
     while not rospy.is_shutdown():
 
@@ -64,7 +73,7 @@ def listener():
 
         if _state == 'SPIN':
             if counter == 0:
-            	spin(50000)
+            	spin(2*np.pi)
 
             if counter == 300:
                 counter = 0
@@ -84,28 +93,28 @@ def listener():
 
 
         elif _state == 'SQUARE1':
-            v.goXYOmega(.5,0,0)
+            motion.drive(.5,0,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE2'
 
         elif _state == 'SQUARE2':
-            v.goXYOmega(0,.5,0)
+            motion.drive(0,.5,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE3'
 
         elif _state == 'SQUARE3':
-            v.goXYOmega(-0.5,0,0)
+            motion.drive(-0.5,0,0)
 
             if counter == 100:
                 counter = 0
                 _state = 'SQUARE4'
 
         elif _state == 'SQUARE4':
-            v.goXYOmega(0,-.5,0)
+            motion.drive(0,-.5,0)
 
             if counter == 100:
                 counter = 0
@@ -121,7 +130,8 @@ def listener():
         elif _state == 'HOME':
             if not _isClose(_theta, 0):
                 print "going to 0 theta"
-                v.goXYOmega(0, 0, 3)
+                motion.drive(0,0,np.pi)
+                # v.goXYOmega(0, 0, 3)
         
             elif not _isClose(_x, 0) or not _isClose(_y, 0):
                 print "going home"
@@ -134,10 +144,12 @@ def listener():
                 vx = -1*sign_x*vx
                 vy = -1*sign_y*vy
 
-                v.goXYOmega(vx, vy, 0)
+                # v.goXYOmega(vx, vy, 0)
+                motion.drive(vx,vy,0)
 
             else:
-                v.goXYOmega(0, 0, 0)
+                # v.goXYOmega(0, 0, 0)
+                motion.stop()
             
         rate.sleep()
 

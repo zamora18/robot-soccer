@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /root/dev/lusk/repo/ros/devel/setup.sh
+    local-name: /home/ecestudent/dev/lusk/ros/devel/setup.sh
