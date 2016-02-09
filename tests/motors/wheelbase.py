@@ -66,8 +66,9 @@ def SetVelocityPID(motor_id, p, i, d, q):
 	return func(p, i, d, q)
 
 def UpdateVelocityPID(motor_id, p=None, i=None, d=None, q=None):
-	vals = ReadVelocityPID(motor_id)
-	new_vals = (p,i,d,q)
+	s,_p,_i,_d,_q = ReadVelocityPID(motor_id)
+	vals = [_p,_i,_d,_q]
+	new_vals = [p,i,d,q]
 
 	# Only update the p,i,d,q values that are not None
 	for i in range(len(new_vals)):
