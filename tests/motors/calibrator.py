@@ -22,8 +22,13 @@ class CalibratorDialog(QtGui.QDialog):
         self.ui.M2PWMSlider.valueChanged.connect(self.pwm_changed_m2)
         self.ui.M3PWMSlider.valueChanged.connect(self.pwm_changed_m3)
 
-	# init calibrator
-	CalibratorSM.init()
+        # init calibrator
+        CalibratorSM.init()
+
+        # Set sliders to default values
+        self.ui.M1PWMSlider.setValue(CalibratorSM.DEFAULT_SPEED_M1)
+        self.ui.M2PWMSlider.setValue(CalibratorSM.DEFAULT_SPEED_M2)
+        self.ui.M3PWMSlider.setValue(CalibratorSM.DEFAULT_SPEED_M3)
 
         # Timer stuff
         self.tick_timer = QtCore.QTimer()

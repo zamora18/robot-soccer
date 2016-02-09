@@ -1,4 +1,4 @@
-import time, math, random
+import time, math, random, sys
 
 import wheelbase as w
 
@@ -224,4 +224,6 @@ def tick():
 
 
     elif _state == 'CALCULATE':
+        print _samples
+        sys.exit(0)
         pass
