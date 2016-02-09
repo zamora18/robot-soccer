@@ -276,3 +276,48 @@ class MotorCalibrator(object):
         time.sleep(sleep_time)
 
         motion.stop()
+
+    def test_square_calibration(self,velocity=0.6,sleep_time=1.5,
+                        M1QPPS=None,M2QPPS=None,M3QPPS=None):
+
+        # Make sure everything is init'd
+        if not self.wheelbase_configured:
+            w.init()
+            self.wheelbase_configured = True
+
+        _m1qpps = M1QPPS if M1QPPS is not None else self.speedM1
+        _m2qpps = M2QPPS if M2QPPS is not None else self.speedM2
+        _m3qpps = M3QPPS if M3QPPS is not None else self.speedM3
+
+        if _m1qpps is not None and _m2qpps is not None and _m3qpps is not None:
+            w.SetVelocityPID(w.M1, self.kp, self.ki, self.kd, _m1qpps)
+            w.SetVelocityPID(w.M2, self.kp, self.ki, self.kd, _m2qpps)
+            w.SetVelocityPID(w.M3, self.kp, self.ki, self.kd, _m3qpps)
+
+
+        # Right
+        motion.drive(velocity,0,0)
+        time.sleep(sleep_time)
+
+        motion.stop()
+        time.sleep(sleep_time)
+
+        # Up
+        motion.drive(0,velocity,0)
+        time.sleep(sleep_time)
+
+        motion.stop()
+        time.sleep(sleep_time)
+
+        # Left
+        motion.drive(-velocity,0,0)
+        time.sleep(sleep_time)
+
+        motion.stop()
+        time.sleep(sleep_time)
+
+        # Down
+        motion.drive(0,-velocity,0)
+        time.sleep(sleep_time)
+
+        motion.stop()
