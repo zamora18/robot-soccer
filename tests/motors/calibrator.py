@@ -49,7 +49,7 @@ def _read(motor_id):
     result = result/samples
     return result
 
-def calibrate(speed=48,sleep_time=2):
+def calibrate(speed=48,sleep_time=2,set_PID=True):
     speedM1Forward  = 0
     speedM1Backward = 0
     speedM2Forward  = 0
@@ -58,7 +58,7 @@ def calibrate(speed=48,sleep_time=2):
     speedM3Backward = 0
 
     # Initialize wheelbase with PID
-    w.init()
+    w.init(set_PID=False)
     wheelbase_configured = True
 
     w.kill()
@@ -150,11 +150,14 @@ def calibrate(speed=48,sleep_time=2):
     speedM2 = (speedM2Forward - speedM2Backward)/2
     speedM3 = (speedM3Forward - speedM3Backward)/2
 
-    w.SetVelocityPID(w.M1,kp,ki,kd,speedM1)
-    w.SetVelocityPID(w.M2,kp,ki,kd,speedM2)
-    w.SetVelocityPID(w.M3,kp,ki,kd,speedM3)
+    print "M1QPPS={},M2QPPS={},M3QPPS={}".format(speedM1,speedM2,speedM3)
 
-    _print_stats()
+    if set_PID:
+        w.SetVelocityPID(w.M1,kp,ki,kd,speedM1)
+        w.SetVelocityPID(w.M2,kp,ki,kd,speedM2)
+        w.SetVelocityPID(w.M3,kp,ki,kd,speedM3)
+
+        _print_stats()
 
 def test_calibration(velocity=0.6,sleep_time=1.5,
                     M1QPPS=None,M2QPPS=None,M3QPPS=None):
