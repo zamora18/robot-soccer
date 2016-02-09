@@ -59,6 +59,7 @@ def calibrate(speed=48,sleep_time=2,set_PID=True):
 
     # Initialize wheelbase with PID
     w.init(set_PID=False)
+    global wheelbase_configured
     wheelbase_configured = True
 
     w.kill()
@@ -161,6 +162,7 @@ def calibrate(speed=48,sleep_time=2,set_PID=True):
 
 def test_calibration(velocity=0.6,sleep_time=1.5,
                     M1QPPS=None,M2QPPS=None,M3QPPS=None):
+    global wheelbase_configured
 
     # Make sure everything is init'd
     if not wheelbase_configured:
@@ -221,6 +223,7 @@ def test_calibration(velocity=0.6,sleep_time=1.5,
 
 def test_square_calibration(velocity=0.6,sleep_time=1.5,
                     M1QPPS=None,M2QPPS=None,M3QPPS=None):
+    global wheelbase_configured
 
     # Make sure everything is init'd
     if not wheelbase_configured:
