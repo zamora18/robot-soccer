@@ -172,10 +172,11 @@ def test_calibration(velocity=0.6,sleep_time=1.5,
     _m3qpps = M3QPPS if M3QPPS is not None else speedM3
 
     if _m1qpps is not None and _m2qpps is not None and _m3qpps is not None:
-        w.SetVelocityPID(w.M1, kp, ki, kd, _m1qpps)
-        w.SetVelocityPID(w.M2, kp, ki, kd, _m2qpps)
-        w.SetVelocityPID(w.M3, kp, ki, kd, _m3qpps)
+        w.UpdateVelocityPID(w.M1, q=_m1qpps)
+        w.UpdateVelocityPID(w.M2, q=_m2qpps)
+        w.UpdateVelocityPID(w.M3, q=_m3qpps)
 
+    _print_stats()
 
     # Forward
     motion.drive(velocity,0,0)

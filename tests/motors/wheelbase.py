@@ -65,6 +65,17 @@ def SetVelocityPID(motor_id, p, i, d, q):
 	func = _getFunction('Set{}VelocityPID', motor_id)
 	return func(p, i, d, q)
 
+def UpdateVelocityPID(motor_id, p=None, i=None, d=None, q=None):
+	vals = ReadVelocityPID(motor_id)
+	new_vals = (p,i,d,q)
+
+	# Only update the p,i,d,q values that are not None
+	for i in range(len(new_vals)):
+		if new_vals[i]:
+			vals[i] = new_vals[i]
+
+	return SetVelocityPID(motor_id,vals[0],vals[1],vals[2],vals[3])
+
 def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
 	return func()
