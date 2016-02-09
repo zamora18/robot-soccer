@@ -16,9 +16,19 @@ _RC = [
 		{ 'addr': 0x80, 'motor': 'M2' }, # M3
 	 ]
 
+_SERIAL_ERR = False
+
+def __dummy(*args):
+	return False
+
 def _getFunction(func_str, motor_id):
 	"""Get Function
 	"""
+
+	# If there was a serial error, it probably wasn't open
+	# so don't return an actual roboclaw command, but a dummy function
+	if _SERIAL_ERR:
+		return __dummy
 
 	# Based on the motor_id, get the correct roboclaw address and motor
 	motor_str = _RC[motor_id]['motor']
@@ -98,7 +108,11 @@ def kill():
 
 
 def init(set_PID=True):
-	r.Open('/dev/ttySAC0', 38400)
+	try:
+		r.Open('/dev/ttySAC0', 38400)
+	except:
+		global _SERIAL_ERR
+		_SERIAL_ERR = True
 
 
 	if set_PID:
