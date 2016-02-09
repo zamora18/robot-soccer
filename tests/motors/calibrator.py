@@ -1,6 +1,6 @@
 import sys
 from PyQt4 import QtCore, QtGui
-from form import Ui_MainWindow
+from calibrator_window import Ui_MainWindow
 
 import matplotlib.pyplot as plt
 import numpy as np
