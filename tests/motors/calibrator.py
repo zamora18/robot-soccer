@@ -2,6 +2,8 @@ import sys
 from PyQt4 import QtCore, QtGui
 from calibrator_window import Ui_MainWindow
 
+import CalibratorSM
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,35 +22,38 @@ class CalibratorDialog(QtGui.QDialog):
         self.ui.M2PWMSlider.valueChanged.connect(self.pwm_changed_m2)
         self.ui.M3PWMSlider.valueChanged.connect(self.pwm_changed_m3)
 
+	# init calibrator
+	CalibratorSM.init()
+
         # Timer stuff
         self.tick_timer = QtCore.QTimer()
-        self.tick_timer.timeout.connect(CalibrateSM.tick)
-        self.tick_timer.start(CalibrateSM.timer_rate_ms)
+        self.tick_timer.timeout.connect(CalibratorSM.tick)
+        self.tick_timer.start(CalibratorSM.timer_rate_ms)
 
         self.ui_timer = QtCore.QTimer()
-        self.ui_timer.timeout.connect(_update_ui)
+        self.ui_timer.timeout.connect(self._update_ui)
         self.ui_timer.start(250)
 
     def _update_ui(self):
         pass
 
     def start_calibration(self):
-        CalibrateSM.start()
+        CalibratorSM.start()
 
     def stop_calibration(self):
-        CalibrateSM.stop()
+        CalibratorSM.stop()
 
     def pwm_changed_m1(self):
         val = self.ui.M1PWMSlider.value()
-        CalibrateSM.set_m1_speed(val)
+        CalibratorSM.set_m1_speed(val)
 
     def pwm_changed_m2(self):
         val = self.ui.M2PWMSlider.value()
-        CalibrateSM.set_m2_speed(val)
+        CalibratorSM.set_m2_speed(val)
 
     def pwm_changed_m3(self):
         val = self.ui.M3PWMSlider.value()
-        CalibrateSM.set_m3_speed(val)
+        CalibratorSM.set_m3_speed(val)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
