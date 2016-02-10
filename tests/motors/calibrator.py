@@ -12,9 +12,9 @@ ki = 1.9959869384765625
 kd = 5.969512939453125
 q  = 308419
 
-speedM1 = 380268
-speedM2 = 302420
-speedM3 = 411356
+speedM1 = None
+speedM2 = None
+speedM3 = None
 
 wheelbase_configured = False
 
