@@ -32,8 +32,8 @@ class CalibratorDialog(QtGui.QDialog):
         self.ui.M3PWMSlider.setValue(CalibratorSM.DEFAULT_SPEED_M3)
 
         # Set TextEdit boxes to default
-        self.ui.txtSleepTime.setText(CalibratorSM._SLEEP_TIME)
-        self.ui.txtDriveTime.setText(CalibratorSM.DRIVE_TIME)
+        self.ui.txtSleepTime.setText(QtCore.QString(str(CalibratorSM._SLEEP_TIME)))
+        self.ui.txtDriveTime.setText(QtCore.Qtring(str(CalibratorSM.DRIVE_TIME)))
 
         # Timer stuff
         self.tick_timer = QtCore.QTimer()
@@ -62,17 +62,17 @@ class CalibratorDialog(QtGui.QDialog):
     def pwm_changed_m1(self):
         val = self.ui.M1PWMSlider.value()
         CalibratorSM.set_m1_speed(val)
-        self.ui.m1PWM.setText(val)
+        self.ui.m1PWM.setText(QtCore.QString(str(val)))
 
     def pwm_changed_m2(self):
         val = self.ui.M2PWMSlider.value()
         CalibratorSM.set_m2_speed(val)
-        self.ui.m2PWM.setText(val)
+        self.ui.m2PWM.setText(QtCore.QString(str(val)))
 
     def pwm_changed_m3(self):
         val = self.ui.M3PWMSlider.value()
         CalibratorSM.set_m3_speed(val)
-        self.ui.m3PWM.setText(val)
+        self.ui.m3PWM.setText(QtCore.QString(str(val)))
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
