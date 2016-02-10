@@ -27,7 +27,9 @@ def stop():
     drive(0,0,0)
 
 def smooth_stop():
-    pass
+    w.SpeedAccel(w.M1,1,w.QPPS.M1*2)
+    w.SpeedAccel(w.M2,1,w.QPPS.M2*2)
+    w.SpeedAccel(w.M3,1,w.QPPS.M3*2)
 
 def kill():
     """Kill
