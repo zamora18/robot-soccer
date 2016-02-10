@@ -86,7 +86,7 @@ class Ui_MainWindow(object):
         self.saveButton = QtGui.QPushButton(self.centralWidget)
         self.saveButton.setGeometry(QtCore.QRect(490, 36, 51, 32))
         self.saveButton.setObjectName(_fromUtf8("saveButton"))
-        MainWindow.setCentralWidget(self.centralWidget)
+        #MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

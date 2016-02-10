@@ -33,7 +33,7 @@ class CalibratorDialog(QtGui.QDialog):
 
         # Set TextEdit boxes to default
         self.ui.txtSleepTime.setText(QtCore.QString(str(CalibratorSM._SLEEP_TIME)))
-        self.ui.txtDriveTime.setText(QtCore.Qtring(str(CalibratorSM.DRIVE_TIME)))
+        self.ui.txtDriveTime.setText(QtCore.QString(str(CalibratorSM.DRIVE_TIME)))
 
         # Timer stuff
         self.tick_timer = QtCore.QTimer()
