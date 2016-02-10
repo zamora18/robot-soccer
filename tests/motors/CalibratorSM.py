@@ -128,16 +128,27 @@ def stop():
     _state = 'START'
 
 def set_m1_speed(val):
+    global _speeds
     m = _motors[w.M1]
     _speeds[m] = val
 
 def set_m2_speed(val):
+    global _speeds
     m = _motors[w.M2]
     _speeds[m] = val
 
 def set_m3_speed(val):
+    global _speeds
     m = _motors[w.M3]
     _speeds[m] = val
+
+def set_drive_time(val):
+    global DRIVE_TIME
+    DRIVE_TIME = val
+
+def set_sleep_time(val):
+    global _SLEEP_TIME
+    _SLEEP_TIME = val
 
 def tick():
     global _counter
