@@ -17,16 +17,19 @@ def square():
 	time.sleep(1)
 
 	motion.stop()
+	time.sleep(0.5)
 
 	motion.drive(0, .5, 0)
 	time.sleep(1)
 
 	motion.stop()
+	time.sleep(0.5)
 
 	motion.drive(-.5, 0, 0)
 	time.sleep(1)
 
 	motion.stop()
+	time.sleep(0.5)
 
 	motion.drive(0, -.5, 0)
 	time.sleep(1)

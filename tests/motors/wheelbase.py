@@ -101,6 +101,10 @@ def ReadMainBatteryVoltage():
 	func = _getFunction('ReadMainBatteryVoltage', motor_id)
 	return func()
 
+def SpeedAccel(motor_id, speed, accel):
+	func = _getFunction('SpeedAccel{}', motor_id)
+	return func(accel, speed)
+
 def kill():
 	for motor_id in range(MOTOR_COUNT):
 		Forward(motor_id, 0)

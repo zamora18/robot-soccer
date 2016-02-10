@@ -26,6 +26,9 @@ def drive(vx,vy,omega):
 def stop():
     drive(0,0,0)
 
+def smooth_stop():
+    pass
+
 def kill():
     """Kill
     Call this only if you don't care about how the bot stops
