@@ -25,7 +25,7 @@ def drive(vx,vy,omega):
 
 def get_velocities():
     # Ask RoboClaw for encoder speed (not raw speed)
-    (s1, s2, s3) = (w.ReadSpeed(w.M1), w.ReadSpeed(w.M2), w.ReadSpeed(w.M3))
+    (s1, s2, s3) = (w.ReadSpeed(w.M1)[1], w.ReadSpeed(w.M2)[1], w.ReadSpeed(w.M3)[1])
 
     # Convert from qpps to rad/s --> robot wheel speeds
     OMEGA1 = s1/PULSES_PER_RADIAN
