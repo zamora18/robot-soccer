@@ -106,7 +106,7 @@ def ReadMainBatteryVoltage():
 	func = _getFunction('ReadMainBatteryVoltage', motor_id)
 	return func()
 
-def SpeedAccel(motor_id, speed, accel):
+def SpeedAccel(motor_id, accel, speed):
 	func = _getFunction('SpeedAccel{}', motor_id)
 	return func(accel, speed)
 
