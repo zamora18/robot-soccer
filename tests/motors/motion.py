@@ -43,7 +43,7 @@ def get_velocities():
     # Convert from wheel angular speeds to world frame velocities
     (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, _theta)
 
-    return (vx, vy, omega)
+    return (vx, vy, omega, s1,s2,s3)
 
 def stop(smooth=True):
     if smooth:

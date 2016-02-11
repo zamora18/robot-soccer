@@ -54,7 +54,7 @@ _motion_timer = None
 _odom_timer = None
 
 _motion_timer_period = 1.0/100
-_odom_timer_period = 1.0/10
+_odom_timer_period = 1.0/5
 
 _vx = 0.5
 _vy = 0.5
@@ -64,6 +64,7 @@ _velocities = (0, 0, 0)
 _set_speed = True
 
 _smooth = True
+_odom_on = True
 
 
 def handle_motion_timer():
@@ -74,9 +75,8 @@ def handle_motion_timer():
 
 
 def handle_odom_timer():
-    pass
-    (x, y, theta) = Odometry.update(_odom_timer_period)
-    print "{}\r".format((x,y,theta))
+    if _odom_on:
+        print "{}\r".format(Odometry.update(_odom_timer_period))
 
 def get_direction():
     getch = _Getch()
@@ -97,6 +97,8 @@ def get_direction():
         return 'SET_HOME'
     elif k == 'u' or k == 'U':
         return 'TOGGLE_SMOOTH'
+    elif k == 'o' or k == 'O':
+        return 'TOGGLE_ODOM'
     elif k == ' ':
         _motion_timer.stop()
         _odom_timer.stop()
@@ -116,7 +118,7 @@ def main():
     print 'started'
 
 
-    global _velocities, _set_speed, _smooth
+    global _velocities, _set_speed, _smooth, _odom_on
 
     while(1):
         dir = get_direction()
@@ -150,6 +152,10 @@ def main():
         elif dir == 'TOGGLE_SMOOTH':
             _smooth = not _smooth
             print("Smooth: {}".format(_smooth))
+
+        elif dir == 'TOGGLE_ODOM':
+            _odom_on = not _odom_on
+            print("Odom: {}".format(_odom_on))
 
         else:
             _set_speed = True
