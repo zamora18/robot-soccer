@@ -54,7 +54,7 @@ _motion_timer = None
 _odom_timer = None
 
 _motion_timer_period = 1.0/100
-_odom_timer_period = 1.0/100
+_odom_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
@@ -101,6 +101,8 @@ def get_direction():
         return 'TOGGLE_ODOM'
     elif k == 'b' or k == 'B':
         return 'BREAKPOINT'
+    elif k =='l' or k == 'L':
+        pass
     elif k == ' ':
         _motion_timer.stop()
         _odom_timer.stop()
@@ -160,7 +162,11 @@ def main():
             print("Odom: {}".format(_odom_on))
 
         elif dir == 'BREAKPOINT':
+            _odom_timer.stop()
+            _motion_timer.stop()
             import ipdb; ipdb.set_trace()
+            _odom_timer.start()
+            _motion_timer.start()
 
         else:
             _set_speed = True
