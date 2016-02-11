@@ -54,19 +54,25 @@ _motion_timer = None
 _odom_timer = None
 
 _motion_timer_period = 1.0/100
-_odom_timer_period = 1.0/100
+_odom_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
-_w = 4*np.pi
+_w = np.pi
 _velocities = (0, 0, 0)
+
+_set_speed = True
 
 
 def handle_motion_timer():
-    motion.drive(*_velocities)
+    global _set_speed
+    if _set_speed:
+        motion.drive(*_velocities)
+        _set_speed = False
 
 
 def handle_odom_timer():
+    pass
     (x, y, theta) = Odometry.update(_odom_timer_period)
     print "{}\r".format((x,y,theta))
 
@@ -85,6 +91,8 @@ def get_direction():
         return 'SPIN_CW'
     elif k == 'z' or k == 'Z':
         return 'SPIN_CCW'
+    elif k == 'h' or k == 'H':
+        return 'SET_HOME'
     elif k == ' ':
         _motion_timer.stop()
         _odom_timer.stop()
@@ -104,29 +112,39 @@ def main():
     print 'started'
 
 
-    global _velocities
+    global _velocities, _set_speed
 
     while(1):
         dir = get_direction()
         if dir == 'UP':
+            _set_speed = True
             _velocities = (0, _vy, 0)
 
         elif dir == 'DOWN':
+            _set_speed = True
             _velocities = (0, -_vy, 0)
 
         elif dir == 'RIGHT':
+            _set_speed = True
             _velocities = (_vx, 0, 0)
 
         elif dir == 'LEFT':
+            _set_speed = True
             _velocities = (-_vx, 0, 0)
 
         elif dir == 'SPIN_CW':
+            _set_speed = True
             _velocities = (0, 0, _w)
 
         elif dir == 'SPIN_CCW':
+            _set_speed = True
             _velocities = (0, 0, -_w)
 
+        elif dir == 'SET_HOME':
+            Odometry.init()
+
         else:
+            _set_speed = True
             _velocities = (0, 0, 0)
 
         print "{}\r".format(_velocities)
