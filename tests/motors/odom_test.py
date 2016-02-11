@@ -63,11 +63,13 @@ _velocities = (0, 0, 0)
 
 _set_speed = True
 
+_smooth = True
+
 
 def handle_motion_timer():
     global _set_speed
     if _set_speed:
-        motion.drive(*_velocities)
+        motion.drive(*_velocities,smooth=_smooth)
         _set_speed = False
 
 
@@ -93,6 +95,8 @@ def get_direction():
         return 'SPIN_CCW'
     elif k == 'h' or k == 'H':
         return 'SET_HOME'
+    elif k == 'u' or k == 'U':
+        return 'TOGGLE_SMOOTH'
     elif k == ' ':
         _motion_timer.stop()
         _odom_timer.stop()
@@ -112,7 +116,7 @@ def main():
     print 'started'
 
 
-    global _velocities, _set_speed
+    global _velocities, _set_speed, _smooth
 
     while(1):
         dir = get_direction()
@@ -142,6 +146,10 @@ def main():
 
         elif dir == 'SET_HOME':
             Odometry.init()
+
+        elif dir == 'TOGGLE_SMOOTH':
+            _smooth = not _smooth
+            print("Smooth: {}".format(_smooth))
 
         else:
             _set_speed = True
