@@ -2,15 +2,13 @@ import wheelbase as w
 import param as p
 import numpy as np
 
-_x = 0
-_y = 0
 _theta = 0 # same as heading
 
 PULSES_PER_REV = 19822
 PULSES_PER_RADIAN = (PULSES_PER_REV / (2.0*np.pi))
 
 def drive(vx,vy,omega):
-    # Convert from world to robot velocities
+    # Convert from world to robot wheel speeds
     (OMEGA1, OMEGA2, OMEGA3) = p.world_to_wheel_speeds(vx, vy, omega, _theta)
 
     # Convert rad/s to qpps
@@ -22,6 +20,22 @@ def drive(vx,vy,omega):
     w.Speed(w.M1, s1)
     w.Speed(w.M2, s2)
     w.Speed(w.M3, s3)
+
+    return (s1, s2, s3)
+
+def get_velocities():
+    # Ask RoboClaw for encoder speed (not raw speed)
+    (s1, s2, s3) = (w.ReadSpeed(w.M1), w.ReadSpeed(w.M2), w.ReadSpeed(w.M3))
+
+    # Convert from qpps to rad/s --> robot wheel speeds
+    OMEGA1 = s1/PULSES_PER_RADIAN
+    OMEGA2 = s2/PULSES_PER_RADIAN
+    OMEGA3 = s3/PULSES_PER_RADIAN
+
+    # Convert from wheel angular speeds to world frame velocities
+    (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, _theta)
+
+    return (vx, vy, omega)
 
 def stop():
     drive(0,0,0)
