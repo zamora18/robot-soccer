@@ -77,7 +77,7 @@ def _go_home():
 
     if abs(theta) > tolerance:
         # since it's periodic...
-        theta = round(theta%(2*np.pi) ,2)
+#        theta = round(theta%(2*np.pi) ,2)
         dt = abs(theta / _w)
         sign = -1 if theta > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, 0, sign*_w, dt))
