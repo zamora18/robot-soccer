@@ -14,16 +14,11 @@ _motion_timer = None
 _odom_timer = None
 _ctrlr_timer = None
 
-_motion_timer_period = 1.0/100
+_motion_timer_period = 1.0/3
 _odom_timer_period = 1.0/6
-_ctrlr_timer_period = 1.0/100
+_ctrlr_timer_period = 1.0/10
 
-_vx = 0.5
-_vy = 0.5
-_w = np.pi
-_velocities = (0, 0, 0)
-
-_set_speed = True
+_set_speed = False
 
 _smooth = False
 _odom_on = True
@@ -33,8 +28,10 @@ _previous_action = None
 def _handle_motion_timer():
     global _set_speed
     if _set_speed:
+#        vx, vy, w = Controller.velocities
+#        print("*** Setting speed: {},{},{}\r".format(vx,vy,w))
         motion.drive(*Controller.velocities,smooth=_smooth)
-        _set_speed = False
+#        _set_speed = False
 
 def _handle_odom_timer():
     if _odom_on:
@@ -42,9 +39,19 @@ def _handle_odom_timer():
 
 def _handle_ctrlr_timer():
     if _ctrlr_on:
-        print "{}\r".format(Controller.update(_ctrlr_timer_period))
+        Controller.update(_ctrlr_timer_period)
+        global _set_speed
+        _set_speed = True
+        #print "{}\r".format(Controller.update(_ctrlr_timer_period))
 
 def main():
+    w.init()
+    motion.stop()
+
+    time.sleep(1)
+
+
+
     global _motion_timer
     _motion_timer = RepeatedTimer(_motion_timer_period, _handle_motion_timer)
     _motion_timer.start()
@@ -57,19 +64,20 @@ def main():
     _ctrlr_timer = RepeatedTimer(_ctrlr_timer_period, _handle_ctrlr_timer)
     _ctrlr_timer.start()
 
-    w.init()
     print 'started'
 
     time.sleep(4)
-    print 'Going to (1, 0, 0)'
+    print '\r\n**** Going to (0.5, 0, 0) ****\r\n'
 
-    Controller.set_commanded_position(1, 0, 0)
+    Controller.set_commanded_position(0.5, 0, 0)
 
     time.sleep(15)
 
     _ctrlr_timer.stop()
     _odom_timer.stop()
     _motion_timer.stop()
+
+    motion.stop()
 
     sys.exit(0)
 

@@ -26,7 +26,7 @@ def update(time_since_last_update):
     y_c = _set_point[1]
     theta_c = _set_point[2]
 
-    vx = PID_x(x_c,x,2,0,0,100,time_since_last_update,0.05)
+    vx = PID_x(x_c,x,0.5,0,0,1,time_since_last_update,0.05)
     vy = 0
     w  = 0
 
@@ -46,6 +46,8 @@ def PID_x(x_c,x,kp,ki,kd,limit,Ts,tau):
     # compute the error
     error = x_c - x
 
+#    print "\t\t `x error: {}\r".format(error)
+
     # update derivative of x
     PID_x.xdot = _tustin_derivative(tau, Ts, PID_x.xdot, PID_x.x_d1, x)
 
@@ -59,8 +61,9 @@ def PID_x(x_c,x,kp,ki,kd,limit,Ts,tau):
     PID_x.x_d1 = x
 
     # compute the PID control signal
-    u_unsat = kp*error + ki*integrator - kd*thetadot;
-    u = _sat(u_unsat, limit)
+    u_unsat = kp*error + ki*PID_x.integrator - kd*PID_x.xdot;
+    u = u_unsat
+#    u = _sat(u_unsat, limit)
 
     # more integrator anti-windup
     if ki:
@@ -69,15 +72,15 @@ def PID_x(x_c,x,kp,ki,kd,limit,Ts,tau):
     return u
 
 
-def _sat(in, limit):
+def _sat(val, limit):
     out = 0
 
-    if in > limit:
+    if val > limit:
         out = limit
-    elif in < limit:
+    elif val < limit:
         out = -limit
     else:
-        out = in
+        out = val
 
     return out
 
