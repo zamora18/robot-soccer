@@ -81,38 +81,35 @@ def handle_odom_timer():
 def get_battery():
     return w.ReadMainBatteryVoltage()[1]/10.0
 
-def get_direction():
+def get_action():
     getch = _Getch()
     k = getch()
-    if k == 'w' or k == 'W':
+    if k == 'w':
         return 'UP'
-    elif k == 's' or k == 'S':
+    elif k == 's':
         return 'DOWN'
-    elif k == 'd' or k == 'D':
+    elif k == 'd':
         return 'RIGHT'
-    elif k == 'a' or k == 'A':
+    elif k == 'a':
         return 'LEFT'
-    elif k == 'x' or k == 'X':
+    elif k == 'x':
         return 'SPIN_CW'
-    elif k == 'z' or k == 'Z':
+    elif k == 'z':
         return 'SPIN_CCW'
-    elif k == 'h' or k == 'H':
+    elif k == 'h':
         return 'SET_HOME'
-    elif k == 'u' or k == 'U':
+    elif k == 'u':
         return 'TOGGLE_SMOOTH'
-    elif k == 'o' or k == 'O':
+    elif k == 'o':
         return 'TOGGLE_ODOM'
     elif k == 'b':
         return 'BREAKPOINT'
     elif k == 'B':
         return 'BATTERY'
-    elif k =='l' or k == 'L':
+    elif k =='l':
         pass
     elif k == ' ':
-        _motion_timer.stop()
-        _odom_timer.stop()
-        motion.stop()
-        return sys.exit(0)
+        return 'DIE'
 
 def main():
     global _motion_timer
@@ -130,51 +127,57 @@ def main():
     global _velocities, _set_speed, _smooth, _odom_on
 
     while(1):
-        dir = get_direction()
-        if dir == 'UP':
+        action = get_action()
+        if action == 'UP':
             _set_speed = True
             _velocities = (0, _vy, 0)
 
-        elif dir == 'DOWN':
+        elif action == 'DOWN':
             _set_speed = True
             _velocities = (0, -_vy, 0)
 
-        elif dir == 'RIGHT':
+        elif action == 'RIGHT':
             _set_speed = True
             _velocities = (_vx, 0, 0)
 
-        elif dir == 'LEFT':
+        elif action == 'LEFT':
             _set_speed = True
             _velocities = (-_vx, 0, 0)
 
-        elif dir == 'SPIN_CW':
+        elif action == 'SPIN_CW':
             _set_speed = True
             _velocities = (0, 0, _w)
 
-        elif dir == 'SPIN_CCW':
+        elif action == 'SPIN_CCW':
             _set_speed = True
             _velocities = (0, 0, -_w)
 
-        elif dir == 'SET_HOME':
+        elif action == 'SET_HOME':
             Odometry.init()
 
-        elif dir == 'TOGGLE_SMOOTH':
+        elif action == 'TOGGLE_SMOOTH':
             _smooth = not _smooth
             print("Smooth: {}".format(_smooth))
 
-        elif dir == 'TOGGLE_ODOM':
+        elif action == 'TOGGLE_ODOM':
             _odom_on = not _odom_on
             print("Odom: {}".format(_odom_on))
 
-        elif dir == 'BATTERY':
+        elif action == 'BATTERY':
             print("Battery: {}".format(get_battery()))
 
-        elif dir == 'BREAKPOINT':
+        elif action == 'BREAKPOINT':
             _odom_timer.stop()
             _motion_timer.stop()
             import ipdb; ipdb.set_trace()
             _odom_timer.start()
             _motion_timer.start()
+
+        elif action == 'DIE':
+            _motion_timer.stop()
+            _odom_timer.stop()
+            motion.stop()
+            return sys.exit(0)
 
         else:
             _set_speed = True

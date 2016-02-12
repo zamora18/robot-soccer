@@ -84,3 +84,19 @@ def RK4():
     http://www.cs.cmu.edu/afs/cs.cmu.edu/academic/class/16311/www/s07/labs/NXTLabs/Lab%203.html
     """
     pass
+
+
+# Things I've learned about Odometry:
+#
+# - If you w.ReadSpeed() (through motion.get_velocities()) at too
+#   high of a rate, you will see strange behavior, such as:
+#   + motors locking up
+#   + encoder readings having data spikes
+#   + encoder readings being false (you have to stop/start the update)
+#   + The optimum update rate changes with battery level
+#
+# - Smooth stopping:
+#   + If you want to smooth stop, only forward/backward commands can
+#       use smooth stop without coming to a complete stop first. Look
+#       at the wheels as you change from going in x to y and you'll
+#       notice that it's not instantaneous for all wheels
