@@ -13,7 +13,7 @@ theta = 0
 # Keep track of what the previous s1, s2, s3 where
 _prev = { 's1': 0, 's2': 0, 's3': 0 }
 _data_spikes = { 's1': 0, 's2': 0, 's3': 0 }
-_data_spike_tolerance = 1000
+_data_spike_tolerance = 10000
 
 def _is_data_spike(s1, s2, s3):
     diff1 = abs(s1 - _prev['s1'])
@@ -36,9 +36,9 @@ def _is_data_spike(s1, s2, s3):
         return True
 
     # No spike, so update for next time
-    _data_spikes['s1'] = s1
-    _data_spikes['s2'] = s2
-    _data_spikes['s3'] = s3
+    _prev['s1'] = s1
+    _prev['s2'] = s2
+    _prev['s3'] = s3
 
     return False
 
