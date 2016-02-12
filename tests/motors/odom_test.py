@@ -54,23 +54,29 @@ def _go_home():
     y = round(Odometry.y, 1)
     theta = round(Odometry.theta, 1)
 
-    dt = x / _vx
-    sign = 1 if x > 0 else -1
-    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
-    # motion.drive(sign*_vx, 0, 0)
-    # sleep.time(dt)
+    # Set a tolerance
+    tolerance = 0.5
 
-    dt = y / _vy
-    sign = 1 if y > 0 else -1
-    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
-    # motion.drive(0, sign*_vy, 0)
-    # sleep.time(dt)
+    if abs(x) > tolerance:
+        dt = x / _vx
+        sign = -1 if x > 0 else 1
+        print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
+        # motion.drive(sign*_vx, 0, 0)
+        # sleep.time(dt)
 
-    dt = theta / _w
-    sign = 1 if theta > 0 else -1
-    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
-    # motion.drive(0, 0, sign*_w)
-    # sleep.time(dt)
+    if abs(y) > tolerance:
+        dt = y / _vy
+        sign = -1 if y > 0 else 1
+        print("motion.drive({},{},{}) for {} s\r".format(0, sign*_vy, 0, dt))
+        # motion.drive(0, sign*_vy, 0)
+        # sleep.time(dt)
+
+    if abs(w) > tolerance:
+        dt = theta / _w
+        sign = -1 if theta > 0 else 1
+        print("motion.drive({},{},{}) for {} s\r".format(0, 0, sign*_w, dt))
+        # motion.drive(0, 0, sign*_w)
+        # sleep.time(dt)
 
 
 def handle_motion_timer():
