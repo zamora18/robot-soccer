@@ -78,6 +78,9 @@ def handle_odom_timer():
     if _odom_on:
         print "{}\r".format(Odometry.update(_odom_timer_period))
 
+def get_battery():
+    return w.ReadMainBatteryVoltage()[1]/10.0
+
 def get_direction():
     getch = _Getch()
     k = getch()
@@ -99,8 +102,10 @@ def get_direction():
         return 'TOGGLE_SMOOTH'
     elif k == 'o' or k == 'O':
         return 'TOGGLE_ODOM'
-    elif k == 'b' or k == 'B':
+    elif k == 'b':
         return 'BREAKPOINT'
+    elif k == 'B':
+        return 'BATTERY'
     elif k =='l' or k == 'L':
         pass
     elif k == ' ':
@@ -160,6 +165,9 @@ def main():
         elif dir == 'TOGGLE_ODOM':
             _odom_on = not _odom_on
             print("Odom: {}".format(_odom_on))
+
+        elif dir == 'BATTERY':
+            print("Battery: {}".format(get_battery()))
 
         elif dir == 'BREAKPOINT':
             _odom_timer.stop()
