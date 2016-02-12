@@ -9,7 +9,7 @@ PULSES_PER_RADIAN = (PULSES_PER_REV / (2.0*np.pi))
 
 def drive(vx,vy,omega,smooth=False):
     # Convert from world to robot wheel speeds
-    (OMEGA1, OMEGA2, OMEGA3) = p.world_to_wheel_speeds(vx, vy, omega, Odometry.theta)
+    (OMEGA1, OMEGA2, OMEGA3) = p.world_to_wheel_speeds(vx, vy, omega, 0)
 
     # Convert rad/s to qpps
     s1 = int(OMEGA1*PULSES_PER_RADIAN)
@@ -41,7 +41,7 @@ def get_velocities():
     OMEGA3 = s3/PULSES_PER_RADIAN
 
     # Convert from wheel angular speeds to world frame velocities
-    (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, Odometry.theta)
+    (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, 0)
 
     return (vx, vy, omega, s1, s2, s3)
 
