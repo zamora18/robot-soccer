@@ -8,12 +8,15 @@ from repeated_timer import RepeatedTimer
 import motion
 import wheelbase as w
 import Odometry
+import Controller
 
 _motion_timer = None
 _odom_timer = None
+_ctrl_timer = None
 
 _motion_timer_period = 1.0/100
 _odom_timer_period = 1.0/6
+_ctrl_timer_period = 1.0/100
 
 _vx = 0.5
 _vy = 0.5
@@ -24,6 +27,7 @@ _set_speed = True
 
 _smooth = True
 _odom_on = True
+_ctrl_on = True
 _previous_action = None
 
 def _action_requires_stop(action):
@@ -86,17 +90,46 @@ def _go_home():
         motion.stop()
         time.sleep(0.5)
 
+def _ask_for_point():
+    """Ask for point
+    Asks user for a point to go to. User enters three floats, separated
+    by spaces, with no other characters; x, y, theta respectively
+    """
+    usr = raw_input("Input point, (syntax: \"x y theta\"): ")
 
-def handle_motion_timer():
+    usr_list = usr.split()
+
+    if len(usr_list) != 3:
+        print("\n\rEnter the point correctly, dummy.\r\n")
+        return False
+
+    try:
+        x = float(usr_list[0])
+        y = float(usr_list[1])
+        theta = float(usr_list[2])
+    except:
+        print("\n\rThere was a problem making your input a float.\r\n")
+        return False
+
+    return Controller.set_commanded_position(x, y, theta)
+
+
+def _handle_motion_timer():
     global _set_speed
     if _set_speed:
         motion.drive(*_velocities,smooth=_smooth)
         _set_speed = False
 
 
-def handle_odom_timer():
+def _handle_odom_timer():
     if _odom_on:
         print "{}\r".format(Odometry.update(_odom_timer_period))
+
+def _handle_ctrl_timer():
+    global _set_speed
+    if _ctrl_on:
+        Controller.update(_ctrlr_timer_period)
+        _set_speed = True
 
 def get_battery():
     return w.ReadMainBatteryVoltage()[1]/10.0
@@ -126,22 +159,30 @@ def get_action():
         return 'BREAKPOINT'
     elif k == 'B':
         return 'BATTERY'
-    elif k =='H':
+    elif k == 'H':
         return 'GO_HOME'
+    elif k == 'G':
+        return 'GO_TO_POINT'
+    elif k == 'C':
+        return 'TOGGLE_CNTRL'
     elif k == ' ':
         return 'DIE'
 
 def main():
     global _motion_timer
-    _motion_timer = RepeatedTimer(_motion_timer_period, handle_motion_timer)
+    _motion_timer = RepeatedTimer(_motion_timer_period, _handle_motion_timer)
     _motion_timer.start()
 
     global _odom_timer
-    _odom_timer = RepeatedTimer(_odom_timer_period, handle_odom_timer)
+    _odom_timer = RepeatedTimer(_odom_timer_period, _handle_odom_timer)
     _odom_timer.start()
 
+    global _ctrl_timer
+    _ctrl_timer = RepeatedTimer(_ctrl_timer_period, _handle_ctrl_timer)
+    _ctrl_timer.start()
+
     w.init()
-    print 'started'
+    print 'Started.'
 
 
     global _velocities, _set_speed, _smooth, _odom_on, _previous_action
@@ -187,6 +228,21 @@ def main():
             _velocities = (0, 0, 0)
             _motion_timer.start()
 
+        elif action == 'GO_TO_POINT':
+            _motion_timer.stop()
+            motion.stop()
+            time.sleep(1)
+
+            _ask_for_point()
+
+            time.sleep(1)
+            _set_speed = True
+            _velocities = (0, 0, 0)
+            _motion_timer.start()
+
+        elif action == 'TOGGLE_CNTRL':
+            _ctrl_on = not _ctrl_on
+            print("Controller: {}".format(_ctrl_on))
 
         elif action == 'TOGGLE_SMOOTH':
             _smooth = not _smooth

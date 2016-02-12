@@ -14,6 +14,7 @@ def init():
 def set_commanded_position(x, y, theta):
     global _set_point
     _set_point = (x, y, theta)
+    return True
 
 def update(time_since_last_update):
     global velocities
