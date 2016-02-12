@@ -14,9 +14,9 @@ _motion_timer = None
 _odom_timer = None
 _ctrl_timer = None
 
-_motion_timer_period = 1.0/10
+_motion_timer_period = 1.0/6
 _odom_timer_period = 1.0/6
-_ctrl_timer_period = 1.0/10
+_ctrl_timer_period = 1.0/7
 
 _vx = 0.5
 _vy = 0.5
@@ -126,14 +126,22 @@ def _handle_motion_timer():
 
 
 def _handle_odom_timer():
+    global _ctrl_on, _velocities, _set_speed
     if _odom_on:
         print "{}\r".format(Odometry.update(_odom_timer_period))
 
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
-            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c) and
-                    _close(Odometry.theta, theta_c, tolerance=(np.pi/32)):
+            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c) and \
+                    _close(Odometry.theta, theta_c, tolerance=1000000*(np.pi/12)):
                 _ctrl_on = False
+                print("\r\n*** Reached Set Point within Tolerances ***\r\n")
+                _motion_timer.stop()
+                motion.stop()
+                time.sleep(0.5)
+                _velocities = (0, 0, 0)
+                _set_speed = True
+                _motion_timer.start()
 
 
 def _handle_ctrl_timer():
@@ -283,6 +291,7 @@ def main():
             _odom_timer.stop()
             _ctrl_timer.stop()
             motion.stop()
+            w.kill()
             return sys.exit(0)
 
         else:

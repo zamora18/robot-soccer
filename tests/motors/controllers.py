@@ -8,56 +8,55 @@ class PID(object):
         self.limit = limit
         self.tau = tau
         self.integrator_limit = integrator_limit
+
+        # Declare persistent/static variables
+        self.integrator = 0
+        self.xdot = 0
+        self.error_d1 = 0
+        self.x_d1 = 0
         
 
     def update(self, x_c, x, Ts):
-        # Declare persistent/static variables
-        if "integrator" not in PID.__dict__: PID.integrator = 0
-        if "xdot" not in PID.__dict__: PID.xdot = 0
-        if "error_d1" not in PID.__dict__: PID.error_d1 = 0
-        if "x_d1" not in PID.__dict__: PID.x_d1 = 0
-
         # compute the error
         error = x_c - x
 
         # update derivative of x
-        PID.xdot = _tustin_derivative(tau, Ts, PID.xdot, PID.x_d1, x)
+        self.xdot = self._tustin_derivative(x, Ts)
 
         # update integral of error
-        if ki and abs(PID.xdot)<self.integrator_limit:
-            PID.integrator = _tustin_integral(Ts, PID.integrator, error,
-                                                        PID.error_d1)
+        if self.ki and abs(self.xdot)<self.integrator_limit:
+            self.integrator = self._tustin_integral(error, Ts)
 
         # update delayed variables for next time
-        PID.error_d1 = error
-        PID.x_d1 = x
+        self.error_d1 = error
+        self.x_d1 = x
 
         # compute the PID control signal
-        u_unsat = kp*error + ki*PID.integrator - kd*PID.xdot;
+        u_unsat = self.kp*error + self.ki*self.integrator - self.kd*self.xdot;
         u = u_unsat
-    #    u = _sat(u_unsat, limit)
+    #    u = self._sat(u_unsat)
 
         # more integrator anti-windup
-        if ki:
-            PID.integrator = PID.integrator + Ts/ki*(u-u_unsat)
+        if self.ki:
+            self.integrator = self.integrator + Ts/self.ki*(u-u_unsat)
 
         return u
 
 
-    def _sat(self, val, limit):
+    def _sat(self, val):
         out = 0
 
-        if val > limit:
-            out = limit
-        elif val < limit:
-            out = -limit
+        if val > self.limit:
+            out = self.limit
+        elif val < self.limit:
+            out = -self.limit
         else:
             out = val
 
         return out
 
-    def _tustin_derivative(self, tau, Ts, xdot, x_d1, x):
-        return (2*tau-Ts)/(2*tau+Ts)*xdot + 2/(2*tau+Ts)*(x-x_d1)
+    def _tustin_derivative(self, x, Ts):
+        return (2*self.tau-Ts)/(2*self.tau+Ts)*self.xdot + 2/(2*self.tau+Ts)*(x-self.x_d1)
 
-    def _tustin_integral(self, Ts, integrator, x, x_d1):
-        return integrator + (Ts/2)*(x+x_d1)
+    def _tustin_integral(self, x, Ts):
+        return self.integrator + (Ts/2)*(x+self.x_d1)

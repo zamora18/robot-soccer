@@ -6,7 +6,9 @@ import motion
 
 from controllers import PID
 
-PID_x = PID(0.75, 0.025, 0, 1, 0.05, integrator_limit=0.05)
+PID_x = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
+PID_y = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
+PID_theta = PID(0, 0, 0, 1, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
@@ -34,9 +36,11 @@ def update(time_since_last_update):
     y_c = _set_point[1]
     theta_c = _set_point[2]
 
-    vx = PID_x.update(x_c,x,time_since_last_update)
-    vy = 0
-    w  = 0
+    Ts = time_since_last_update
+
+    vx = PID_x.update(x_c, x, Ts)
+    vy = PID_y.update(y_c, y, Ts)
+    w  = PID_theta.update(theta_c, theta, Ts)
 
     velocities = (vx, vy, w)
 
