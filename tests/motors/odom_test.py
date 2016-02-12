@@ -55,28 +55,36 @@ def _go_home():
     theta = round(Odometry.theta, 1)
 
     # Set a tolerance
-    tolerance = 0.5
+    tolerance = 0.1
 
     if abs(x) > tolerance:
-        dt = x / _vx
+        dt = abs(x / _vx)
         sign = -1 if x > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
-        # motion.drive(sign*_vx, 0, 0)
-        # sleep.time(dt)
+        motion.drive(sign*_vx, 0, 0)
+        time.sleep(dt)
+        motion.stop()
+        time.sleep(0.5)
 
     if abs(y) > tolerance:
-        dt = y / _vy
+        dt = abs(y / _vy)
         sign = -1 if y > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, sign*_vy, 0, dt))
-        # motion.drive(0, sign*_vy, 0)
-        # sleep.time(dt)
+        motion.drive(0, sign*_vy, 0)
+        time.sleep(dt)
+        motion.stop()
+        time.sleep(0.5)
 
-    if abs(w) > tolerance:
-        dt = theta / _w
+    if abs(theta) > tolerance:
+        # since it's periodic...
+        theta = round(theta%(2*np.pi) ,2)
+        dt = abs(theta / _w)
         sign = -1 if theta > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, 0, sign*_w, dt))
-        # motion.drive(0, 0, sign*_w)
-        # sleep.time(dt)
+        motion.drive(0, 0, sign*_w)
+        time.sleep(dt)
+        motion.stop()
+        time.sleep(0.5)
 
 
 def handle_motion_timer():
