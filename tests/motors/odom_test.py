@@ -138,7 +138,7 @@ def main():
 
     global _odom_timer
     _odom_timer = RepeatedTimer(_odom_timer_period, handle_odom_timer)
-    _motion_timer.start()
+    _odom_timer.start()
 
     w.init()
     print 'started'
