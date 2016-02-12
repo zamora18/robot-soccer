@@ -201,7 +201,10 @@ def main():
 
         # handle stopping before changing directions
         if _action_requires_stop(action):
+            _set_speed = False
             motion.stop()
+            time.sleep(0.4)
+            _set_speed = True
 
         _previous_action = action
 
