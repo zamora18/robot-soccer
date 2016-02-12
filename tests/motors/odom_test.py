@@ -24,7 +24,29 @@ _set_speed = True
 
 _smooth = True
 _odom_on = True
+_previous_action = None
 
+def _action_requires_stop(action):
+    if action == _previous_action:
+        return False
+
+    if action == 'UP' and _previous_action != 'DOWN':
+        return True
+
+    if action == 'DOWN' and _previous_action != 'UP':
+        return True
+
+    if action == 'LEFT' and _previous_action != 'RIGHT':
+        return True
+
+    if action == 'RIGHT' and _previous_action != 'LEFT':
+        return True
+
+    if action == 'SPIN_CW' and _previous_action != 'SPIN_CCW':
+        return True
+
+    if action == 'SPIN_CCW' and _previous_action != 'SPIN_CW':
+        return True
 
 def handle_motion_timer():
     global _set_speed
@@ -83,7 +105,7 @@ def main():
     print 'started'
 
 
-    global _velocities, _set_speed, _smooth, _odom_on
+    global _velocities, _set_speed, _smooth, _odom_on, _previous_action
 
     while(1):
         action = get_action()
@@ -141,6 +163,12 @@ def main():
         else:
             _set_speed = True
             _velocities = (0, 0, 0)
+
+        # handle stopping before changing directions
+        if _action_requires_stop(action):
+            motion.stop()
+
+        _previous_action = action
 
         print "{}\r".format(_velocities)
 
