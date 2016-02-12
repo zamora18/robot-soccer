@@ -35,6 +35,11 @@ def _is_data_spike(s1, s2, s3):
         _data_spikes['s3'] += 1
         return True
 
+    # No spike, so update for next time
+    _data_spikes['s1'] = s1
+    _data_spikes['s2'] = s2
+    _data_spikes['s3'] = s3
+
     return False
 
 

@@ -54,7 +54,7 @@ _motion_timer = None
 _odom_timer = None
 
 _motion_timer_period = 1.0/100
-_odom_timer_period = 1.0/10
+_odom_timer_period = 1.0/6
 
 _vx = 0.5
 _vy = 0.5
