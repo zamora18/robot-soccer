@@ -126,11 +126,17 @@ def _handle_odom_timer():
     if _odom_on:
         print "{}\r".format(Odometry.update(_odom_timer_period))
 
+        if _ctrl_on:
+            x_c, y_c, theta_c = Controller.get_commanded_position()
+            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c)
+                    and _close(Odometry.theta, theta_c):
+                _ctrl_on = False
+
+
 def _handle_ctrl_timer():
     global _set_speed
     global _velocities
     if _ctrl_on:
-        print "Controller"
         _velocities = Controller.update(_ctrl_timer_period)
         _set_speed = True
 
@@ -242,8 +248,7 @@ def main():
 
             time.sleep(1)
             _ctrl_on = True
-#            _set_speed = True
-#            _velocities = (0, 0, 0)
+            _odom_on = True
             _motion_timer.start()
             _odom_timer.start()
             _ctrl_timer.start()
