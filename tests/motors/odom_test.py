@@ -14,9 +14,9 @@ _motion_timer = None
 _odom_timer = None
 _ctrl_timer = None
 
-_motion_timer_period = 1.0/100
+_motion_timer_period = 1.0/10
 _odom_timer_period = 1.0/6
-_ctrl_timer_period = 1.0/100
+_ctrl_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
@@ -27,7 +27,7 @@ _set_speed = True
 
 _smooth = True
 _odom_on = True
-_ctrl_on = True
+_ctrl_on = False
 _previous_action = None
 
 def _action_requires_stop(action):
@@ -111,6 +111,7 @@ def _ask_for_point():
         print("\n\rThere was a problem making your input a float.\r\n")
         return False
 
+    print("Going to: ({}, {}, {})\r".format(x,y,theta))
     return Controller.set_commanded_position(x, y, theta)
 
 
@@ -127,8 +128,10 @@ def _handle_odom_timer():
 
 def _handle_ctrl_timer():
     global _set_speed
+    global _velocities
     if _ctrl_on:
-        Controller.update(_ctrlr_timer_period)
+        print "Controller"
+        _velocities = Controller.update(_ctrl_timer_period)
         _set_speed = True
 
 def get_battery():
@@ -230,15 +233,21 @@ def main():
 
         elif action == 'GO_TO_POINT':
             _motion_timer.stop()
+            _odom_timer.stop()
+            _ctrl_timer.stop()
             motion.stop()
             time.sleep(1)
 
             _ask_for_point()
+            print 'okay'
 
             time.sleep(1)
+            _ctrl_on = True
             _set_speed = True
             _velocities = (0, 0, 0)
             _motion_timer.start()
+            _odom_timer.start()
+            _ctrl_timer.start()
 
         elif action == 'TOGGLE_CNTRL':
             _ctrl_on = not _ctrl_on
@@ -265,6 +274,7 @@ def main():
         elif action == 'DIE':
             _motion_timer.stop()
             _odom_timer.stop()
+            _ctrl_timer.stop()
             motion.stop()
             return sys.exit(0)
 
