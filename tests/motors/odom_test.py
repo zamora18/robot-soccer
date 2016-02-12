@@ -114,6 +114,9 @@ def _ask_for_point():
     print("Going to: ({}, {}, {})\r".format(x,y,theta))
     return Controller.set_commanded_position(x, y, theta)
 
+def _close(a, b, tolerance=0.050):
+    return abs(a - b) <= tolerance
+
 
 def _handle_motion_timer():
     global _set_speed
@@ -128,8 +131,8 @@ def _handle_odom_timer():
 
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
-            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c)
-                    and _close(Odometry.theta, theta_c):
+            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c) and
+                    _close(Odometry.theta, theta_c, tolerance=(np.pi/32)):
                 _ctrl_on = False
 
 
