@@ -14,9 +14,9 @@ _motion_timer = None
 _odom_timer = None
 _ctrl_timer = None
 
-_motion_timer_period = 1.0/6
-_odom_timer_period = 1.0/6
-_ctrl_timer_period = 1.0/7
+_motion_timer_period = 1.0/3
+_odom_timer_period = 1.0/7
+_ctrl_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
