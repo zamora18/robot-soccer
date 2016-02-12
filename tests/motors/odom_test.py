@@ -56,18 +56,21 @@ def _go_home():
 
     dt = x / _vx
     sign = 1 if x > 0 else -1
-    motion.drive(sign*_vx, 0, 0)
-    sleep.time(dt)
+    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
+    # motion.drive(sign*_vx, 0, 0)
+    # sleep.time(dt)
 
     dt = y / _vy
     sign = 1 if y > 0 else -1
-    motion.drive(0, sign*_vy, 0)
-    sleep.time(dt)
+    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
+    # motion.drive(0, sign*_vy, 0)
+    # sleep.time(dt)
 
     dt = theta / _w
     sign = 1 if theta > 0 else -1
-    motion.drive(0, 0, sign*_w)
-    sleep.time(dt)
+    print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
+    # motion.drive(0, 0, sign*_w)
+    # sleep.time(dt)
 
 
 def handle_motion_timer():
