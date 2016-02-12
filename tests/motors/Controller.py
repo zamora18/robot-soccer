@@ -26,7 +26,7 @@ def update(time_since_last_update):
     y_c = _set_point[1]
     theta_c = _set_point[2]
 
-    vx = PID_x(x_c,x,0.5,0,0,1,time_since_last_update,0.05)
+    vx = PID_x(x_c,x,0.75,0.05,0.1,1,time_since_last_update,0.05)
     vy = 0
     w  = 0
 

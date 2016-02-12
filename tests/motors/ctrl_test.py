@@ -20,7 +20,7 @@ _ctrlr_timer_period = 1.0/10
 
 _set_speed = False
 
-_smooth = False
+_smooth = True
 _odom_on = True
 _ctrlr_on = True
 _previous_action = None
