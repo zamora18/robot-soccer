@@ -48,6 +48,28 @@ def _action_requires_stop(action):
     if action == 'SPIN_CCW' and _previous_action != 'SPIN_CW':
         return True
 
+def _go_home():
+    # Get current robot position, rounded to 1 decimal place
+    x = round(Odometry.x, 1)
+    y = round(Odometry.y, 1)
+    theta = round(Odometry.theta, 1)
+
+    dt = x / _vx
+    sign = 1 if x > 0 else -1
+    motion.drive(sign*_vx, 0, 0)
+    sleep.time(dt)
+
+    dt = y / _vy
+    sign = 1 if y > 0 else -1
+    motion.drive(0, sign*_vy, 0)
+    sleep.time(dt)
+
+    dt = theta / _w
+    sign = 1 if theta > 0 else -1
+    motion.drive(0, 0, sign*_w)
+    sleep.time(dt)
+
+
 def handle_motion_timer():
     global _set_speed
     if _set_speed:
@@ -87,8 +109,8 @@ def get_action():
         return 'BREAKPOINT'
     elif k == 'B':
         return 'BATTERY'
-    elif k =='l':
-        pass
+    elif k =='H':
+        return 'GO_HOME'
     elif k == ' ':
         return 'DIE'
 
@@ -136,6 +158,19 @@ def main():
         elif action == 'SET_HOME':
             Odometry.init()
 
+        elif action == 'GO_HOME':
+            _motion_timer.stop()
+            motion.stop()
+            time.sleep(1)
+
+            _go_home()
+
+            time.sleep(1)
+            _set_speed = True
+            _velocities = (0, 0, 0)
+            _motion_timer.start()
+
+
         elif action == 'TOGGLE_SMOOTH':
             _smooth = not _smooth
             print("Smooth: {}".format(_smooth))
@@ -145,7 +180,7 @@ def main():
             print("Odom: {}".format(_odom_on))
 
         elif action == 'BATTERY':
-            print("Battery: {}".format(get_battery()))
+            print("\n\r*** Battery: {} ***\n\r".format(get_battery()))
 
         elif action == 'BREAKPOINT':
             _odom_timer.stop()
