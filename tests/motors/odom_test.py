@@ -188,7 +188,7 @@ def main():
     print 'Started.'
 
 
-    global _velocities, _set_speed, _smooth, _odom_on, _previous_action
+    global _velocities, _set_speed, _smooth, _odom_on, _previous_action, _ctrl_on
 
     while(1):
         action = get_action()
@@ -239,12 +239,11 @@ def main():
             time.sleep(1)
 
             _ask_for_point()
-            print 'okay'
 
             time.sleep(1)
             _ctrl_on = True
-            _set_speed = True
-            _velocities = (0, 0, 0)
+#            _set_speed = True
+#            _velocities = (0, 0, 0)
             _motion_timer.start()
             _odom_timer.start()
             _ctrl_timer.start()
