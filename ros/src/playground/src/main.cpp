@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}//*/
 
-	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
 	int ballLowH = 111;
 	int ballHighH = 179;
@@ -48,24 +49,34 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 80;
-	int robot1HighH = 100;
+	int robot1LowH = 90;
+	int robot1HighH = 107;
 
 	int robot1LowS = 80;
 	int robot1HighS = 255;
 
-	int robot1LowV = 0;
+	int robot1LowV = 189;
 	int robot1HighV = 255;	
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "Control", &ballLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Control", &ballHighH, 179);
+	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "BallControl", &ballHighH, 179);
 
-	cvCreateTrackbar("LowS", "Control", &ballLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Control", &ballHighS, 255);
+	cvCreateTrackbar("LowS", "BallControl", &ballLowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "BallControl", &ballHighS, 255);
 
-	cvCreateTrackbar("LowV", "Control", &ballLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Control", &ballHighV, 255);
+	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
+
+	//Create trackbars in "Control" window
+	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
+
+	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
+
+	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
 
 	Mat imgTemp;
 
