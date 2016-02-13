@@ -42,7 +42,7 @@ def main():
         msg = Pose2D()
         msg.x = xhat
         msg.y = yhat
-        msg.theta = thathat
+        msg.theta = thetahat
 
         pub.publish(msg)
 

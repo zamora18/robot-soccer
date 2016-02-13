@@ -21,7 +21,7 @@ def set_commanded_position(x, y, theta):
 def get_commanded_position():
     return _set_point
 
-def update(time_since_last_update, xhat, xhat, thetahat):
+def update(time_since_last_update, xhat, yhat, thetahat):
     global velocities
 
     # Break out variables for easy access
