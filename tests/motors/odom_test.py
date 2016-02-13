@@ -128,7 +128,8 @@ def _handle_motion_timer():
 def _handle_odom_timer():
     global _ctrl_on, _velocities, _set_speed
     if _odom_on:
-        print "{}\r".format(Odometry.update(_odom_timer_period))
+        odom = Odometry.update(_odom_timer_period)
+        print "{}\r".format(odom)
 
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()

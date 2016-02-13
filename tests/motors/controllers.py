@@ -1,5 +1,19 @@
 class PID(object):
-    """docstring for PID"""
+    """PID Controller
+
+    Simple controller based on Dr. Beard's ECEn 483 Control Book, ch 13.
+
+    Create an instance of this class for every PID loop that you want. Then
+    call the update() function periodically (10 Hz).
+
+    kp:                 Proportional gain
+    ki:                 Integrator gain
+    kd:                 Derivative gain
+    limit:              Saturate the output so that it stays below this value (+/-)
+    tau:                Constant for band-limited dirty derivative
+    integrator_limit:   Don't start integrating until derivative is below this value,
+                        i.e., if waveform is moving quickly, don't integrate
+    """
     def __init__(self, kp, ki, kd, limit, tau, integrator_limit=0.05):
         super(PID, self).__init__()
         self.kp = kp
@@ -17,6 +31,10 @@ class PID(object):
         
 
     def update(self, x_c, x, Ts):
+        """Update
+
+        Computes the output 'force' to send to the plant so that x_c == x
+        """
         # compute the error
         error = x_c - x
 
@@ -55,7 +73,15 @@ class PID(object):
         return out
 
     def _tustin_derivative(self, x, Ts):
+        """Tustin Derivative
+        Using the Tustin Approximation (Bilinear Transform), compute
+        a discrete dirty-derivative.
+        """
         return (2*self.tau-Ts)/(2*self.tau+Ts)*self.xdot + 2/(2*self.tau+Ts)*(x-self.x_d1)
 
     def _tustin_integral(self, x, Ts):
+        """Tustin Integral
+        Using the Tustin approximation (Bilinear Transform), compute
+        a discrete integral.
+        """
         return self.integrator + (Ts/2)*(x+self.x_d1)
