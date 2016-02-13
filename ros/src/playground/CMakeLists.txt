@@ -54,7 +54,7 @@ add_message_files(
   FILES
   coords.msg
   EncoderEstimates.msg
-  QPPS.msg
+  QPulses.msg
   WorldVelocities.msg
 )
 

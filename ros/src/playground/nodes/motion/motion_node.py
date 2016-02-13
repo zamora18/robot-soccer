@@ -38,9 +38,9 @@ def main():
         estimate.world_velocities.vx = vx
         estimate.world_velocities.vy = vy
         estimate.world_velocities.w  = w
-        estimate.qpps.s1 = s1
-        estimate.qpps.s2 = s2
-        estimate.qpps.s3 = s3
+        estimate.pulses.s1 = s1
+        estimate.pulses.s2 = s2
+        estimate.pulses.s3 = s3
         pub.publish(estimate)
             
         rate.sleep()

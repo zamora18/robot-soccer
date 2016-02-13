@@ -1,2 +1,2 @@
-QPPS qpps
+QPulses pulses
 WorldVelocities world_velocities
