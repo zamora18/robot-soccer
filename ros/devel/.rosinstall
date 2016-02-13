@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /root/dev/lusk/repo/ros/devel/setup.sh
+    local-name: /home/chris/robot-soccer/ros/devel/setup.sh
