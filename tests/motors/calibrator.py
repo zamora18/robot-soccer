@@ -180,6 +180,8 @@ def test_calibration(velocity=0.6,sleep_time=1.5,
 
     _print_stats()
 
+    print("velocity: {}\r".format(velocity))
+
     # Forward
     motion.drive(velocity,0,0)
     time.sleep(sleep_time)

@@ -122,7 +122,7 @@ def _close(a, b, tolerance=0.050):
 
 def _deal_with_calibration():
 
-    usr = raw_input("What do you want? ('calibrate 48 2 f', 'test 0.6 1.5 m1 m2 m3') ").upper()
+    usr = raw_input("What do you want? ('calibrate 48 2 t', 'test 0.6 1.5 m1 m2 m3') ").upper()
 
     action = usr.split()[0]
     other = usr.split()[1:]
@@ -139,7 +139,7 @@ def _deal_with_calibration():
             sleep_time = 2
 
         try:
-            set_PID = (other[2] == 'F')
+            set_PID = (other[2] == 'T')
         except:
             set_PID = True
 
@@ -149,7 +149,7 @@ def _deal_with_calibration():
         try:
             velocity = float(other[0])
         except:
-            velocity = 48
+            velocity = 0.6
 
         try:
             sleep_time = float(other[1])
@@ -165,7 +165,7 @@ def _deal_with_calibration():
             M2QPPS = None
             M3QPPS = None
 
-        test_calibration(velocity=velocity,sleep_time=sleep_time,
+        c.test_calibration(velocity=velocity,sleep_time=sleep_time,
                             M1QPPS=M1QPPS,M2QPPS=M2QPPS,M3QPPS=M3QPPS)
 
 
