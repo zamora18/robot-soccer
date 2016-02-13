@@ -2,7 +2,7 @@
 
 import roslib; roslib.load_manifest('playground')
 import rospy
-from geometry_msgs.msg import Twist, Pose2D
+from geometry_msgs.msg import Twist
 from playground.msg import EncoderEstimates
 
 import numpy as np

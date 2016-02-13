@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from rcv3 import roboclaw as r
 from functools import partial
 
