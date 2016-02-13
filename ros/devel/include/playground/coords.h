@@ -27,15 +27,15 @@ struct coords_
     : robot_x(0.0)
     , robot_y(0.0)
     , robot_theta(0.0)
-    , center_x(0.0)
-    , center_y(0.0)  {
+    , ball_x(0.0)
+    , ball_y(0.0)  {
     }
   coords_(const ContainerAllocator& _alloc)
     : robot_x(0.0)
     , robot_y(0.0)
     , robot_theta(0.0)
-    , center_x(0.0)
-    , center_y(0.0)  {
+    , ball_x(0.0)
+    , ball_y(0.0)  {
     }
 
 
@@ -49,11 +49,11 @@ struct coords_
    typedef double _robot_theta_type;
   _robot_theta_type robot_theta;
 
-   typedef double _center_x_type;
-  _center_x_type center_x;
+   typedef double _ball_x_type;
+  _ball_x_type ball_x;
 
-   typedef double _center_y_type;
-  _center_y_type center_y;
+   typedef double _ball_y_type;
+  _ball_y_type ball_y;
 
 
 
@@ -132,12 +132,12 @@ struct MD5Sum< ::playground::coords_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "a989a5b39fd7f2e512b8a4d190a60faf";
+    return "92e73cedfd0c1f1a450dee8e234adf07";
   }
 
   static const char* value(const ::playground::coords_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xa989a5b39fd7f2e5ULL;
-  static const uint64_t static_value2 = 0x12b8a4d190a60fafULL;
+  static const uint64_t static_value1 = 0x92e73cedfd0c1f1aULL;
+  static const uint64_t static_value2 = 0x450dee8e234adf07ULL;
 };
 
 template<class ContainerAllocator>
@@ -159,8 +159,8 @@ struct Definition< ::playground::coords_<ContainerAllocator> >
     return "float64 robot_x\n\
 float64 robot_y\n\
 float64 robot_theta\n\
-float64 center_x\n\
-float64 center_y\n\
+float64 ball_x\n\
+float64 ball_y\n\
 ";
   }
 
@@ -182,8 +182,8 @@ namespace serialization
       stream.next(m.robot_x);
       stream.next(m.robot_y);
       stream.next(m.robot_theta);
-      stream.next(m.center_x);
-      stream.next(m.center_y);
+      stream.next(m.ball_x);
+      stream.next(m.ball_y);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER;
@@ -208,10 +208,10 @@ struct Printer< ::playground::coords_<ContainerAllocator> >
     Printer<double>::stream(s, indent + "  ", v.robot_y);
     s << indent << "robot_theta: ";
     Printer<double>::stream(s, indent + "  ", v.robot_theta);
-    s << indent << "center_x: ";
-    Printer<double>::stream(s, indent + "  ", v.center_x);
-    s << indent << "center_y: ";
-    Printer<double>::stream(s, indent + "  ", v.center_y);
+    s << indent << "ball_x: ";
+    Printer<double>::stream(s, indent + "  ", v.ball_x);
+    s << indent << "ball_y: ";
+    Printer<double>::stream(s, indent + "  ", v.ball_y);
   }
 };
 

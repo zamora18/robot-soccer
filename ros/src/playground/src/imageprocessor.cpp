@@ -60,6 +60,47 @@ vector<vector<Point> >  ImageProcessor::getContours(Mat contourOutput)
 
 }
 
+
+void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
+{
+	Mat contourOutput;
+
+	contourOutput = img.clone();
+
+	//get the contours of the image
+	vector<vector<Point> > contours = getContours(contourOutput);
+
+	vector<Moments> contourmoments = vector<Moments>();
+
+	for(int i = 0; i < contours.size(); i++)
+	{
+		//eliminates any noise
+		//if(contourArea(contours[i]) > 100)
+		//{
+			contourmoments.push_back(moments(contours[i]));
+		//}
+
+	}
+
+	vector<Point2d> objects = vector<Point2d>();
+
+
+	for(int i = 0; i < contourmoments.size(); i++)
+	{
+		double x = (contourmoments[i].m10)/(contourmoments[i].m00);
+		double y = (contourmoments[i].m01)/(contourmoments[i].m00);
+		objects.push_back(Point2d(x,y));
+	}
+
+	if(objects.size() != 1)
+	{
+		cout << "CANT FIND BALL" << endl;
+	}
+	else
+	{
+		ball->setLocation(imageToFieldTransform(objects[0]));
+	}
+}
 //initializes the robot positions, can be used to update position also
 bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 {
@@ -207,6 +248,7 @@ Point2d ImageProcessor::fieldToImageTransform(Point2d p)
 	p.y = center.y - (p.y/scalingfactor) ;
 	return p;
 }
+
 
 
 
