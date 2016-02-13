@@ -2,9 +2,6 @@ import time
 
 import numpy as np
 
-import wheelbase as w
-import param as p
-
 x = 0
 y = 0
 theta = 0
@@ -48,14 +45,14 @@ def init(x=0,y=0,theta=0):
    globals()['theta'] = theta
 
 
-def update(time_since_last_updateß):
+def update(time_since_last_update, velocities):
     global x, y, theta
 
     # We need this for Euler's method of derivation
     T = time_since_last_update
 
     # Get the current world velocities based on current motor speeds
-    (vx, vy, omega, s1, s2, s3) = motion.get_velocities()
+    (vx, vy, omega, s1, s2, s3) = velocities
 
     # Check if there was a data spike
     if _is_data_spike(s1, s2, s3):
@@ -73,7 +70,7 @@ def update(time_since_last_updateß):
     y = P_next.getA()[1][0]
     theta = P_next.getA()[2][0]
 
-    return (x, y, theta, s1, s2, s3)
+    return (x, y, theta)
 
 def RK4():
     """Runge-Kutta 4
