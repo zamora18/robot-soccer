@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
   message_generation
 )
 
@@ -52,6 +53,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_message_files(
   FILES
   coords.msg
+  EncoderEstimates.msg
+  QPPS.msg
+  WorldVelocities.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -106,7 +110,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES playground
- CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+ CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 
