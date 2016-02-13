@@ -35,6 +35,13 @@ M = (1.0/R)*mSub
 
 def rot(theta):
     """Rotation matrix
+
+    Rotate CCW between two coordinate frames by theta.
+
+    Used to rotate from between the world and body frames.
+    
+    The body frame is the intermediate coordinate frame that
+    links the world velocities to the robot wheel speeds.
     """
     return np.matrix([ [ np.cos(theta),np.sin(theta),0.0],
                        [-np.sin(theta),np.cos(theta),0.0],
@@ -43,9 +50,30 @@ def rot(theta):
 
 
 def world_to_wheel_speeds(vx, vy, omega, theta):
+    """World velocities to wheel speeds
+    """
     result = M*rot(theta)*np.matrix([ [vx],[vy],[omega] ])
-    tmp = (result.getA()[0][0], result.getA()[1][0], result.getA()[2][0])
-    return tmp
+    
+    OMEGA1 = result.getA()[0][0]
+    OMEGA2 = result.getA()[1][0]
+    OMEGA3 = result.getA()[2][0]
+    
+    return (OMEGA1, OMEGA2, OMEGA3)
+
+
+def wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, theta):
+    """Wheel speeds to world velocities
+    """
+    R_T = rot(theta).transpose()
+    M_inv = np.linalg.inv(M)
+
+    result = R_T*M_inv*np.matrix([ [OMEGA1],[OMEGA2],[OMEGA3] ])
+    
+    vx = result.getA()[0][0]
+    vy = result.getA()[1][0]
+    w  = result.getA()[2][0]
+
+    return (vx, vy, w)
 
 # -------------------------------------
 

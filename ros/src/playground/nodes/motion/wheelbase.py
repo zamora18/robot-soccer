@@ -16,9 +16,24 @@ _RC = [
 		{ 'addr': 0x80, 'motor': 'M2' }, # M3
 	 ]
 
+_SERIAL_ERR = False
+
+class QPPS:
+	M1 = 198970
+	M2 = 170489
+	M3 = 171568
+
+def __dummy(*args):
+	return False
+
 def _getFunction(func_str, motor_id):
 	"""Get Function
 	"""
+
+	# If there was a serial error, it probably wasn't open
+	# so don't return an actual roboclaw command, but a dummy function
+	if _SERIAL_ERR:
+		return __dummy
 
 	# Based on the motor_id, get the correct roboclaw address and motor
 	motor_str = _RC[motor_id]['motor']
@@ -65,6 +80,18 @@ def SetVelocityPID(motor_id, p, i, d, q):
 	func = _getFunction('Set{}VelocityPID', motor_id)
 	return func(p, i, d, q)
 
+def UpdateVelocityPID(motor_id, p=None, i=None, d=None, q=None):
+	s,_p,_i,_d,_q = ReadVelocityPID(motor_id)
+	vals = [_p,_i,_d,_q]
+	new_vals = [p,i,d,q]
+
+	# Only update the p,i,d,q values that are not None
+	for i in range(len(new_vals)):
+		if new_vals[i]:
+			vals[i] = new_vals[i]
+
+	return SetVelocityPID(motor_id,vals[0],vals[1],vals[2],vals[3])
+
 def ResetEncoders(motor_id):
 	func = _getFunction('ResetEncoders', motor_id)
 	return func()
@@ -79,20 +106,31 @@ def ReadMainBatteryVoltage():
 	func = _getFunction('ReadMainBatteryVoltage', motor_id)
 	return func()
 
+def SpeedAccel(motor_id, accel, speed):
+	func = _getFunction('SpeedAccel{}', motor_id)
+	return func(accel, speed)
+
 def kill():
 	for motor_id in range(MOTOR_COUNT):
 		Forward(motor_id, 0)
 		Speed(motor_id, 0)
 
 
-def init():
-	r.Open('/dev/ttySAC0', 38400)
+def init(set_PID=True):
+	try:
+		r.Open('/dev/ttySAC0', 38400)
+	except:
+		global _SERIAL_ERR
+		_SERIAL_ERR = True
 
-	M1QPPS = 20000 #12764
-	M2QPPS = 20000 #12764
-	M3QPPS = 20000 #12764
 
-	# PID stuff here?
-	SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M1QPPS)
-	SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M2QPPS)
-	SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, M3QPPS)
+	if set_PID:
+		# M1QPPS = 198970 #380268 #180000 #12764
+		# M2QPPS = 170489 #302420 #241547 #12764
+		# M3QPPS = 171568 #411356 #180000 #12764
+
+		# PID stuff here?
+		SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M1)
+		SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M2)
+		SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M3)
+		# SetVelocityPID(2, 0.0152587890625,   0.6103515625,       0.249481201171875, M3QPPS)
