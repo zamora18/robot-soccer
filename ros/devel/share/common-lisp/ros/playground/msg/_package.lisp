@@ -3,5 +3,11 @@
   (:export
    "<COORDS>"
    "COORDS"
+   "<WORLDVELOCITIES>"
+   "WORLDVELOCITIES"
+   "<QPPS>"
+   "QPPS"
+   "<ENCODERESTIMATES>"
+   "ENCODERESTIMATES"
   ))
 
