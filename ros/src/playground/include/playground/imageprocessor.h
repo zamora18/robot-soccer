@@ -43,6 +43,8 @@ class ImageProcessor
 
 		void setScalingFactor(double scaling);
 		double getScalingFactor();
+
+		void initializeBall(VisionObject* ball, Mat img);
 };
 
 #endif // IMAGEPROCESSOR_H

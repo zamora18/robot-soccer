@@ -5,8 +5,8 @@
           ROBOT_Y
           ROBOT_THETA-VAL
           ROBOT_THETA
-          CENTER_X-VAL
-          CENTER_X
-          CENTER_Y-VAL
-          CENTER_Y
+          BALL_X-VAL
+          BALL_X
+          BALL_Y-VAL
+          BALL_Y
 ))

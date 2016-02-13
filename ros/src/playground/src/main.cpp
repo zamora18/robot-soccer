@@ -36,26 +36,47 @@ int main(int argc, char *argv[])
 		return -1;
 	}//*/
 
-	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
-	int iLowH = 80;
-	int iHighH = 100;
+	int ballLowH = 111;
+	int ballHighH = 179;
 
-	int iLowS = 47;
-	int iHighS = 255;
+	int ballLowS = 41;
+	int ballHighS = 162;
 
-	int iLowV = 0;
-	int iHighV = 255;
+	int ballLowV = 183;
+	int ballHighV = 255;
+
+
+	int robot1LowH = 90;
+	int robot1HighH = 107;
+
+	int robot1LowS = 80;
+	int robot1HighS = 255;
+
+	int robot1LowV = 189;
+	int robot1HighV = 255;	
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Control", &iHighH, 179);
+	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "BallControl", &ballHighH, 179);
 
-	cvCreateTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Control", &iHighS, 255);
+	cvCreateTrackbar("LowS", "BallControl", &ballLowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "BallControl", &ballHighS, 255);
 
-	cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Control", &iHighV, 255);
+	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
+
+	//Create trackbars in "Control" window
+	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
+
+	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
+
+	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
 
 	Mat imgTemp;
 
@@ -80,8 +101,10 @@ int main(int argc, char *argv[])
 
 	Robot robot = Robot();
 
+	VisionObject ball = VisionObject();
+
 	//thresh hold the image
-	inRange(imgTemp, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgTemp);
+	inRange(imgTemp, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgTemp);
 
 	//get rid of noise
 	video.erodeDilate(imgTemp);
@@ -118,14 +141,16 @@ int main(int argc, char *argv[])
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
 
-		Mat imgThresholded, imgBW;
+		Mat imgRobotThresh, imgBW, imgBallThresh;
 
 		centercircle = imgOriginal.clone();
 
 
 
 		//thresh hold the image
-		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
+
 
 
 
@@ -137,9 +162,11 @@ int main(int argc, char *argv[])
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
-		video.erodeDilate(imgThresholded);
+		video.erodeDilate(imgRobotThresh);
+		video.erodeDilate(imgBallThresh);
 
-		video.initializeRobot(&robot, imgThresholded);		
+		video.initializeRobot(&robot, imgRobotThresh);		
+		video.initializeBall(&ball, imgBallThresh);
 
 		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
@@ -163,7 +190,8 @@ int main(int argc, char *argv[])
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		imshow("thresh", imgThresholded);
+		imshow("robotthresh", imgRobotThresh);
+		imshow("ballthresh", imgBallThresh);
 
 
 
@@ -181,8 +209,8 @@ int main(int argc, char *argv[])
 		msg.robot_x = robot.getLocation().x;
 		msg.robot_y = robot.getLocation().y;
 		msg.robot_theta = robot.getOrientation();
-		msg.center_x = video.getCenter().x;
-		msg.center_y = video.getCenter().y;
+		msg.ball_x = ball.getLocation().x;
+		msg.ball_y = ball.getLocation().y;
 
 		pub.publish(msg);
 		ros::spinOnce();
