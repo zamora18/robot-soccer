@@ -33,8 +33,7 @@ class PID(object):
 
         # compute the PID control signal
         u_unsat = self.kp*error + self.ki*self.integrator - self.kd*self.xdot;
-        u = u_unsat
-    #    u = self._sat(u_unsat)
+        u = self._sat(u_unsat)
 
         # more integrator anti-windup
         if self.ki:
@@ -48,7 +47,7 @@ class PID(object):
 
         if val > self.limit:
             out = self.limit
-        elif val < self.limit:
+        elif val < -self.limit:
             out = -self.limit
         else:
             out = val
