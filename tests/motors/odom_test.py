@@ -14,7 +14,7 @@ _motion_timer = None
 _odom_timer = None
 _ctrl_timer = None
 
-_motion_timer_period = 1.0/3
+_motion_timer_period = 1.0/6
 _odom_timer_period = 1.0/7
 _ctrl_timer_period = 1.0/10
 
@@ -149,6 +149,7 @@ def _handle_ctrl_timer():
     global _velocities
     if _ctrl_on:
         _velocities = Controller.update(_ctrl_timer_period)
+        #print("Vel: {}\r".format(_velocities))
         _set_speed = True
 
 def get_battery():
