@@ -10,6 +10,8 @@ import wheelbase as w
 import Odometry
 import Controller
 
+import calibrator as c
+
 _motion_timer = None
 _odom_timer = None
 _ctrl_timer = None
@@ -118,6 +120,55 @@ def _close(a, b, tolerance=0.050):
     return abs(a - b) <= tolerance
 
 
+def _deal_with_calibration():
+
+    usr = raw_input("What do you want? ('calibrate 48 2 f', 'test 0.6 1.5 m1 m2 m3') ").upper()
+
+    action = usr.split()[0]
+    other = usr.split()[1:]
+
+    if action == 'CALIBRATE':
+        try:
+            speed = int(other[0])
+        except:
+            speed = 48
+
+        try:
+            sleep_time = float(other[1])
+        except:
+            sleep_time = 2
+
+        try:
+            set_PID = (other[2] == 'F')
+        except:
+            set_PID = True
+
+        c.calibrate(speed=speed,sleep_time=sleep_time,set_PID=set_PID)
+
+    elif action == 'TEST':
+        try:
+            velocity = float(other[0])
+        except:
+            velocity = 48
+
+        try:
+            sleep_time = float(other[1])
+        except:
+            sleep_time = 2
+
+        try:
+            M1QPPS = float(other[2])
+            M2QPPS = float(other[3])
+            M3QPPS = float(other[4])
+        except:
+            M1QPPS = None
+            M2QPPS = None
+            M3QPPS = None
+
+        test_calibration(velocity=velocity,sleep_time=sleep_time,
+                            M1QPPS=M1QPPS,M2QPPS=M2QPPS,M3QPPS=M3QPPS)
+
+
 def _handle_motion_timer():
     global _set_speed
     if _set_speed:
@@ -185,8 +236,10 @@ def get_action():
         return 'GO_HOME'
     elif k == 'G':
         return 'GO_TO_POINT'
-    elif k == 'C':
+    elif k == 'c':
         return 'TOGGLE_CNTRL'
+    elif k == 'C':
+        return 'CALIBRATION_MODE'
     elif k == ' ':
         return 'DIE'
 
@@ -251,9 +304,7 @@ def main():
             _motion_timer.start()
 
         elif action == 'GO_TO_POINT':
-            _motion_timer.stop()
-            _odom_timer.stop()
-            _ctrl_timer.stop()
+            _toggle_timers(False)
             motion.stop()
             time.sleep(1)
 
@@ -262,9 +313,7 @@ def main():
             time.sleep(1)
             _ctrl_on = True
             _odom_on = True
-            _motion_timer.start()
-            _odom_timer.start()
-            _ctrl_timer.start()
+            _toggle_timers(True)
 
         elif action == 'TOGGLE_CNTRL':
             _ctrl_on = not _ctrl_on
@@ -282,16 +331,20 @@ def main():
             print("\n\r*** Battery: {} ***\n\r".format(get_battery()))
 
         elif action == 'BREAKPOINT':
-            _odom_timer.stop()
-            _motion_timer.stop()
+            _toggle_timers(False)
             import ipdb; ipdb.set_trace()
-            _odom_timer.start()
-            _motion_timer.start()
+            _toggle_timers(True)
+
+        elif action == 'CALIBRATION_MODE':
+            _toggle_timers(False)
+
+            _deal_with_calibration()
+
+            time.sleep(1)
+            _toggle_timers(True)
 
         elif action == 'DIE':
-            _motion_timer.stop()
-            _odom_timer.stop()
-            _ctrl_timer.stop()
+            _toggle_timers(False)
             motion.stop()
             w.kill()
             return sys.exit(0)
@@ -310,6 +363,19 @@ def main():
         _previous_action = action
 
         print "{}\r".format(_velocities)
+
+
+def _toggle_timers(on):
+    if on:
+        _motion_timer.start()
+        _odom_timer.start()
+        _ctrl_timer.start()
+
+    else:
+        _motion_timer.stop()
+        _odom_timer.stop()
+        _ctrl_timer.stop()
+
 
 if __name__ == '__main__':
     main()
