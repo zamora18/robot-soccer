@@ -7,8 +7,6 @@ from playground.msg import coords
 
 import numpy as np
 
-import Controller
-
 _hack_period = 1.0/100
 
 _ball_x = 0
@@ -17,8 +15,8 @@ _ball_y = 0
 def _handle_vision_coords(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
     global _ball_x, _ball_y
-    _ball_x = msg.ball_x
-    _ball_y = msg.ball_y
+    _ball_x = -msg.ball_x/100
+    _ball_y = -msg.ball_y/100
 
 def main():
     rospy.init_node('hack', anonymous=False)
@@ -32,7 +30,7 @@ def main():
         msg = Pose2D()
         msg.x = _ball_x
         msg.y = _ball_y
-        msg.z = 0
+        msg.theta = 0
 
         pub.publish(msg)
 
