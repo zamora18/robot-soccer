@@ -15,11 +15,21 @@ _ball_y = 0
 def _handle_vision_coords(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
     global _ball_x, _ball_y
-    _ball_x = -msg.ball_x/100
-    _ball_y = -msg.ball_y/100
+    _ball_x = msg.ball_x/100
+    _ball_y = msg.ball_y/100
+
+
+    robo_msg = Pose2D()
+    robo_msg.x = msg.robot_x
+    robo_msg.y = msg.robot_y
+    robo_msg.theta = msg.robot_theta
+    robopub.publish(robo_msg)
 
 def main():
     rospy.init_node('hack', anonymous=False)
+
+    # Don't use odom node with this
+    robopub = rospy.Publisher('estimated_position', Pose2D, queue_size=10)
 
     rospy.Subscriber('vision', coords, _handle_vision_coords)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
