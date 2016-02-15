@@ -81,27 +81,134 @@ function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
     bot1_x = robot(1,1);
     
     % set some configuration variables
-    guard_at_x = -P.field_length*3/8; % After the ball and bot go past this point,
-                    % the other bot switches into defense mode at that point
-                    % (Past 1/12 on their half of the field)
+    hard_line_of_defense = -P.field_length*3/8; %Both robots defend at goal.
 
-    % Predicates
-%     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
-%     time_to_guard = (ball_x < guard_at_x);
-    time_to_guard = false;
+%     v1 = skill_followBallOnLine(robot(:,1), ball, hard_line_of_defense, P);
+%     v2 = play_guardGoal(robot(:,2), ball, P);
     
-    % Bot1 depends on the time_to_guard predicate
-    if (time_to_guard)
-        v1 = skill_followBallOnLine(robot(:,1), ball, guard_at_x, P);
-    else
-        v1 = play_rushGoal(robot(:,1), ball, P);
+    line_A = -(P.field_length/6)*2;
+    line_B = -(P.field_length/6);
+    line_C = 0;
+    line_D = (P.field_length/6);
+    line_E = (P.field_length/6)*2;
+    
+    
+    section = compute_section(ball(1), P);
+    switch section
+        case 1,
+            v1 = skill_followBallOnLine(robot(:,1), ball*-1, line_A, P);
+            v2 = play_guardGoal(robot(:,2), ball, P);
+        case 2,
+            closest_player_to_goal = get_closest_robot(robot, P.goal(1), P.goal(2));
+            if (closest_player_to_goal == 1)
+                v1 = play_guardGoal(robot(:,1), ball, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            else
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = play_guardGoal(robot(:,2), ball, P); 
+            end
+            
+        case 3,
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_rushGoal(robot(:,2), ball, P);
+%             v2 = play_guardGoal(robot(:,2), ball, P);
+        case 4, 
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_rushGoal(robot(:,2), ball, P);
+        case 5,
+            closest_player_to_ball = get_closest_robot(robot, ball(1), ball(2));
+            if (closest_player_to_ball == 1)
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = skill_followBallOnLine(robot(:,2), ball, line_C, P);
+            else
+                v1 = skill_followBallOnLine(robot(:,1), ball, line_C, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            end
+%             v1 = play_rushGoal(robot(:,1), ball, P);
+%             v2 = skill_followBallOnLine(robot(:,2), ball, line_C, P);
+        case 6,
+            closest_player_to_ball = get_closest_robot(robot, ball(1), ball(2));
+            if (closest_player_to_ball == 1)
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = skill_followBallOnLine(robot(:,2), ball, line_D, P);
+            else
+                v1 = skill_followBallOnLine(robot(:,1), ball, line_D, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            end
+        otherwise
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_guardGoal(robot(:,2), ball, P);
     end
 
-    % Always goalie
-    v2 = play_guardGoal(robot(:,2), ball, P);
+
+%     % Predicates
+% %     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
+% %     time_to_guard = (ball_x < guard_at_x);
+%     time_to_guard = false;
+%     
+%     % Bot1 depends on the time_to_guard predicate
+%     if (time_to_guard)
+%         v1 = skill_followBallOnLine(robot(:,1), ball, guard_at_x, P);
+%     else
+%         v1 = play_rushGoal(robot(:,1), ball, P);
+%     end
+% 
+%     % Always goalie
+%     v2 = play_guardGoal(robot(:,2), ball, P);
     
-    v_c = [v1; v2];
+v_c = [v1; v2];
 end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Helper Function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function ball_section = compute_section(x_val, P)
+% Field is divided into 6 sections.
+% compute_section takes the x-position as input, and returns a number 1-6
+
+x_pos = x_val;
+if (x_pos <= 0) %Ball is in our half.
+    if (x_pos < -(P.field_length/6)*2)
+        section = 1;
+    elseif (x_pos < -(P.field_length/6)*1) 
+        section = 2;
+    else
+        section = 3;   
+    end
+    
+else %Ball is in their half.
+    if (x_pos < (P.field_length/6)*1)
+        section = 4;
+    elseif (x_pos < (P.field_length/6)*2)
+        section = 5;
+    else
+        section = 6;
+    end
+
+end
+
+ball_section = section;
+end
+
+function rob = get_closest_robot(robot, target_x, target_y)
+
+x_dist_rob_1 = robot(1,1) - target_x;
+y_dist_rob_1 = robot(2,1) - target_y;
+x_dist_rob_2 = robot(1,2) - target_x;
+y_dist_rob_2 = robot(2,2) - target_y;
+
+dist_rob_1 = sqrt(x_dist_rob_1^2 + y_dist_rob_1^2);
+dist_rob_2 = sqrt(x_dist_rob_2^2 + y_dist_rob_2^2);
+
+
+if (dist_rob_1 < dist_rob_2)
+    rob = 1;
+else
+    rob = 2;
+end
+
+end
+
+
 
 %-----------------------------------------
 % strategy: strong defense
@@ -264,14 +371,29 @@ end
 %   - keep heading toward ball
 function v = play_guardGoal(robot, ball, P)
   
-  % Set bounds of the segment (i.e., the goalie box)
-  y_min = -P.field_width/3;
-  y_max =  P.field_width/3;
+  theta = atan2(ball(2)+P.goal(2), ball(1)+P.goal(1));
+  x_pos = -P.field_length/2 + P.goal_box_length*cos(theta);
+  y_pos = P.goal_box_length*sin(theta);
   
-  % set x position to stay at
-  x_pos = -(P.field_length/2)*23/24;
+  % If the ball is really close to my position then i should push forward
+  % to push the ball away from the goal.  This will allow us to get the
+  % ball farther away from our goal rather than keeping it close where
+  % they can try to score.
+  %
+%   if ball(1) < x_pos + 0.05,
+%       if ball(2) < abs(y_pos)+ 0.05,
+%           x_pos = -P.field_length/2 + cos(theta) * P.goal_width*2;% / 2;
+%           y_pos = sin(theta) * P.goal_width*2; % / 2;
+%       end
+%   end
+
+  vx = -P.control_k_vx*(robot(1) - x_pos);
+  vy = -P.control_k_vy*(robot(2) - y_pos);
+  omega = -P.control_k_phi*(robot(3) - theta);
   
-  v = skill_followBallOnSegment(robot,ball,x_pos,y_min,y_max,ball,P);
+  
+  v = [vx; vy; omega];  
+  
 end
 
 %-----------------------------------------

@@ -9,7 +9,7 @@
 
 %%%%%%%%%%%%%%%%%%% Main %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function v_c=controller_away(uu,P)
+function v_c=controller_home(uu,P)
 
     % process inputs to function
     % robots - own team
@@ -31,10 +31,11 @@ function v_c=controller_away(uu,P)
     % current time
     t      = uu(1+NN);
     
-    v_c = strategy_strong_offense(robot, opponent, ball, P, t);
-%     v_c = strategy_switch_offense_and_defense(robot, opponent, ball, P, t);
-
-%     v_c = [[0 0 0] [0 0 0]];
+%     v_c = strategy_strong_offense(robot, opponent, ball, P, t);
+    v_c = strategy_switch_offense_and_defense(robot, opponent, ball, P, t);
+    
+%     v_c(1:3) = play_rush_goal(robot(:,1), ball, P);
+%     v_c(4:end) = [0 0 0];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Strategies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -147,14 +148,14 @@ function v_c = strategy_strong_offense(robot, opponent, ball, P, t)
     playtype = offense;
     
     % If the ball gets behind 3/4 field then go on defense
-    if(ball(1) < (3*P.field_length/8)) %P.field_width/8
+    if(ball(1) < (3*P.field_length/12)) %P.field_width/8
         playtype = defense;
     end
     
     v1 = play_rush_goal(robot(:,1), ball, P);
     
     if(playtype == offense)
-        v2 = skill_follow_ball_on_line(robot(:,2), ball, P.field_length/4, P);
+        v2 = skill_follow_ball_on_line(robot(:,2), ball, P.field_length/6, P);
     else
         v2 = play_rush_goal(robot(:,2), ball, P);
     end
@@ -183,8 +184,7 @@ function v = play_rush_goal(robot, ball, P)
   position = ball - 0.2*n;
     
   if norm(position-robot(1:2))<.21,
-      %v = skill_go_to_point_angle_corrected(ball, robot, P.goal, P);
-      v = skill_go_to_point(robot, P.goal, P);
+      v = skill_go_to_point_angle_corrected(ball, robot, P.goal, P);
   else
       v = skill_go_to_point(robot, position, P);
   end
@@ -262,6 +262,39 @@ function v=skill_guard_goal(robot, ball, P)
     v = [vx; vy; omega];
 end
 
+function v=skill_follow_ball(robot, ball, ballvel, P)
+    persistent first_run;
+    persistent mag;
+    persistent dir;
+    
+    if isempty(first_run)
+        mag = 0;
+        dir = 0;
+        first_run = 0;
+    end
+    
+    if ballvel(3) == 1
+        mag = ballvel(1);
+        dir = ballvel(2);
+    end
+    ball_vel_xy = [ball(1)*cos(ball(2));ball(1)*sin(ball(2))];
+    ball_estimate = -P.ball_mu*ball_vel_xy*P.control_sample_rate + ball;
+    point_behind_ball = -(P.ball_radius)*...
+        [cos(dir);sin(dir)] + ball_estimate;
+    angle_follow_ball = dir;
+%    if point_behind_ball(1) < (P.field_length/2 - P.robot_radius) && point_behind_ball(1) > - (P.field_length/2 - P.robot_radius),
+%        if point_behind_ball(2) < (P.field_width/2 - P.robot_radius) && point_behind_ball(2) > - (P.field_width/2 -P.robot_radius),
+            v = skill_go_to_point_and_angle_w_spindir (robot, point_behind_ball,...
+                angle_follow_ball, counterclockwise, P);
+%        else
+%            v = zeros(3,1);
+%        end
+%    else
+%        v = zeros(3,1);
+%    end
+        
+end
+
 function v=skill_go_to_front_of_ball_and_face_ball(robot, ball, ballvel, P)
     persistent first_run;
     persistent mag;
@@ -280,7 +313,7 @@ function v=skill_go_to_front_of_ball_and_face_ball(robot, ball, ballvel, P)
     
     point_in_front_of_ball = (P.robot_radius+P.ball_radius)*...
         [cos(dir);sin(dir)] + ball;
-    angle_face_ball = dir + pi/4;
+    angle_face_ball = dir + pi;
     
     v = skill_go_to_point_and_angle(robot, point_in_front_of_ball,...
         angle_face_ball, P);
@@ -305,6 +338,26 @@ function v=skill_go_to_point_and_angle(robot, point, angle, P)
     v = [vx; vy; omega];
 end
 
+function v=skill_go_to_point_and_angle_w_spindir(robot, point, angle, dir, P)
+
+    % control x position to stay on current line
+    vx = -P.control_k_vx*(robot(1)-point(1));
+    
+    % control y position to match the ball's y-position
+    vy = -P.control_k_vy*(robot(2)-point(2));
+
+    % control angle to -pi/2
+    theta_d = angle;
+    delta = robot(3) - theta_d;
+    if delta < 0 && dir == clockwise
+        delta = 2*pi + delta;
+    elseif delta > 0 && dir == counterclockwise
+        delta = -2*pi + delta;
+    end
+    omega = -P.control_k_phi*delta; 
+    
+    v = [vx; vy; omega];
+end
 
 %-----------------------------------------
 % skill - go to point
@@ -534,4 +587,13 @@ function v = utility_get_ball_info(ball, P)
     v(1) = magnitude;
     v(2) = direction;
     v(3) = information_valid;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%% defines %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function x = clockwise
+    x = 0;
+end
+
+function x = counterclockwise
+    x = 1;
 end
