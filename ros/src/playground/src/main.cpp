@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "geometry_msgs/Pose2D.h"
 #include <math.h>
 #include "visionobject.h"
 #include "robot.h"
@@ -22,7 +23,8 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "vision_talker");
 
 	ros::NodeHandle n;
-	ros::Publisher pub = n.advertise<playground::coords>("vision", 5);
+	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>("vision_robot_position", 5);
+	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
 
 	// cap;
@@ -173,7 +175,7 @@ int main(int argc, char *argv[])
 		//thresh hold the image
 		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
-		inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
 
@@ -188,11 +190,11 @@ int main(int argc, char *argv[])
 
 		video.erodeDilate(imgRobotThresh);
 		video.erodeDilate(imgBallThresh);
-		video.erodeDilate(imgRobot2Thresh);
+		// video.erodeDilate(imgRobot2Thresh);
 
 		video.initializeRobot(&robot, imgRobotThresh);		
 		video.initializeBall(&ball, imgBallThresh);
-		video.initializeRobot(&robot2, imgRobot2Thresh);
+		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
 		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
@@ -218,7 +220,7 @@ int main(int argc, char *argv[])
 		//show the new image
 		imshow("robotthresh", imgRobotThresh);
 		imshow("ballthresh", imgBallThresh);
-		imshow("robot2thresh", imgRobot2Thresh);
+		// imshow("robot2thresh", imgRobot2Thresh);
 
 
 		//imshow("BWOTSU", imgBW);
@@ -231,14 +233,18 @@ int main(int argc, char *argv[])
 		}
 
 		// -------------------------------------
-		playground::coords msg;
-		msg.robot_x = robot.getLocation().x;
-		msg.robot_y = robot.getLocation().y;
-		msg.robot_theta = robot.getOrientation();
-		msg.ball_x = ball.getLocation().x;
-		msg.ball_y = ball.getLocation().y;
+		geometry_msgs::Pose2D robot1pos;
+		geometry_msgs::Pose2D ballpos;
+		robot1pos.x = robot.getLocation().x;
+		robot1pos.y = robot.getLocation().y;
+		robot1pos.theta = robot.getOrientation();
 
-		pub.publish(msg);
+
+		ballpos.x = ball.getLocation().x;
+		ballpos.y = ball.getLocation().y;
+
+		pubrobot.publish(robot1pos);
+		pubball.publish(ballpos);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
