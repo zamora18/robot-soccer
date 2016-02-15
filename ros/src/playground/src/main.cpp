@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
 	ImageProcessor video = ImageProcessor("http://192.168.1.48:8080/stream?topic=/image&dummy=param.mjpg");
-
+	//ImageProcessor video = ImageProcessor();
+	cout << "made0 " << endl;
 	/*if(!cap.isOpened())
 	{
 		cout << "cap is closed" << endl;
@@ -53,8 +54,8 @@ int main(int argc, char *argv[])
 	int robot1LowH = 76;
 	int robot1HighH = 107;
 
-	int robot1LowS = 80;
-	int robot1HighS = 255;
+	int robot1LowS = 50;
+	int robot1HighS = 112;
 
 	int robot1LowV = 189;
 	int robot1HighV = 255;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
 	int robot2LowH = 76;
 	int robot2HighH = 107;
 
-	int robot2LowS = 80;
+	int robot2LowS = 168;
 	int robot2HighS = 255;
 
 	int robot2LowV = 189;
@@ -99,20 +100,22 @@ int main(int argc, char *argv[])
 
 	Mat imgTemp;
 
+	cout << "trying to read" << endl;
 	video.read(&imgTemp);
+	cout << "read!" << endl;
 
 	//clones image so that we can do operations on it w/o messing up original image
 	Mat centercircle = imgTemp.clone();
 
 	Vec3f centercirc;
 
-	//locate the center circle of the image
+	// //locate the center circle of the image
 	centercirc = video.findCenterCircle(centercircle);
 
-	//set the image center
+	// //set the image center
 	video.setCenter(Point2d(centercirc[0], centercirc[1]));
 
-	//with the center find the scaling factor
+	// //with the center find the scaling factor
 	video.setScalingFactor(CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2));
 
 	//covert original immage to HSV to find robots
@@ -129,7 +132,7 @@ int main(int argc, char *argv[])
 	//get rid of noise
 	video.erodeDilate(imgTemp);
 
-	//find position and angle of robot
+	// //find position and angle of robot
 	video.initializeRobot(&robot, imgTemp);
 
 	//yay we did it!
@@ -163,7 +166,7 @@ int main(int argc, char *argv[])
 
 		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
 
-		centercircle = imgOriginal.clone();
+		//centercircle = imgOriginal.clone();
 
 
 

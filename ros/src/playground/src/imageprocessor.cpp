@@ -11,7 +11,7 @@ using namespace std;
 
 ImageProcessor::ImageProcessor()
 {
-	//cap(0);
+	cap.open(1);
 }
 
 ImageProcessor::ImageProcessor(string inputsource)
@@ -157,7 +157,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 	double angle = findAngleTwoPoints(p1, p2);
 
 	robot->setOrientation(angle);
-	robot->setLocation(imageToFieldTransform(p2));
+	robot->setLocation(imageToFieldTransform(p1));
 
 
 }
