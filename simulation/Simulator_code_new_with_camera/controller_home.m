@@ -33,12 +33,27 @@ function out=controller_home_(uu,P)
     opponent = utility_kalman_filter_opponent(opponent,t,P);
     ball     = utility_kalman_filter_ball(ball,t,P);
 
-    % robot #1 positions itself behind ball and rushes the goal.
-    v1 = play_rush_goal(robot(1), ball, P);
- 
-    % robot #2 stays on line, following the ball, facing the goal
-    v2 = skill_follow_ball_on_line(robot(2), ball, -2*P.field_width/3, P);
+    %------------
+    % Choose the strategy to perform    
+    
+     v_c = strategy_strongOffense(robot, opponent, ball, P, t);
+%     v_c = strategy_switchRoles(robot,opponent,ball,P,t,t==0);
+    
+%     v_c(1:3) = skill_followBallOnLine(robot(:,1), ball, -P.field_length/3, P);
+%     v_c(4:6) = skill_followBallOnSegment(robot(:,2),ball,-P.field_length/4,-P.field_width/3,P.field_width/3,ball,P);
+%     v_c(4:6) = play_guardGoal(robot(:,2),ball,P);
+    %------------
+    
+%     % robot #1 positions itself behind ball and rushes the goal.
+%     v1 = play_rush_goal(robot(1), ball, P);
+%  
+%     % robot #2 stays on line, following the ball, facing the goal
+%     v2 = skill_follow_ball_on_line(robot(2), ball, -2*P.field_width/3, P);
 
+
+    %converting to v1 and v2 for compatibility with new code.
+    v1 = v_c(1);
+    v2 = v_C(2);
     
     % output velocity commands to robots
     v1 = utility_saturate_velocity(v1,P);
@@ -49,6 +64,157 @@ function out=controller_home_(uu,P)
 %    out = [v1; v2; opponent(1).pos; reshape(opponent(1).S(1:2,1:2),4,1)];
     out = [v1; v2; robot(1).pos; reshape(robot(1).S(1:2,1:2),4,1)];
 end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Strategies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%-----------------------------------------
+% strategy: strong offsense
+%   - both bots rush ball to goal
+%   - Once ball and bot1 are on the right half of the field,
+%     bot2 follows ball on line at half of the pitch
+% TODO: Perhaps don't assign roles to bot1/bot2 -- just act
+%       based on whoever gets there first. Also, maybe make
+%       the defensive bot move proportional to how close the ball/other bot
+%       are to the goal.
+function v_c = strategy_strongOffense(robot, opponent, ball, P, t)
+    % Break out variables into something that makes sense
+    ball_x = ball(1);
+    bot1_x = robot(1,1);
+    
+    % set some configuration variables
+    hard_line_of_defense = -P.field_length*3/8; %Both robots defend at goal.
+
+%     v1 = skill_followBallOnLine(robot(:,1), ball, hard_line_of_defense, P);
+%     v2 = play_guardGoal(robot(:,2), ball, P);
+    
+    line_A = -(P.field_length/6)*2;
+    line_B = -(P.field_length/6);
+    line_C = 0;
+    line_D = (P.field_length/6);
+    line_E = (P.field_length/6)*2;
+    
+    
+    section = compute_section(ball(1), P);
+    switch section
+        case 1,
+            v1 = skill_followBallOnLine(robot(:,1), ball*-1, line_A, P);
+            v2 = play_guardGoal(robot(:,2), ball, P);
+        case 2,
+            closest_player_to_goal = get_closest_robot(robot, P.goal(1), P.goal(2));
+            if (closest_player_to_goal == 1)
+                v1 = play_guardGoal(robot(:,1), ball, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            else
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = play_guardGoal(robot(:,2), ball, P); 
+            end
+            
+        case 3,
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_rushGoal(robot(:,2), ball, P);
+%             v2 = play_guardGoal(robot(:,2), ball, P);
+        case 4, 
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_rushGoal(robot(:,2), ball, P);
+        case 5,
+            closest_player_to_ball = get_closest_robot(robot, ball(1), ball(2));
+            if (closest_player_to_ball == 1)
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = skill_followBallOnLine(robot(:,2), ball, line_C, P);
+            else
+                v1 = skill_followBallOnLine(robot(:,1), ball, line_C, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            end
+%             v1 = play_rushGoal(robot(:,1), ball, P);
+%             v2 = skill_followBallOnLine(robot(:,2), ball, line_C, P);
+        case 6,
+            closest_player_to_ball = get_closest_robot(robot, ball(1), ball(2));
+            if (closest_player_to_ball == 1)
+                v1 = play_rushGoal(robot(:,1), ball, P);
+                v2 = skill_followBallOnLine(robot(:,2), ball, line_D, P);
+            else
+                v1 = skill_followBallOnLine(robot(:,1), ball, line_D, P);
+                v2 = play_rushGoal(robot(:,2), ball, P);
+            end
+        otherwise
+            v1 = play_rushGoal(robot(:,1), ball, P);
+            v2 = play_guardGoal(robot(:,2), ball, P);
+    end
+
+
+%     % Predicates
+% %     time_to_guard = (ball_x > guard_at_x) && (bot1_x > guard_at_x);
+% %     time_to_guard = (ball_x < guard_at_x);
+%     time_to_guard = false;
+%     
+%     % Bot1 depends on the time_to_guard predicate
+%     if (time_to_guard)
+%         v1 = skill_followBallOnLine(robot(:,1), ball, guard_at_x, P);
+%     else
+%         v1 = play_rushGoal(robot(:,1), ball, P);
+%     end
+% 
+%     % Always goalie
+%     v2 = play_guardGoal(robot(:,2), ball, P);
+    
+v_c = [v1; v2];
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Helper Functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function ball_section = compute_section(x_val, P)
+% Field is divided into 6 sections.
+% compute_section takes the x-position as input, and returns a number 1-6
+
+x_pos = x_val;
+if (x_pos <= 0) %Ball is in our half.
+    if (x_pos < -(P.field_length/6)*2)
+        section = 1;
+    elseif (x_pos < -(P.field_length/6)*1) 
+        section = 2;
+    else
+        section = 3;   
+    end
+    
+else %Ball is in their half.
+    if (x_pos < (P.field_length/6)*1)
+        section = 4;
+    elseif (x_pos < (P.field_length/6)*2)
+        section = 5;
+    else
+        section = 6;
+    end
+
+end
+
+ball_section = section;
+end
+
+function rob = get_closest_robot(robot, target_x, target_y)
+% Gets the closest robot to a specified target
+% Will return a 1 or 2 corresponding to robot_1 or robot_2
+
+x_dist_rob_1 = robot(1,1) - target_x;
+y_dist_rob_1 = robot(2,1) - target_y;
+x_dist_rob_2 = robot(1,2) - target_x;
+y_dist_rob_2 = robot(2,2) - target_y;
+
+dist_rob_1 = sqrt(x_dist_rob_1^2 + y_dist_rob_1^2);
+dist_rob_2 = sqrt(x_dist_rob_2^2 + y_dist_rob_2^2);
+
+
+if (dist_rob_1 < dist_rob_2)
+    rob = 1;
+else
+    rob = 2;
+end
+
+end
+
+
+
+
 
 %-----------------------------------------
 % play - rush goal
