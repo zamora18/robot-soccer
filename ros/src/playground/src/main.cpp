@@ -9,6 +9,7 @@
 #include <ros/ros.h>
 #include "playground/coords.h"
 
+#define ESC 1048603
 
 
 using namespace cv;
@@ -29,8 +30,8 @@ int main(int argc, char *argv[])
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
 	ImageProcessor video = ImageProcessor("http://192.168.1.48:8080/stream?topic=/image&dummy=param.mjpg");
-	//ImageProcessor video = ImageProcessor();
-	cout << "made0 " << endl;
+	//ImageProcessor video = ImageProcessor(); //use for webcam
+
 	/*if(!cap.isOpened())
 	{
 		cout << "cap is closed" << endl;
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
+	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
 	int ballLowH = 111;
 	int ballHighH = 179;
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 	int robot1HighH = 107;
 
 	int robot1LowS = 50;
-	int robot1HighS = 112;
+	int robot1HighS = 137;
 
 	int robot1LowV = 189;
 	int robot1HighV = 255;
@@ -100,9 +101,7 @@ int main(int argc, char *argv[])
 
 	Mat imgTemp;
 
-	cout << "trying to read" << endl;
 	video.read(&imgTemp);
-	cout << "read!" << endl;
 
 	//clones image so that we can do operations on it w/o messing up original image
 	Mat centercircle = imgTemp.clone();
@@ -173,7 +172,7 @@ int main(int argc, char *argv[])
 		//thresh hold the image
 		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
-		inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
 
@@ -188,11 +187,11 @@ int main(int argc, char *argv[])
 
 		video.erodeDilate(imgRobotThresh);
 		video.erodeDilate(imgBallThresh);
-		video.erodeDilate(imgRobot2Thresh);
+		// video.erodeDilate(imgRobot2Thresh);
 
 		video.initializeRobot(&robot, imgRobotThresh);		
 		video.initializeBall(&ball, imgBallThresh);
-		video.initializeRobot(&robot2, imgRobot2Thresh);
+		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
 		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
@@ -218,14 +217,14 @@ int main(int argc, char *argv[])
 		//show the new image
 		imshow("robotthresh", imgRobotThresh);
 		imshow("ballthresh", imgBallThresh);
-		imshow("robot2thresh", imgRobot2Thresh);
+		// imshow("robot2thresh", imgRobot2Thresh);
 
 
 		//imshow("BWOTSU", imgBW);
 
 
 
-		if(waitKey(1) >= 0)
+		if(waitKey(1) == ESC)
 		{
 			break;
 		}
