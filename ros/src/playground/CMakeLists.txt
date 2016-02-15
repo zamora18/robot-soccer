@@ -7,6 +7,7 @@ project(playground)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  roslaunch
   std_msgs
   geometry_msgs
   message_generation
@@ -15,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+# Check all *.launch files for common errors
+roslaunch_add_file_check(launch)
 
 find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
