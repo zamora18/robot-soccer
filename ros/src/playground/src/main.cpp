@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "geometry_msgs/Pose2D.h"
 #include <math.h>
 #include "visionobject.h"
 #include "robot.h"
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "vision_talker");
 
 	ros::NodeHandle n;
-	ros::Publisher pub = n.advertise<playground::coords>("vision", 5);
+	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>("vision_robot_position", 5);
+	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
 
 	// cap;
@@ -230,14 +232,18 @@ int main(int argc, char *argv[])
 		}
 
 		// -------------------------------------
-		playground::coords msg;
-		msg.robot_x = robot.getLocation().x;
-		msg.robot_y = robot.getLocation().y;
-		msg.robot_theta = robot.getOrientation();
-		msg.ball_x = ball.getLocation().x;
-		msg.ball_y = ball.getLocation().y;
+		geometry_msgs::Pose2D robot1pos;
+		geometry_msgs::Pose2D ballpos;
+		robot1pos.x = robot.getLocation().x;
+		robot1pos.y = robot.getLocation().y;
+		robot1pos.theta = robot.getOrientation();
 
-		pub.publish(msg);
+
+		ballpos.x = ball.getLocation().x;
+		ballpos.y = ball.getLocation().y;
+
+		pubrobot.publish(robot1pos);
+		pubball.publish(ballpos);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
