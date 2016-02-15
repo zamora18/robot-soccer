@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
 	int ballLowH = 111;
 	int ballHighH = 179;
@@ -49,14 +50,23 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 90;
+	int robot1LowH = 76;
 	int robot1HighH = 107;
 
 	int robot1LowS = 80;
 	int robot1HighS = 255;
 
 	int robot1LowV = 189;
-	int robot1HighV = 255;	
+	int robot1HighV = 255;
+
+	int robot2LowH = 76;
+	int robot2HighH = 107;
+
+	int robot2LowS = 80;
+	int robot2HighS = 255;
+
+	int robot2LowV = 189;
+	int robot2HighV = 255;	
 
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
@@ -77,6 +87,15 @@ int main(int argc, char *argv[])
 
 	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
+
+	cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
+
+	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
+
+	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);
 
 	Mat imgTemp;
 
@@ -100,6 +119,7 @@ int main(int argc, char *argv[])
 	cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
 	Robot robot = Robot();
+	Robot robot2 = Robot();
 
 	VisionObject ball = VisionObject();
 
@@ -141,7 +161,7 @@ int main(int argc, char *argv[])
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
 
-		Mat imgRobotThresh, imgBW, imgBallThresh;
+		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
 
 		centercircle = imgOriginal.clone();
 
@@ -150,6 +170,7 @@ int main(int argc, char *argv[])
 		//thresh hold the image
 		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
+		inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
 
@@ -164,9 +185,11 @@ int main(int argc, char *argv[])
 
 		video.erodeDilate(imgRobotThresh);
 		video.erodeDilate(imgBallThresh);
+		video.erodeDilate(imgRobot2Thresh);
 
 		video.initializeRobot(&robot, imgRobotThresh);		
 		video.initializeBall(&ball, imgBallThresh);
+		video.initializeRobot(&robot2, imgRobot2Thresh);
 
 		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
@@ -192,7 +215,7 @@ int main(int argc, char *argv[])
 		//show the new image
 		imshow("robotthresh", imgRobotThresh);
 		imshow("ballthresh", imgBallThresh);
-
+		imshow("robot2thresh", imgRobot2Thresh);
 
 
 		//imshow("BWOTSU", imgBW);
