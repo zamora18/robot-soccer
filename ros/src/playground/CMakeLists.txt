@@ -7,13 +7,17 @@ project(playground)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  roslaunch
   std_msgs
+  geometry_msgs
   message_generation
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+# Check all *.launch files for common errors
+roslaunch_add_file_check(launch)
 
 find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -52,6 +56,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_message_files(
   FILES
   coords.msg
+  EncoderEstimates.msg
+  QPulses.msg
+  WorldVelocities.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -106,7 +113,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES playground
- CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+ CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 

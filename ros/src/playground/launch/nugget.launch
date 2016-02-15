@@ -1,0 +1,7 @@
+<launch>
+	<node name="motion" pkg="playground" type="motion_node.py" />
+	<!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->
+	<node name="controller" pkg="playground" type="controller_node.py" />
+	<node name="hack" pkg="playground" type="hack_node.py" />
+        <!-- <node name="teleop" pkg="playground" type="teleop_node.py" /> -->
+</launch>

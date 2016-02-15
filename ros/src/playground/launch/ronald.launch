@@ -1,0 +1,3 @@
+<launch>
+	<node name="vision" pkg="playground" type="vision" />
+</launch>
