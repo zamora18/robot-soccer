@@ -31,7 +31,7 @@ def main():
     pub = rospy.Publisher('encoder_estimates', EncoderEstimates, queue_size=10)
 
     # Hack
-    rospy.Subscriber('estimated_position', Pose2D, _handle_theta)
+    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_theta)
 
     # init wheelbase
     wheelbase.init()

@@ -12,18 +12,19 @@ _hack_period = 1.0/100
 robopub = None
 ballpub = None
 
-def _handle_vision_coords(msg):
+def _handle_vision_robot_position(msg):
     # Split up into robot position
     robo_msg = Pose2D()
-    robo_msg.x = msg.robot_x/100.0
-    robo_msg.y = msg.robot_y/100.0
-    robo_msg.theta = msg.robot_theta*(np.pi/180.0)
+    robo_msg.x = msg.x/100.0
+    robo_msg.y = msg.y/100.0
+    robo_msg.theta = msg.theta*(np.pi/180.0)
     robopub.publish(robo_msg)
 
+def _handle_vision_ball_position(msg):
     # ... and ball position
     ball_msg = Pose2D()
-    ball_msg.x = msg.ball_x/100.0
-    ball_msg.y = msg.ball_y/100.0
+    ball_msg.x = msg.x/100.0
+    ball_msg.y = msg.y/100.0
     ball_msg.theta = 0
 
     ballpub.publish(ball_msg)
@@ -36,7 +37,8 @@ def main():
     robopub = rospy.Publisher('estimated_robot_position', Pose2D, queue_size=10)
     ballpub = rospy.Publisher('estimated_ball_position', Pose2D, queue_size=10)
 
-    rospy.Subscriber('vision', coords, _handle_vision_coords)
+    rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
+    rospy.Subscriber('vision_robot_position', Pose2D, _handle_vision_robot_position)
     # pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     # rate = rospy.Rate(int(1/_hack_period))

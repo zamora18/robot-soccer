@@ -30,7 +30,7 @@ def _handle_desired_position(msg):
 def main():
     rospy.init_node('controller', anonymous=False)
 
-    rospy.Subscriber('estimated_position', Pose2D, _handle_estimated_position)
+    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_position)
     rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
     pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
 
