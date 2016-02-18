@@ -34,8 +34,7 @@ def _toggle_controller():
     rospy.wait_for_service('/controller/toggle')
     try:
         toggle = rospy.ServiceProxy('/controller/toggle', Trigger)
-        resp = toggle()
-        return (resp.success, resp.message)
+        return toggle()
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 

@@ -3,7 +3,7 @@
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
-from std_srvs.srv import Trigger
+from std_srvs.srv import Trigger, TriggerResponse
 
 import numpy as np
 
@@ -36,7 +36,7 @@ def _toggle(req):
     srv = Trigger()
     srv.success = True
     srv.message = "Controller is {}".format(_ctrl_on)
-    return srv
+    return TriggerResponse(True, "Controller is {}".format(_ctrl_on))
 
 def main():
     rospy.init_node('controller', anonymous=False)
