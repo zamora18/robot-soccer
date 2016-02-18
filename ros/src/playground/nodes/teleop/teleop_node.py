@@ -10,22 +10,39 @@ from Getch import _Getch
 
 _ctrl_period = 1.0/100
 
+_vx = 0.5
+_vy = 0.5
+_w = np.pi
+
 _xhat = 0
 _yhat = 0
 _thetahat = 0
 
-def _handle_estimated_position(msg):
-    # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
+_vel_pub = None
+_pos_cmd_pub = None
+
+def _handle_estimated_bot_position(msg):
     global _xhat, _yhat, _thetahat
     _xhat = msg.x
     _yhat = msg.y
     _thetahat = msg.theta
 
-def _handle_desired_position(msg):
-    # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
-    print("Set Point: ({}, {}, {})".format(msg.x, msg.y, msg.theta))
-    Controller.set_commanded_position(msg.x, msg.y, msg.theta)
+def _shutdown_hook():
+    _set_velocity(0,0,0)
 
+def _set_velocity(vx,vy,w):
+    msg = Twist()
+    msg.linear.x = vx
+    msg.linear.y = vy
+    msg.angular.z = w
+    _vel_pub.publish(msg)
+
+def _set_desired_position(x,y,theta):
+    msg = Pose2D()
+    msg.x = x
+    msg.y = y
+    msg.theta = theta
+    _pos_cmd_pub.publish(msg)
 
 def _get_action():
     getch = _Getch()
@@ -67,49 +84,37 @@ def _get_action():
 def main():
     rospy.init_node('controller', anonymous=False)
 
-    rospy.Subscriber('estimated_position', Pose2D, _handle_estimated_position)
-    rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
-    vel_pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
+    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_bot_position)
     
+    global _vel_pub, _pos_cmd_pub
+    _vel_pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
+    _pos_cmd_pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
+
+    # Setup shutdown hook
+    rospy.on_shutdown(_shutdown_hook)
 
     while(1):
         action = _get_action()
         if action == 'UP':
-            msg = Twist()
-            msg.linear.x = 0
-            msg.linear.y = 0.5
-            msg.angular.z = 0
-            vel_pub.publish(msg)
+            _set_velocity(0, _vy, 0)
 
         elif action == 'DOWN':
-            pass
+            _set_velocity(0, -_vy, 0)
 
         elif action == 'RIGHT':
-            pass
+            _set_velocity(_vx, 0, 0)
 
         elif action == 'LEFT':
-            pass
+            _set_velocity(-_vx, 0, 0)
 
         elif action == 'SPIN_CW':
-            pass
+            _set_velocity(0, 0, _w)
 
         elif action == 'SPIN_CCW':
-            pass
+            _set_velocity(0, 0, _w)
 
-        # elif action == 'SET_HOME':
-        #     Odometry.init()
-
-        # elif action == 'GO_HOME':
-        #     _motion_timer.stop()
-        #     motion.stop()
-        #     time.sleep(1)
-
-        #     _go_home()
-
-        #     time.sleep(1)
-        #     _set_speed = True
-        #     _velocities = (0, 0, 0)
-        #     _motion_timer.start()
+        elif action == 'GO_HOME':
+            _set_desired_position(0, 0, 0)
 
         # elif action == 'GO_TO_POINT':
         #     _toggle_timers(False)
