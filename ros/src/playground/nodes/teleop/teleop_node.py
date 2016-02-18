@@ -5,6 +5,7 @@ import sys
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
+from std_srvs.srv import Trigger
 
 import numpy as np
 
@@ -28,6 +29,15 @@ def _handle_estimated_bot_position(msg):
     _xhat = msg.x
     _yhat = msg.y
     _thetahat = msg.theta
+
+def _toggle_controller():
+    rospy.wait_for_service('/controller/toggle')
+    try:
+        toggle = rospy.ServiceProxy('/controller/toggle', Trigger)
+        resp = toggle()
+        return (resp.success, resp.message)
+    except rospy.ServiceException, e:
+        print "Service call failed: %s"%e
 
 def _shutdown_hook():
     _set_velocity(0,0,0)
@@ -150,9 +160,9 @@ def main():
             (x, y, theta) = _ask_for_point()
             _set_desired_position(x, y, theta)
             
-        # elif action == 'TOGGLE_CNTRL':
-        #     _ctrl_on = not _ctrl_on
-        #     print("Controller: {}".format(_ctrl_on))
+        elif action == 'TOGGLE_CNTRL':
+            r = _toggle_controller()
+            print("Controller: {}".format(r.message))
 
         # elif action == 'TOGGLE_SMOOTH':
         #     _smooth = not _smooth
@@ -181,8 +191,8 @@ def main():
         elif action == 'DIE':
             sys.exit(0)
 
-        # else:
-        #     pass
+        else:
+            _set_velocity(0, 0, 0)
 
 
 if __name__ == '__main__':
