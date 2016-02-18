@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
@@ -44,6 +46,30 @@ def _set_desired_position(x,y,theta):
     msg.theta = theta
     _pos_cmd_pub.publish(msg)
 
+def _ask_for_point():
+    """Ask for point
+    Asks user for a point to go to. User enters three floats, separated
+    by spaces, with no other characters; x, y, theta respectively
+    """
+    usr = raw_input("Input point, (syntax: \"x y theta\"): ")
+
+    usr_list = usr.split()
+
+    if len(usr_list) != 3:
+        print("\n\rEnter the point correctly, dummy.\r\n")
+        return False
+
+    try:
+        x = float(usr_list[0])
+        y = float(usr_list[1])
+        theta = float(usr_list[2])
+    except:
+        print("\n\rThere was a problem making your input a float.\r\n")
+        return False
+
+    print("Going to: ({}, {}, {})\r".format(x,y,theta))
+    return (x, y, theta)
+
 def _get_action():
     getch = _Getch()
     k = getch()
@@ -82,7 +108,7 @@ def _get_action():
 
 
 def main():
-    rospy.init_node('controller', anonymous=False)
+    rospy.init_node('teleop', anonymous=False)
 
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_bot_position)
     
@@ -93,9 +119,13 @@ def main():
     # Setup shutdown hook
     rospy.on_shutdown(_shutdown_hook)
 
-    while(1):
+    print 'Starting...'
+
+
+    while not rospy.is_shutdown():
         action = _get_action()
         if action == 'UP':
+            print 'hi'
             _set_velocity(0, _vy, 0)
 
         elif action == 'DOWN':
@@ -116,18 +146,10 @@ def main():
         elif action == 'GO_HOME':
             _set_desired_position(0, 0, 0)
 
-        # elif action == 'GO_TO_POINT':
-        #     _toggle_timers(False)
-        #     motion.stop()
-        #     time.sleep(1)
-
-        #     _ask_for_point()
-
-        #     time.sleep(1)
-        #     _ctrl_on = True
-        #     _odom_on = True
-        #     _toggle_timers(True)
-
+        elif action == 'GO_TO_POINT':
+            (x, y, theta) = _ask_for_point()
+            _set_desired_position(x, y, theta)
+            
         # elif action == 'TOGGLE_CNTRL':
         #     _ctrl_on = not _ctrl_on
         #     print("Controller: {}".format(_ctrl_on))
@@ -156,8 +178,8 @@ def main():
         #     time.sleep(1)
         #     _toggle_timers(True)
 
-        # elif action == 'DIE':
-        #     pass
+        elif action == 'DIE':
+            sys.exit(0)
 
         # else:
         #     pass
