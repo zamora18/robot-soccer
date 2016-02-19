@@ -176,14 +176,14 @@ def _deal_with_calibration():
             M2QPPS = None
             M3QPPS = None
 
-        c.test_calibration(velocity=velocity,sleep_time=sleep_time,
-                            M1QPPS=M1QPPS,M2QPPS=M2QPPS,M3QPPS=M3QPPS)
+        c.test_calibration(velocity=velocity, sleep_time=sleep_time,
+                            M1QPPS=M1QPPS, M2QPPS=M2QPPS, M3QPPS=M3QPPS)
 
 
 def _handle_motion_timer():
     global _set_speed, _velocityhat
     if _set_speed:
-        motion.drive(*_velocities,smooth=_smooth)
+        motion.drive(*_velocities, smooth=_smooth, _theta=_thetahat)
         _set_speed = False
 
     (vx, vy, w, s1, s2, s3) = motion.get_velocities()
