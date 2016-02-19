@@ -36,6 +36,7 @@ def _strong_offense(robot, ball):
             x_c = ball['xhat'] - _dist_behind_ball*np.sin(theta)
             y_c = ball['yhat'] - _dist_behind_ball*np.cos(theta)
             return (x_c, y_c, theta)
+            
 
 def _strong_defense(robot, ball):
     #for not we want to make one robot defend the goal
