@@ -16,13 +16,17 @@ _yhat = 0
 _thetahat = 0
 
 _ctrl_on = True
+_initializing = True
 
 def _handle_estimated_position(msg):
-    # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
-    global _xhat, _yhat, _thetahat
+    global _xhat, _yhat, _thetahat, _initializing
     _xhat = msg.x
     _yhat = msg.y
     _thetahat = msg.theta
+
+    if _initializing:
+        _initializing = False
+        Controller.set_commanded_position(msg.x, msg.y, msg.theta)
 
 def _handle_desired_position(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)

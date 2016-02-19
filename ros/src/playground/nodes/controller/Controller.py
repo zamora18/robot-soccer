@@ -42,11 +42,20 @@ def update(time_since_last_update, xhat, yhat, thetahat):
         vy = PID_y.update(y_c, yhat, Ts)
 
     if not _close(theta_c, thetahat, tolerance=np.pi/18): # 10 degrees
+        reverse = False
+        if (theta_c - thetahat) > np.pi:
+            thetahat = thetahat - np.pi
+            theta_c = theta_c + np.pi
+            reverse = True
         w  = PID_theta.update(theta_c, thetahat, Ts)
+        if reverse:
+            w = -1*w
+#if ((theta_c + np.pi) - thetahat) > 0:
+        #    w = -1*w
 
     velocities = (vx, vy, w)
 
     return velocities
 
-def _close(a, b, tolerance=0.050):
+def _close(a, b, tolerance=0.005):
     return abs(a - b) <= tolerance
