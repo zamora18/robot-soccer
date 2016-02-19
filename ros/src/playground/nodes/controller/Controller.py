@@ -4,7 +4,7 @@ from controllers import PID
 
 PID_x = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
 PID_y = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
-PID_theta = PID(0, 0, 0, 1, 0.05, integrator_limit=0.05)
+PID_theta = PID(0.7, 0, 0, 1, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
@@ -31,10 +31,22 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
     Ts = time_since_last_update
 
-    vx = PID_x.update(x_c, xhat, Ts)
-    vy = PID_y.update(y_c, yhat, Ts)
-    w  = 0#PID_theta.update(theta_c, thetahat, Ts)
+    # Initialize velocities
+    vx = vy = w = 0
+
+    # Only control the positions that aren't 'close'
+    if not _close(x_c, xhat):
+        vx = PID_x.update(x_c, xhat, Ts)
+
+    if not _close(y_c, yhat):
+        vy = PID_y.update(y_c, yhat, Ts)
+
+    if not _close(theta_c, thetahat, tolerance=np.pi/18): # 10 degrees
+        w  = PID_theta.update(theta_c, thetahat, Ts)
 
     velocities = (vx, vy, w)
 
     return velocities
+
+def _close(a, b, tolerance=0.050):
+    return abs(a - b) <= tolerance
