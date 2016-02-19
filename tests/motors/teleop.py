@@ -1,17 +1,20 @@
 import time
 import sys
-import imp
 
 import numpy as np
-from Getch import _Getch
 
 from repeated_timer import RepeatedTimer
 
-motion = imp.load_source('motion', '../../ros/src/playground/nodes/motion/motion.py')
-w = imp.load_source('wheelbase', '../../ros/src/playground/nodes/motion/wheelbase.py')
-Odometry = imp.load_source('Odometry', '../../ros/src/playground/nodes/odometry/Odometry.py')
-Controller = imp.load_source('Controller', '../../ros/src/playground/nodes/controller/Controller.py')
-Getch = imp.load_source('Getch', '../../ros/src/playground/nodes/teleop/Getch.py')
+sys.path.append('../../ros/src/playground/nodes/motion/')
+sys.path.append('../../ros/src/playground/nodes/odometry/')
+sys.path.append('../../ros/src/playground/nodes/controller/')
+sys.path.append('../../ros/src/playground/nodes/teleop/')
+
+import motion
+import wheelbase as w
+import Odometry
+import Controller
+from Getch import _Getch
 
 import calibrator as c
 
@@ -65,7 +68,7 @@ def _action_requires_stop(action):
 def _go_home():
     # Get current robot position, rounded to 1 decimal place
     xhat = round(_xhat, 1)
-    yhat = round(_yhat 1)
+    yhat = round(_yhat, 1)
     thetahat = round(_thetahat, 1)
 
     # Set a tolerance
