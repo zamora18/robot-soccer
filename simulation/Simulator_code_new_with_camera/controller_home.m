@@ -394,7 +394,7 @@ function opponent = utility_kalman_filter_opponent(opponent,t,P)
         end
     
         % prediction step between measurements
-        N = 10;
+        N = 10; % 10 differential equation steps
         for i=1:N,
             f = [xhat(4:6,n); xhat(7:9,n); 0; 0; 0];
             xhat(:,n) = xhat(:,n) + (P.control_sample_rate/N)*f;
@@ -407,7 +407,7 @@ function opponent = utility_kalman_filter_opponent(opponent,t,P)
         end
  
         % correction step at measurement
-        H = [eye(3), zeros(3,3), zeros(3,3)];
+        H = [eye(3), zeros(3,3), zeros(3,3)]; % H corresponds to C in his notes
         y_pred = H*xhat(:,n);  % predicted measurement
         L = S(:,:,n)*H'/(P.R_opponent+H*S(:,:,n)*H');
         S(:,:,n) = (eye(9)-L*H)*S(:,:,n);
