@@ -70,7 +70,7 @@ def update(time_since_last_update, velocities):
     y = P_next.getA()[1][0]
     theta = P_next.getA()[2][0]
 
-    # Take care of the fact that theta is periodic with 2π
+    # Take care of the fact that theta is periodic with 2pi
     theta = theta % 360
 
     return (x, y, theta)
