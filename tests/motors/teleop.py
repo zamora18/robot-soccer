@@ -92,7 +92,7 @@ def _go_home():
         motion.stop()
         time.sleep(0.5)
 
-    if abs(thetahat) > tolerance:
+    if abs(thetahat) > tolerance*100:
         # since it's periodic...
 #        thetahat = round(thetahat%(360) ,2)
         dt = abs(thetahat / _w)
@@ -203,7 +203,7 @@ def _handle_odom_timer():
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
             if _close(_xhat, x_c) and _close(_yhat, y_c) and \
-                    _close(_thetahat, theta_c, tolerance=300):
+                    _close(_thetahat, theta_c, tolerance=10):
                 _ctrl_on = False
                 print("\r\n*** Reached Set Point within Tolerances ***\r\n")
                 _motion_timer.stop()

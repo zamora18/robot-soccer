@@ -41,7 +41,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if not _close(theta_c, thetahat, tolerance=10): # 10 degrees
+    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=10): # 10 degrees
 #        print 'theta'
         #reverse = False
         #if (theta_c - thetahat) > 180:
@@ -54,7 +54,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 #if ((theta_c + np.pi) - thetahat) > 0:
         #    w = -1*w
 
-    velocities = (vx, vy, 0)
+    velocities = (vx, vy, w)
 
     #print("velocities: {}\r".format(velocities))
 
