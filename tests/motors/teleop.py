@@ -108,7 +108,7 @@ def _ask_for_point():
     Asks user for a point to go to. User enters three floats, separated
     by spaces, with no other characters; x, y, theta respectively
     """
-    usr = raw_input("Input point, (syntax: \"x y theta\"): ")
+    usr = raw_input("Input point, (syntax: \"x y theta\" (degrees))): ")
 
     usr_list = usr.split()
 
@@ -123,6 +123,9 @@ def _ask_for_point():
     except:
         print("\n\rThere was a problem making your input a float.\r\n")
         return False
+
+    # Make theta into radians 
+    theta = theta*pi/180
 
     print("Going to: ({}, {}, {})\r".format(x,y,theta))
     return Controller.set_commanded_position(x, y, theta)
@@ -203,7 +206,7 @@ def _handle_odom_timer():
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
             if _close(_xhat, x_c) and _close(_yhat, y_c) and \
-                    _close(_thetahat, theta_c, tolerance=1000000*(np.pi/12)):
+                    _close(_thetahat, theta_c, tolerance=(np.pi/18)): # 10 degrees
                 _ctrl_on = False
                 print("\r\n*** Reached Set Point within Tolerances ***\r\n")
                 _motion_timer.stop()
