@@ -28,7 +28,7 @@ _ctrl_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
-_w = 180 # degrees
+_w = np.pi/2
 _velocities = (0, 0, 0)
 
 _xhat = 0
@@ -183,10 +183,10 @@ def _deal_with_calibration():
 def _handle_motion_timer():
     global _set_speed, _velocityhat
     if _set_speed:
-        motion.drive(*_velocities, smooth=_smooth, theta=90)
+        motion.drive(*_velocities, smooth=_smooth, theta=_thetahat)
         _set_speed = False
 
-    (vx, vy, w, s1, s2, s3) = motion.get_velocities(theta=0)
+    (vx, vy, w, s1, s2, s3) = motion.get_velocities(theta=_thetahat)
     _velocityhat = (vx, vy, w, s1, s2, s3)
 
 
