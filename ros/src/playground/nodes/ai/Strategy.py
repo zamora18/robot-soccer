@@ -20,6 +20,7 @@ def _strong_offense(robot, ball):
     #
     # arctan2([y], [x])
     theta = np.arctan2([ ball['yhat'] 0 _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
+    theta = theta*180/np.pi
     dist_from_ball = _get_distance(robot, ball)
 
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
@@ -42,6 +43,7 @@ def _strong_offense(robot, ball):
 def _strong_defense(robot, ball):
     #for not we want to make one robot defend the goal
     theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat'] ], [ ball['xhat'] - _goal_position_opp[0] ])
+    theta_c = theta_c*180/np.pi
     x_c = _goal_position_home[0] + _goal_box_length*np.cos(theta)
     y_c = _goal_position_home[1] + _goal_box_length*np.sin(theta)
     return (x_c, y_c, theta_c)
@@ -50,7 +52,6 @@ def _get_distance(object_1, object_2):
     x_dist = object_1['xhat'] - object_2['xhat']
     y_dist = object_1['yhat'] - object_2['yhat']
     distance = np.sqrt(x_dist^2 + y_dist^2)
-
     return distance
 
 
