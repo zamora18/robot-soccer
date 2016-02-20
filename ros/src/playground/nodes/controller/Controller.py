@@ -43,9 +43,9 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
     if not _close(theta_c, thetahat, tolerance=10): # 10 degrees
         reverse = False
-        if (theta_c - thetahat) > np.pi:
-            thetahat = thetahat - np.pi
-            theta_c = theta_c + np.pi
+        if (theta_c - thetahat) > 180:
+            thetahat = thetahat - 180
+            theta_c = theta_c + 180
             reverse = True
         w  = PID_theta.update(theta_c, thetahat, Ts)
         if reverse:

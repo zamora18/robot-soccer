@@ -108,7 +108,7 @@ def _ask_for_point():
     Asks user for a point to go to. User enters three floats, separated
     by spaces, with no other characters; x, y, theta respectively
     """
-    usr = raw_input("Input point, (syntax: \"x y theta\" (degrees))): ")
+    usr = raw_input("Input point, (syntax: \"x y theta\" [degrees]): ")
 
     usr_list = usr.split()
 
@@ -123,9 +123,6 @@ def _ask_for_point():
     except:
         print("\n\rThere was a problem making your input a float.\r\n")
         return False
-
-    # Make theta into radians 
-    theta = theta*pi/180
 
     print("Going to: ({}, {}, {})\r".format(x,y,theta))
     return Controller.set_commanded_position(x, y, theta)
