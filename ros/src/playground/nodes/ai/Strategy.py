@@ -18,7 +18,8 @@ def choose_strategy(robot, ball):
 def _strong_offense(robot, ball):
     # for now we want to make one robot kick the ball into the open goal
     #
-    theta = np.arctan2([ball['yhat'], _goal_position_opp[1]], [ball['xhat'], _goal_position_opp[0]])
+    # arctan2([y], [x])
+    theta = np.arctan2([ ball['yhat'] 0 _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
     dist_from_ball = _get_distance(robot, ball)
 
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
@@ -28,19 +29,19 @@ def _strong_offense(robot, ball):
         # if robot is behind the ball and aligned towards goal
         if (theta == robot(2) && dist_from_ball <= _dist_behind_ball):
             #kick ball towards goal 6 inches
-            x_c = ball['xhat'] + _kick_dist*np.sin(theta)
-            y_c = ball['yhat'] + _kick_dist*np.cos(theta)
+            x_c = ball['xhat'] + _kick_dist*np.cos(theta)
+            y_c = ball['yhat'] + _kick_dist*np.sin(theta)
             return (x_c, y_c, theta)
         else: 
             # get aligned with ball facing goal
-            x_c = ball['xhat'] - _dist_behind_ball*np.sin(theta)
-            y_c = ball['yhat'] - _dist_behind_ball*np.cos(theta)
+            x_c = ball['xhat'] - _dist_behind_ball*np.cos(theta)
+            y_c = ball['yhat'] - _dist_behind_ball*np.sin(theta)
             return (x_c, y_c, theta)
             
 
 def _strong_defense(robot, ball):
     #for not we want to make one robot defend the goal
-    theta_c = np.arctan2([ _goal_position_home[1], ball['yhat'] ], [ _goal_position_opp[0], ball['xhat'] ])
+    theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat'] ], [ ball['xhat'] - _goal_position_opp[0] ])
     x_c = _goal_position_home[0] + _goal_box_length*np.cos(theta)
     y_c = _goal_position_home[1] + _goal_box_length*np.sin(theta)
     return (x_c, y_c, theta_c)
