@@ -52,7 +52,7 @@ def get_velocities():
     (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, 0)
 
     # Convert from radians to degrees
-    omega = omega*180/pi
+    omega = omega*180/np.pi
 
     return (vx, vy, omega, s1, s2, s3)
 
