@@ -183,10 +183,10 @@ def _deal_with_calibration():
 def _handle_motion_timer():
     global _set_speed, _velocityhat
     if _set_speed:
-        motion.drive(*_velocities, smooth=_smooth, theta=_thetahat)
+        motion.drive(*_velocities, smooth=_smooth, theta=90)
         _set_speed = False
 
-    (vx, vy, w, s1, s2, s3) = motion.get_velocities()
+    (vx, vy, w, s1, s2, s3) = motion.get_velocities(theta=0)
     _velocityhat = (vx, vy, w, s1, s2, s3)
 
 
@@ -203,7 +203,7 @@ def _handle_odom_timer():
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
             if _close(_xhat, x_c) and _close(_yhat, y_c) and \
-                    _close(_thetahat, theta_c, tolerance=10):
+                    _close(_thetahat, theta_c, tolerance=300):
                 _ctrl_on = False
                 print("\r\n*** Reached Set Point within Tolerances ***\r\n")
                 _motion_timer.stop()

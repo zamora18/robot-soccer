@@ -39,7 +39,10 @@ def drive(vx,vy,omega,smooth=False,theta=0):
 
     return (s1, s2, s3)
 
-def get_velocities():
+def get_velocities(theta=0):
+    """Get Velocities
+    theta is expected in degrees
+    """
     # Ask RoboClaw for encoder speed (not raw speed)
     (s1, s2, s3) = (w.ReadSpeed(w.M1)[1], w.ReadSpeed(w.M2)[1], w.ReadSpeed(w.M3)[1])
 
@@ -48,8 +51,11 @@ def get_velocities():
     OMEGA2 = s2/PULSES_PER_RADIAN
     OMEGA3 = s3/PULSES_PER_RADIAN
 
+    # Convert degrees to radians
+    theta = theta*np.pi/180
+
     # Convert from wheel angular speeds to world frame velocities
-    (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, 0)
+    (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, theta)
 
     # Convert from radians to degrees
     omega = omega*180/np.pi
