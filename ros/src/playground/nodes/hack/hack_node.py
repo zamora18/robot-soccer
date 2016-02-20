@@ -17,7 +17,7 @@ def _handle_vision_robot_position(msg):
     robo_msg = Pose2D()
     robo_msg.x = msg.x/100.0
     robo_msg.y = msg.y/100.0
-    robo_msg.theta = msg.theta*(np.pi/180.0)
+    robo_msg.theta = msg.theta
     robopub.publish(robo_msg)
 
 def _handle_vision_ball_position(msg):

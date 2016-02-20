@@ -7,6 +7,15 @@ PULSES_PER_REV = 19822
 PULSES_PER_RADIAN = (PULSES_PER_REV / (2.0*np.pi))
 
 def drive(vx,vy,omega,smooth=False,theta=0):
+    """drive
+    Take in linear velocity and angular velocity and drive the robot with it!
+    vx      : velocity in x direction (world)
+    vy      : velocity in y direction (world)
+    omega   : angular velocity in degrees (world)
+    """
+    # Convert omega (rad) into (degrees)
+    omega = omega*np.pi/180
+
     # Convert from world to robot wheel speeds
     (OMEGA1, OMEGA2, OMEGA3) = p.world_to_wheel_speeds(vx, vy, omega, theta)
 
@@ -41,6 +50,9 @@ def get_velocities():
 
     # Convert from wheel angular speeds to world frame velocities
     (vx, vy, omega) = p.wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, 0)
+
+    # Convert from radians to degrees
+    omega = omega*180/pi
 
     return (vx, vy, omega, s1, s2, s3)
 

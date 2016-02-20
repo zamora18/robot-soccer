@@ -28,7 +28,7 @@ _ctrl_timer_period = 1.0/10
 
 _vx = 0.5
 _vy = 0.5
-_w = np.pi
+_w = 180 # degrees
 _velocities = (0, 0, 0)
 
 _xhat = 0
@@ -94,7 +94,7 @@ def _go_home():
 
     if abs(thetahat) > tolerance:
         # since it's periodic...
-#        thetahat = round(thetahat%(2*np.pi) ,2)
+#        thetahat = round(thetahat%(360) ,2)
         dt = abs(thetahat / _w)
         sign = -1 if thetahat > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, 0, sign*_w, dt))
@@ -206,7 +206,7 @@ def _handle_odom_timer():
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
             if _close(_xhat, x_c) and _close(_yhat, y_c) and \
-                    _close(_thetahat, theta_c, tolerance=(np.pi/18)): # 10 degrees
+                    _close(_thetahat, theta_c, tolerance=10):
                 _ctrl_on = False
                 print("\r\n*** Reached Set Point within Tolerances ***\r\n")
                 _motion_timer.stop()

@@ -6,6 +6,9 @@ class Vector(object):
     Create an object with an x, y, theta based on magnitude and angle
     """
     def __init__(self, r, theta=0):
+        """
+        theta is expected in radians
+        """
         super(Vector, self).__init__()
         self.r = r
         self.theta = theta
@@ -42,6 +45,8 @@ def rot(theta):
     
     The body frame is the intermediate coordinate frame that
     links the world velocities to the robot wheel speeds.
+
+    theta is expected in radians.
     """
     return np.matrix([ [ np.cos(theta),np.sin(theta),0.0],
                        [-np.sin(theta),np.cos(theta),0.0],
@@ -49,10 +54,12 @@ def rot(theta):
                      ])
 
 
-def world_to_wheel_speeds(vx, vy, omega, theta):
+def world_to_wheel_speeds(vx, vy, w, theta):
     """World velocities to wheel speeds
+
+    w and theta are expected in radians
     """
-    result = M*rot(theta)*np.matrix([ [vx],[vy],[omega] ])
+    result = M*rot(theta)*np.matrix([ [vx],[vy],[w] ])
     
     OMEGA1 = result.getA()[0][0]
     OMEGA2 = result.getA()[1][0]
@@ -63,6 +70,9 @@ def world_to_wheel_speeds(vx, vy, omega, theta):
 
 def wheel_speeds_to_world(OMEGA1, OMEGA2, OMEGA3, theta):
     """Wheel speeds to world velocities
+
+    theta is expected in radians
+    w is returned in radians
     """
     R_T = rot(theta).transpose()
     M_inv = np.linalg.inv(M)

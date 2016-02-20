@@ -41,7 +41,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if not _close(theta_c, thetahat, tolerance=np.pi/18): # 10 degrees
+    if not _close(theta_c, thetahat, tolerance=10): # 10 degrees
         reverse = False
         if (theta_c - thetahat) > np.pi:
             thetahat = thetahat - np.pi
