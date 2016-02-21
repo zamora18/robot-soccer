@@ -14,7 +14,23 @@ def init():
     pass
 
 def set_commanded_position(x, y, theta):
+    """Set Commanded Position
+
+    x_c, y_c, theta_c. These will tell the controller where it wants to go.
+
+    theta_c (degrees) can be given on the interval [0, 360].
+    This function can also receive theta from [-360, 0].
+
+    """
     global _set_point
+
+    # Because theta is periodic with 360 degrees
+    theta = theta % 360
+
+    # Deal with the possibilty of negative values
+    if theta < 0:
+        theta = 360 + theta
+
     _set_point = (x, y, theta)
     return True
 
@@ -42,13 +58,23 @@ def update(time_since_last_update, xhat, yhat, thetahat):
         vy = PID_y.update(y_c, yhat, Ts)
 
     if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=10): # 10 degrees
+        ccw_dist = _ccw_distance(theta, theta_c)
+        cw_dist  = _cw_distance(theta, theta_c)
+
+        if (ccw_dist <= cw_dist):
+            # Go CCW (normal)
+            w  = PID_theta.update(theta_c, thetahat, Ts)
+        else:
+            # Go CW (reversed)
+            w  = PID_theta.update((theta_c-360), thetahat, Ts)
+
 #        print 'theta'
         #reverse = False
         #if (theta_c - thetahat) > 180:
         #    thetahat = thetahat - 180
         #    theta_c = theta_c + 180
         #    reverse = True
-        w  = PID_theta.update(theta_c, thetahat, Ts)
+        
         #if reverse:
         #    w = -1*w
 #if ((theta_c + np.pi) - thetahat) > 0:
@@ -62,3 +88,10 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
 def _close(a, b, tolerance=0.05):
     return abs(a - b) <= tolerance
+
+def _ccw_distance(x, x_c):
+    return abs((x - (360 + x_c)) % 360)
+
+def _cw_distance(x, x_c):
+    x_c_complement = x_c - 360
+    return abs((x - (x_c_complement)) % 360)
