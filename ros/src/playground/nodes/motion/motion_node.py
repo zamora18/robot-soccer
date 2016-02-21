@@ -4,6 +4,7 @@ import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
 from playground.msg import EncoderEstimates
+from playground.srv import RoboClawRPC, RoboClawRPCResponse
 
 import numpy as np
 
@@ -12,6 +13,8 @@ import wheelbase
 
 _smooth = True
 _theta = 0
+
+# -----------------------------------------------------------------------------
 
 def _handle_velocity_command(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
@@ -24,11 +27,22 @@ def _handle_theta(msg):
     global _theta
     _theta = msg.theta
 
+# -----------------------------------------------------------------------------
+
+def _get_battery_voltage(req):
+    resp = w.ReadMainBatteryVoltage()
+    return RoboClawRPCResponse(resp[0], resp[1]/10.0)
+
+# -----------------------------------------------------------------------------
+
 def main():
     rospy.init_node('motion', anonymous=False)
 
     rospy.Subscriber('vel_cmds', Twist, _handle_velocity_command)
     pub = rospy.Publisher('encoder_estimates', EncoderEstimates, queue_size=10)
+
+    # Services
+    rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
 
     # Hack
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_theta)
