@@ -4,7 +4,7 @@ from controllers import PID
 
 PID_x = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
 PID_y = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
-PID_theta = PID(0.5, 0, 0, 1, 0.05, integrator_limit=0.05)
+PID_theta = PID(0.75, 0, 0, 90, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
@@ -57,16 +57,19 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=10): # 10 degrees
-        ccw_dist = _ccw_distance(theta, theta_c)
-        cw_dist  = _cw_distance(theta, theta_c)
+    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=2.5): # 10 degrees
+        ccw_dist = _ccw_distance(thetahat, theta_c)
+        cw_dist  = _cw_distance(thetahat, theta_c)
 
         if (ccw_dist <= cw_dist):
             # Go CCW (normal)
-            w  = PID_theta.update(theta_c, thetahat, Ts)
+            w  = abs(PID_theta.update(theta_c, thetahat, Ts))
         else:
             # Go CW (reversed)
-            w  = PID_theta.update((theta_c-360), thetahat, Ts)
+            print 'hi'
+            w  = -1*abs(PID_theta.update(theta_c, thetahat, Ts))
+
+        print("Dist: ({}, {}) --- w: {}\r".format(ccw_dist, cw_dist, w))
 
 #        print 'theta'
         #reverse = False
@@ -80,6 +83,8 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 #if ((theta_c + np.pi) - thetahat) > 0:
         #    w = -1*w
 
+    w = w*np.pi/180
+
     velocities = (vx, vy, w)
 
     #print("velocities: {}\r".format(velocities))
@@ -90,8 +95,8 @@ def _close(a, b, tolerance=0.05):
     return abs(a - b) <= tolerance
 
 def _ccw_distance(x, x_c):
-    return abs((x - (360 + x_c)) % 360)
+    return abs((x - (360 + x_c))) % 360
 
 def _cw_distance(x, x_c):
     x_c_complement = x_c - 360
-    return abs((x - (x_c_complement)) % 360)
+    return abs((x - (x_c_complement))) % 360
