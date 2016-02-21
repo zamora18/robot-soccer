@@ -31,7 +31,7 @@ def _handle_theta(msg):
 
 def _get_battery_voltage(req):
     resp = wheelbase.ReadMainBatteryVoltage()
-    return RoboClawRPCResponse(resp[0], resp[1]/10.0)
+    return RoboClawRPCResponse(resp[0], str(resp[1]/10.0))
 
 # -----------------------------------------------------------------------------
 
