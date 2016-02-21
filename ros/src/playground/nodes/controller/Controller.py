@@ -25,11 +25,8 @@ def set_commanded_position(x, y, theta):
     global _set_point
 
     # Because theta is periodic with 360 degrees
+    # This also deals with theta being negative
     theta = theta % 360
-
-    # Deal with the possibilty of negative values
-    if theta < 0:
-        theta = 360 + theta
 
     _set_point = (x, y, theta)
     return True
@@ -66,28 +63,9 @@ def update(time_since_last_update, xhat, yhat, thetahat):
             w  = abs(PID_theta.update(theta_c, thetahat, Ts))
         else:
             # Go CW (reversed)
-            print 'hi'
             w  = -1*abs(PID_theta.update(theta_c, thetahat, Ts))
 
-        print("Dist: ({}, {}) --- w: {}\r".format(ccw_dist, cw_dist, w))
-
-#        print 'theta'
-        #reverse = False
-        #if (theta_c - thetahat) > 180:
-        #    thetahat = thetahat - 180
-        #    theta_c = theta_c + 180
-        #    reverse = True
-        
-        #if reverse:
-        #    w = -1*w
-#if ((theta_c + np.pi) - thetahat) > 0:
-        #    w = -1*w
-
-    w = w*np.pi/180
-
     velocities = (vx, vy, w)
-
-    #print("velocities: {}\r".format(velocities))
 
     return velocities
 

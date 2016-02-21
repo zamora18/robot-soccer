@@ -11,11 +11,12 @@ def drive(vx,vy,omega,smooth=False,theta=0):
     Take in linear velocity and angular velocity and drive the robot with it!
     vx      : velocity in x direction (world)
     vy      : velocity in y direction (world)
-    omega   : angular velocity in rad/s (world)
+    omega   : angular velocity in degrees/s (world)
     theta   : heading in degrees (world)
     """
-    # Convert theta (rad) into (degrees)
+    # Convert theta and omega (rad) into (degrees)
     theta = theta*np.pi/180
+    omega = omega*np.pi/180
 
     # Convert from world to robot wheel speeds
     (OMEGA1, OMEGA2, OMEGA3) = p.world_to_wheel_speeds(vx, vy, omega, theta)

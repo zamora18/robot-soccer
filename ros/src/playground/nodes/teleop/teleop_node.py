@@ -15,7 +15,7 @@ _ctrl_period = 1.0/100
 
 _vx = 0.5
 _vy = 0.5
-_w = np.pi
+_w = 180
 
 _xhat = 0
 _yhat = 0

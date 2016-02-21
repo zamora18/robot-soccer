@@ -28,7 +28,7 @@ _ctrl_timer_period = 1.0/8
 
 _vx = 0.5
 _vy = 0.5
-_w = np.pi/2
+_w = 180
 _velocities = (0, 0, 0)
 
 _xhat = 0
