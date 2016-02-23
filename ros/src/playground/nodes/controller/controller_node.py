@@ -32,6 +32,7 @@ def _handle_desired_position(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
     # print("Set Point: ({}, {}, {})".format(msg.x, msg.y, msg.theta))
     Controller.set_commanded_position(msg.x, msg.y, msg.theta)
+    _ctrl_on = True
 
 def _toggle(req):
     global _ctrl_on
@@ -59,6 +60,10 @@ def main():
 
         if _ctrl_on:
             (vx, vy, w) = Controller.update(_ctrl_period, _xhat, _yhat, _thetahat)
+
+            if vx == 0 and vy == 0 and w == 0:
+                _ctrl_on = False
+                return
 
             msg = Twist()
             msg.linear.x = vx
