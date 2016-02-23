@@ -2,9 +2,9 @@ import numpy as np
 
 from controllers import PID
 
-PID_x = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
-PID_y = PID(0.65, 0.01, 0, 1, 0.05, integrator_limit=0.05)
-PID_theta = PID(0.75, 0, 0, 90, 0.05, integrator_limit=0.05)
+PID_x = PID(1.1, 0.01, 0.075, 2, 0.05, integrator_limit=0.05)
+PID_y = PID(1.1, 0.01, 0.075, 2, 0.05, integrator_limit=0.05)
+PID_theta = PID(1.5, 0, 0, 180, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
@@ -54,7 +54,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=2.5): # 10 degrees
+    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=2.5): # degrees
         ccw_dist = _ccw_distance(thetahat, theta_c)
         cw_dist  = _cw_distance(thetahat, theta_c)
 

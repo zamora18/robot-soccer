@@ -49,6 +49,7 @@ def main():
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_position)
     rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
     pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
+    pub_err = rospy.Publisher('error', Pose2D, queue_size=10)
 
     # Services
     rospy.Service('/controller/toggle', Trigger, _toggle)
@@ -65,6 +66,12 @@ def main():
             msg.angular.z = w
 
             pub.publish(msg)
+
+            msg = Pose2D()
+            msg.x = Controller.PID_x.error_d1
+            msg.y = Controller.PID_y.error_d1
+            msg.theta = Controller.PID_theta.error_d1
+            pub_err.publish(msg)
 
         rate.sleep()
 
