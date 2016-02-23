@@ -226,8 +226,10 @@ function chk_node_controller_Callback(hObject, eventdata, handles)
 % hObject    handle to chk_node_controller (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of chk_node_controller
+    handles = guidata(hObject);
+    if get(handles.chk_node_controller,'Value') == 1
+        disp('Not implemented... Oops.');
+    end
 
 
 % --- Executes on button press in btn_update_status.
@@ -235,6 +237,12 @@ function btn_update_status_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_update_status (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
     
-    get_battery = rossvcclient('/test')
+    get_battery = rossvcclient('/motion/main_battery');
+    req = rosmessage(get_battery);
+    resp = call(get_battery,req,'Timeout',3)
+    
+    set(handles.lbl_battery,'String',[num2str(resp) 'v']);
+    
 
