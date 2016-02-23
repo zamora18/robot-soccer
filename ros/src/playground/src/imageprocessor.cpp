@@ -25,6 +25,8 @@ ImageProcessor::ImageProcessor(int capnumber)
 ImageProcessor::ImageProcessor(string inputsource)
 {
 	cap.open(inputsource);
+	center.x = 0;
+	center.y = 0;
 }
 
 //reads in the image from the input source

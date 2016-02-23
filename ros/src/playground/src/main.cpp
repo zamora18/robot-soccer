@@ -22,7 +22,7 @@ pthread_cond_t robot1cond;
 pthread_cond_t robot1done;
 pthread_mutex_t mrobot1cond;
 pthread_mutex_t mrobot1done;
-bool done1;
+bool done1, start1;
 
 
 void* trackRobot(void* robotobject);
@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	//ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
-	ImageProcessor video = ImageProcessor(0); //use for webcam
+	ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
+	//ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
 	{
@@ -68,11 +68,11 @@ int main(int argc, char *argv[])
 	int robot1LowH = 84;
 	int robot1HighH = 126;
 
-	int robot1LowS = 132;//50;
-	int robot1HighS = 255;//137;
+	int robot1LowS = 50;
+	int robot1HighS = 137;
 
-	int robot1LowV = 88;//189;
-	int robot1HighV = 192;
+	int robot1LowV = 189;
+	int robot1HighV = 255;
 
 	int robot2LowH = 76;
 	int robot2HighH = 107;
@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
 
 		pthread_mutex_lock(&mrobot1cond);
 		done1 = false;
+		start1 = true;
 		pthread_cond_signal(&robot1cond);
 		pthread_mutex_unlock(&mrobot1cond);
 
@@ -316,7 +317,8 @@ void* trackRobot(void* robotobject)
 		cout << "wait for thread go command" << endl;
 
 		pthread_mutex_lock(&mrobot1cond);
-		pthread_cond_wait(&robot1cond, &mrobot1cond);
+		while(!start1)
+			pthread_cond_wait(&robot1cond, &mrobot1cond);
 		pthread_mutex_unlock(&mrobot1cond);
 
 		cout << "go command received" << endl;
@@ -334,6 +336,7 @@ void* trackRobot(void* robotobject)
 
 		pthread_mutex_lock(&mrobot1done);
 		done1 = true;
+		start1 = false;
 		pthread_cond_signal(&robot1done);
 		pthread_mutex_unlock(&mrobot1done);
 
