@@ -17,11 +17,8 @@ _theta = 0
 # -----------------------------------------------------------------------------
 
 def _handle_velocity_command(msg):
-    # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
-
-    # So every time I hear a message, update the motion?
     velocities = (msg.linear.x, msg.linear.y, msg.angular.z)
-    motion.drive(*velocities, smooth=_smooth, theta=0)
+    motion.drive(*velocities, smooth=_smooth, theta=_theta)
 
 def _handle_theta(msg):
     global _theta
