@@ -65,14 +65,16 @@ set(handles.fig_position, 'XGrid', 'on', 'YGrid', 'on');
 
 % Setup Velocity Plot
 handles.plot_velocity = quiver(handles.fig_velocity,0,0,0,0,0);
-set(handles.fig_velocity,'XLim',[-2.5 2.5],'YLim',[-1.5 1.5]);
+set(handles.fig_velocity,'XLim',[-1.5 1.5],'YLim',[-1.5 1.5]);
 daspect(handles.fig_velocity, [1 1 1]);
 xlabel(handles.fig_velocity,'width (m/s)');
 ylabel(handles.fig_velocity,'height (m/s)');
 set(handles.fig_velocity, 'XGrid', 'on', 'YGrid', 'on');
 
-% Setup Desired Position Table
+% Setup Tables
 set(handles.table_desired_position,'Data', {0 0 0});
+set(handles.table_velocity,'Data', {0 0 0});
+set(handles.table_position,'Data', {0 0 0});
 
 % Setup ROS Subscribers
 handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
@@ -111,7 +113,12 @@ clear handles.pub
 % The GUI is no longer waiting, just close it
 delete(hObject);
 
-function visionRobotPositionCallback(src, msg, handles)   
+function visionRobotPositionCallback(src, msg, handles)
+
+if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
+    return
+end
+
 x = get(handles.plot_position,'XData');
 y = get(handles.plot_position,'YData');
 x = [x msg.X/100];
@@ -121,9 +128,16 @@ set(handles.plot_position,'XData',x,'YData',y);
 set(handles.table_position,'Data', {msg.X/100 msg.Y/100 msg.Theta});
     
 function desiredPositionCallback(src, msg, handles)
+if ~ishandle(handles.table_desired_position)
+    return
+end
+
 set(handles.table_desired_position,'Data', {msg.X msg.Y msg.Theta});
     
 function velCmdsCallback(src, msg, handles)
+if ~ishandle(handles.plot_velocity) || ~ishandle(handles.table_velocity)
+    return
+end
 
 vx = msg.Linear.X;
 vy = msg.Linear.Y;
@@ -151,8 +165,9 @@ function btn_set_desired_position_Callback(hObject, eventdata, handles)
 global c_raw
 global desired
 c_raw = get(handles.table_desired_position,'Data');
-c = c_raw(1,:)
-desired = cellfun(@str2num,c);
+c = c_raw(1,:);
+% desired = cellfun(@str2num,c);
+desired = cell2mat(c);
 
 msg = rosmessage(handles.pub.desired_position);
 msg.X = desired(1);
