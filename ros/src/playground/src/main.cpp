@@ -55,24 +55,24 @@ int main(int argc, char *argv[])
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 76;//111;
-	int ballHighH = 108;//179;
+	int ballLowH = 84;//111;
+	int ballHighH = 126;//179;
 
 	int ballLowS = 132;//41;
-	int ballHighS = 212;//162;
+	int ballHighS = 255;//162;
 
-	int ballLowV = 160;//183;
-	int ballHighV = 255;//255;
+	int ballLowV = 88;//183;
+	int ballHighV = 192;//255;
 
 
-	int robot1LowH = 76;
-	int robot1HighH = 108;
+	int robot1LowH = 84;
+	int robot1HighH = 126;
 
 	int robot1LowS = 132;//50;
-	int robot1HighS = 212;//137;
+	int robot1HighS = 255;//137;
 
-	int robot1LowV = 160;//189;
-	int robot1HighV = 255;
+	int robot1LowV = 88;//189;
+	int robot1HighV = 192;
 
 	int robot2LowH = 76;
 	int robot2HighH = 107;
@@ -141,10 +141,13 @@ int main(int argc, char *argv[])
 
 	//initialize threads
 	pthread_t robot1thread;
+
 	pthread_cond_init(&robot1cond, NULL);
 	pthread_cond_init(&robot1done, NULL);
+
 	pthread_mutex_init(&mrobot1cond, NULL);
 	pthread_mutex_init(&mrobot1done, NULL);
+
 	pthread_create(&robot1thread, NULL, trackRobot, &robot);
 
 	robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
 	{
 		Mat imgOriginal;
 
-
+		cout << "reading" << endl;
 		//load in the camera image
 		bool readSuccess = video.read(&imgOriginal);
 
@@ -171,20 +174,25 @@ int main(int argc, char *argv[])
 			break;
 		}
 
+		cout << "cloning" << endl;
 
 		currentImage = imgOriginal.clone();
+
+		cout << "go threads go" << endl;
 
 		pthread_mutex_lock(&mrobot1cond);
 		done1 = false;
 		pthread_cond_signal(&robot1cond);
 		pthread_mutex_unlock(&mrobot1cond);
 
+		cout << "done telling threads to go" << endl;
+
 		//blur(imgOriginal, imgOriginal, Size(3,3));
 
 		Mat imgHSV;
 
 		//convert from the input image to a HSV image
-		cvtColor(currentImage, imgHSV, COLOR_BGR2HSV);
+		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
 
 		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
@@ -219,11 +227,15 @@ int main(int argc, char *argv[])
 
 
 		//wait for various threads to finish
+
+		cout << "waiting for thread to finish" << endl;
+
 		pthread_mutex_lock(&mrobot1done);
 		while(!done1)
 			pthread_cond_wait(&robot1done, &mrobot1done);
 		pthread_mutex_unlock(&mrobot1done);
 
+		cout << "thread finished! finishing and displaying" << endl;
 
 		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
@@ -238,11 +250,12 @@ int main(int argc, char *argv[])
 		end.x = robotlocation.x + 50 * sinx;
 		end.y = robotlocation.y + 50 * siny;
 
-
+		cout << "robot stuffs done" << endl;
 
 
 		line(imgOriginal, robotlocation, end, Scalar(0,0,255), 2);
 
+		cout << "line drawn" << endl;
 
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
@@ -254,12 +267,14 @@ int main(int argc, char *argv[])
 
 		//imshow("BWOTSU", imgBW);
 
-
+		cout << "leaging" << endl;
 
 		if(waitKey(1) == ESC)
 		{
 			break;
 		}
+
+		cout << "sending ros message" << endl;
 
 		// -------------------------------------
 		geometry_msgs::Pose2D robot1pos;
@@ -297,10 +312,14 @@ void* trackRobot(void* robotobject)
 	{
 		Mat robotimage;
 		//insert condwait here
+
+		cout << "wait for thread go command" << endl;
+
 		pthread_mutex_lock(&mrobot1cond);
 		pthread_cond_wait(&robot1cond, &mrobot1cond);
 		pthread_mutex_unlock(&mrobot1cond);
 
+		cout << "go command received" << endl;
 
 		//event = 0;
 		cvtColor(currentImage, robotimage, COLOR_BGR2HSV);
@@ -311,16 +330,18 @@ void* trackRobot(void* robotobject)
 
 		video.initializeRobot(robot, robotimage);
 
+		cout << "sending thread done command" << endl;
 
 		pthread_mutex_lock(&mrobot1done);
 		done1 = true;
 		pthread_cond_signal(&robot1done);
 		pthread_mutex_unlock(&mrobot1done);
 
+		cout << "thread done command sent" << endl;
+
 		cout << ++c << endl;
 		imshow("robot thread threshold", robotimage);
 
-		waitKey(1);
 	}
 }
 
