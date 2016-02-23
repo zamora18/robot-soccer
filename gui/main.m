@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 22-Feb-2016 17:48:07
+% Last Modified by GUIDE v2.5 23-Feb-2016 13:25:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,11 +57,12 @@ handles.output = hObject;
 
 % Setup Position Plot
 handles.plot_position = plot(handles.fig_position,0,0);
-set(handles.fig_position,'XLim',[-3 3],'YLim',[-2 2]);
+set(handles.fig_position,'XLim',[-1.8 1.8],'YLim',[-1 1]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
 ylabel(handles.fig_position, 'height (meters)');
 set(handles.fig_position, 'XGrid', 'on', 'YGrid', 'on');
+set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
 % Setup Velocity Plot
 handles.plot_velocity = quiver(handles.fig_velocity,0,0,0,0,0);
@@ -75,11 +76,13 @@ set(handles.fig_velocity, 'XGrid', 'on', 'YGrid', 'on');
 set(handles.table_desired_position,'Data', {0 0 0});
 set(handles.table_velocity,'Data', {0 0 0});
 set(handles.table_position,'Data', {0 0 0});
+set(handles.table_error,'Data', {0 0 0});
 
 % Setup ROS Subscribers
 handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
 handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
+handles.sub.error = rossubscriber('/error', 'geometry_msgs/Pose2D', {@errorCallback,handles});
 
 % And Publishers
 handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D');
@@ -115,37 +118,49 @@ delete(hObject);
 
 function visionRobotPositionCallback(src, msg, handles)
 
-if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
-    return
-end
+    if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
+        return
+    end
+    
+    global pos
+    pos = [msg.X msg.Y msg.Theta];
 
-x = get(handles.plot_position,'XData');
-y = get(handles.plot_position,'YData');
-x = [x msg.X/100];
-y = [y msg.Y/100];
-set(handles.plot_position,'XData',x,'YData',y);
+    x = get(handles.plot_position,'XData');
+    y = get(handles.plot_position,'YData');
+    x = [x msg.X/100];
+    y = [y msg.Y/100];
+    set(handles.plot_position,'XData',x,'YData',y);
+    
+    set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
-set(handles.table_position,'Data', {msg.X/100 msg.Y/100 msg.Theta});
+    set(handles.table_position,'Data', {msg.X/100 msg.Y/100 msg.Theta});
     
 function desiredPositionCallback(src, msg, handles)
-if ~ishandle(handles.table_desired_position)
-    return
-end
+    if ~ishandle(handles.table_desired_position)
+        return
+    end
 
-set(handles.table_desired_position,'Data', {msg.X msg.Y msg.Theta});
-    
+    set(handles.table_desired_position,'Data', {msg.X msg.Y msg.Theta});
+
 function velCmdsCallback(src, msg, handles)
-if ~ishandle(handles.plot_velocity) || ~ishandle(handles.table_velocity)
-    return
-end
+    if ~ishandle(handles.plot_velocity) || ~ishandle(handles.table_velocity)
+        return
+    end
 
-vx = msg.Linear.X;
-vy = msg.Linear.Y;
-w  = msg.Angular.Z;
+    vx = msg.Linear.X;
+    vy = msg.Linear.Y;
+    w  = msg.Angular.Z;
 
-set(handles.plot_velocity,'XData',0,'YData',0,'UData',vx,'VData',vy);
+    set(handles.plot_velocity,'XData',0,'YData',0,'UData',vx,'VData',vy);
 
-set(handles.table_velocity,'Data', {vx vy w});
+    set(handles.table_velocity,'Data', {vx vy w});
+    
+function errorCallback(src, msg, handles)
+    if ~ishandle(handles.table_error)
+        return
+    end
+
+    set(handles.table_error,'Data', {msg.X msg.Y msg.Theta});
 
 
 % --- Executes on button press in btn_clear_position.
@@ -162,11 +177,7 @@ function btn_set_desired_position_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_set_desired_position (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global c_raw
-global desired
-c_raw = get(handles.table_desired_position,'Data');
-c = c_raw(1,:);
-% desired = cellfun(@str2num,c);
+c = get(handles.table_desired_position,'Data');
 desired = cell2mat(c);
 
 msg = rosmessage(handles.pub.desired_position);
@@ -174,3 +185,56 @@ msg.X = desired(1);
 msg.Y = desired(2);
 msg.Theta = desired(3);
 send(handles.pub.desired_position, msg);
+
+
+% --- Executes on button press in chk_point_move.
+function chk_point_move_Callback(hObject, eventdata, handles)
+% hObject    handle to chk_point_move (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chk_point_move
+
+
+% --- Executes on mouse press over axes background.
+function fig_position_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to fig_position (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    handles = guidata(hObject);
+    global pos;
+    
+    if get(handles.chk_point_move,'Value') == 1
+        point = eventdata.IntersectionPoint(1:2);
+        
+        theta = pos(2);
+
+
+        set(handles.table_desired_position,'Data', {0 0 0});
+
+        msg = rosmessage(handles.pub.desired_position);
+        msg.X = point(1);
+        msg.Y = point(2);
+        msg.Theta = theta;
+        send(handles.pub.desired_position, msg);
+    end
+
+
+% --- Executes on button press in chk_node_controller.
+function chk_node_controller_Callback(hObject, eventdata, handles)
+% hObject    handle to chk_node_controller (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chk_node_controller
+
+
+% --- Executes on button press in btn_update_status.
+function btn_update_status_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_update_status (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    
+    get_battery = rossvcclient('/test')
+
