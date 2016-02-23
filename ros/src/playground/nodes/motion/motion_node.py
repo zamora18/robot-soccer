@@ -11,7 +11,7 @@ import numpy as np
 import motion
 import wheelbase
 
-_smooth = True
+_smooth = False
 _theta = 0
 
 # -----------------------------------------------------------------------------

@@ -30,7 +30,7 @@ def _handle_estimated_position(msg):
 
 def _handle_desired_position(msg):
     # rospy.loginfo(rospy.get_caller_id() + "I heard (%s,%s,%s)", data.linear.x,data.linear.y,data.angular.z)
-    print("Set Point: ({}, {}, {})".format(msg.x, msg.y, msg.theta))
+    # print("Set Point: ({}, {}, {})".format(msg.x, msg.y, msg.theta))
     Controller.set_commanded_position(msg.x, msg.y, msg.theta)
 
 def _toggle(req):
