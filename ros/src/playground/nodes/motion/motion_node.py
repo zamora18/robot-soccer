@@ -21,7 +21,7 @@ def _handle_velocity_command(msg):
 
     # So every time I hear a message, update the motion?
     velocities = (msg.linear.x, msg.linear.y, msg.angular.z)
-    motion.drive(*velocities, smooth=_smooth, theta=_theta)
+    motion.drive(*velocities, smooth=_smooth, theta=0)
 
 def _handle_theta(msg):
     global _theta
@@ -57,7 +57,7 @@ def main():
     while not rospy.is_shutdown():
 
 
-        (vx, vy, w, s1, s2, s3) = motion.get_velocities()
+        (vx, vy, w, s1, s2, s3) = motion.get_velocities(theta=_theta)
         estimate = EncoderEstimates()
         estimate.world_velocities.vx = vx
         estimate.world_velocities.vy = vy
