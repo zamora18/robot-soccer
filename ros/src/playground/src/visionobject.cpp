@@ -51,3 +51,21 @@ void VisionObject::toString()
 {
 	cout << "(" << location.x << "," << location.y << ")";
 }
+
+Scalar VisionObject::getLowHSV()
+{
+	return lowHSV;
+}
+
+void VisionObject::setLowHSV(Scalar hsv)
+{
+	lowHSV = hsv;
+}
+Scalar VisionObject::getHighHSV()
+{
+	return highHSV;
+}
+void VisionObject::setHighHSV(Scalar hsv)
+{
+	highHSV = hsv;
+}

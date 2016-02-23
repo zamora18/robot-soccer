@@ -20,6 +20,7 @@ class ImageProcessor
 		
 	public:
 		ImageProcessor();
+		ImageProcessor(int capnumber);
 		ImageProcessor(string inputsource);
 
 		vector<vector<Point> >  getContours(Mat contourOutput);
@@ -45,6 +46,8 @@ class ImageProcessor
 		double getScalingFactor();
 
 		void initializeBall(VisionObject* ball, Mat img);
+
+		void initializeCenter(Mat centercircle);
 };
 
 #endif // IMAGEPROCESSOR_H

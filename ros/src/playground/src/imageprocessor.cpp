@@ -9,26 +9,37 @@
 using namespace cv;
 using namespace std;
 
+
+//use for webcam, 0 for first webcam, 1 for second
 ImageProcessor::ImageProcessor()
 {
-	cap.open(1);
+	
 }
 
+ImageProcessor::ImageProcessor(int capnumber)
+{
+	cap.open(capnumber);
+}
+
+//open the input string source
 ImageProcessor::ImageProcessor(string inputsource)
 {
 	cap.open(inputsource);
 }
 
+//reads in the image from the input source
 bool ImageProcessor::read(Mat* img)
 {
 	return cap.read(*img);
 }
 
+//sets the center of the field
 void ImageProcessor::setCenter(Point2d centeroffield)
 {
 	center = centeroffield;
 }
 
+//returns the center
 Point2d ImageProcessor::getCenter()
 {
 	return center;
@@ -250,6 +261,21 @@ Point2d ImageProcessor::fieldToImageTransform(Point2d p)
 }
 
 
+void ImageProcessor::initializeCenter(Mat centercircle)
+{
+	//clones image so that we can do operations on it w/o messing up original image
 
+
+	Vec3f centercirc;
+
+	// //locate the center circle of the image
+	centercirc = findCenterCircle(centercircle);
+
+	// //set the image center
+	setCenter(Point2d(centercirc[0], centercirc[1]));
+
+	// //with the center find the scaling factor
+	setScalingFactor(CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2));
+}
 
 
