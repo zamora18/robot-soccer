@@ -55,7 +55,7 @@ def _strong_defense(robot, ball):
     
     if (ball['yhat'] > _goal_box_width/2):
         y_c = _goal_box_width/2
-    else if (ball['yhat'] < -_goal_box_width/2):
+    elif (ball['yhat'] < -_goal_box_width/2):
         y_c = -_goal_box_width/2
     else:
         y_c = ball['yhat']
