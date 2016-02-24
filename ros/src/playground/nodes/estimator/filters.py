@@ -18,7 +18,7 @@ class LowpassFilter(object):
         self.old_position_measurement = self.position
         
 
-    def filter(self, ball_x, ball_y, Ts):
+    def filter(self, ball_x, ball_y, Ts, flag):
         """Filter
 
         This is case 2, which compensates for fixed camera delay
@@ -27,7 +27,7 @@ class LowpassFilter(object):
 
         vision_ball_position = np.matrix([ball_x, ball_y])
 
-        if 1: # correct
+        if flag: # correction
             # low pass filter position 
             self.position_d1 = self.alpha*self.position_d1 + (1-self.alpha)*vision_ball_position
 
@@ -37,7 +37,7 @@ class LowpassFilter(object):
 
             # propagate upto current location
             N = int(np.floor(Ts/Ts_control))
-            for i in range(N):
+            for i in xrange(N):
                 self.position_d1 = self.position_d1 + Ts*self.velocity
 
             self.position = self.position_d1
@@ -45,9 +45,6 @@ class LowpassFilter(object):
         else: # prediction
             # propagate prediction ahead one control sample time
             self.position = self.position + Ts_control*self.velocity
-
-
-        import ipdb; ipdb.set_trace()
 
         xhat = self.position.getA()[0][0]
         yhat = self.position.getA()[0][1]
