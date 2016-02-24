@@ -21,17 +21,21 @@ _thetahat = 0
 
 _last_time = time.time()
 _camera_flag = 0
+_camera_flag_counter = 0
 
 _estimator_on = True
 
 def _handle_vision_ball_position(msg):
-    global _xhat, _yhat, _thetahat, _last_time, _camera_flag
+    global _xhat, _yhat, _thetahat, _last_time, _camera_flag, _camera_flag_counter
     _xhat = msg.x
     _yhat = msg.y
     _thetahat = msg.theta
 
     _last_time = time.time()
-    _camera_flag = 1
+    _camera_flag_counter += 1
+    if _camera_flag_counter == 5
+        _camera_flag = 1
+        _camera_flag_counter = 0
 
 def main():
     rospy.init_node('estimator', anonymous=False)
