@@ -41,7 +41,7 @@ def _strong_offense(robot, ball):
             y_c = ball['yhat'] + (_dist_behind_ball+_kick_dist)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg)
         else: 
-            get aligned with ball facing goal
+            #get aligned with ball facing goal
             x_c = ball['xhat'] - (_dist_behind_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
             y_c = ball['yhat'] - (_dist_behind_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg)
