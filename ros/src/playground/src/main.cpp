@@ -67,13 +67,13 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 137;
-	int robot1HighH = 179;
+	int robot1LowH = 84;
+	int robot1HighH = 102;
 
-	int robot1LowS = 136;
-	int robot1HighS = 255;
+	int robot1LowS = 57;
+	int robot1HighS = 122;
 
-	int robot1LowV = 229;
+	int robot1LowV = 194;
 	int robot1HighV = 255;
 
 	int robot2LowH = 76;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
 
 		//thresh hold the image
-		//inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
 		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
-		//video.erodeDilate(imgRobotThresh);
+		video.erodeDilate(imgRobotThresh);
 		video.erodeDilate(imgBallThresh);
 		// video.erodeDilate(imgRobot2Thresh);
 
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		//imshow("robotthresh", imgRobotThresh);
+		imshow("robotthresh", imgRobotThresh);
 		//imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
