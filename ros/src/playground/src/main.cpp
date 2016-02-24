@@ -67,13 +67,13 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 160;
+	int robot1LowH = 137;
 	int robot1HighH = 179;
 
-	int robot1LowS = 117;
+	int robot1LowS = 136;
 	int robot1HighS = 255;
 
-	int robot1LowV = 164;
+	int robot1LowV = 229;
 	int robot1HighV = 255;
 
 	int robot2LowH = 76;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 		}
 
 
-		
+
 		//cout << "cloning" << endl;
 
 		currentImage = imgOriginal.clone();
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 		imshow("Raw Image", imgOriginal);
 		//show the new image
 		//imshow("robotthresh", imgRobotThresh);
-		imshow("ballthresh", imgBallThresh);
+		//imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 

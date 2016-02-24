@@ -5,7 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#define CIRCLE_DIAMETER_IN_CM 49.35
+#define CIRCLE_DIAMETER_IN_CM 50
 
 using namespace cv;
 using namespace std;
