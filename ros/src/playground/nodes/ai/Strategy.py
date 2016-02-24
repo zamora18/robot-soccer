@@ -14,8 +14,8 @@ _kick_dist          = 0.1524 #(6.0in)
 
 
 def choose_strategy(robot, ball):
-    return _strong_defense(robot, ball)
-    #return _strong_offense(robot, ball)
+    #return _strong_defense(robot, ball)
+    return _strong_offense(robot, ball)
 
 
 def _strong_offense(robot, ball):
@@ -34,7 +34,7 @@ def _strong_offense(robot, ball):
     else:
         # if robot is behind the ball and aligned towards goal
         if ( _close(theta_ball_to_goal_deg, theta_bot_to_goal_deg) and \
-             _close(theta_ball_to_goal_deg, robot['thetahat']) and \
+             #_close(theta_ball_to_goal_deg, robot['thetahat']) and \
             dist_from_ball <= (_des_dist_from_ball+_robot_half_width)): #taking into account 1/2 robot width
             #kick ball towards goal 6 inches
             x_c = ball['xhat'] + (_des_dist_from_ball+_kick_dist)*np.cos(theta_ball_to_goal)
@@ -71,5 +71,5 @@ def _get_distance(object_1, object_2):
     return distance
 
 
-def _close(a, b, tolerance=5.0):
+def _close(a, b, tolerance=20.0):
     return abs(a - b) <= tolerance
