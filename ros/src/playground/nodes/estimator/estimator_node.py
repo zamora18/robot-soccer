@@ -11,7 +11,7 @@ import numpy as np
 
 from filters import LowpassFilter
 
-ball_lpf = LowpassFilter(0.7, 0.02)
+ball_lpf = LowpassFilter(0.3, 0.02)
 
 _estimator_period = 1.0/100
 

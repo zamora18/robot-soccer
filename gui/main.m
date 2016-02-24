@@ -135,13 +135,13 @@ function visionRobotPositionCallback(src, msg, handles)
 
     x = get(handles.plot_position,'XData');
     y = get(handles.plot_position,'YData');
-    x = [x msg.X/100];
-    y = [y msg.Y/100];
+    x = [x msg.X];
+    y = [y msg.Y];
     set(handles.plot_position,'XData',x,'YData',y);
     
     set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
-    set(handles.table_position,'Data', {msg.X/100 msg.Y/100 msg.Theta});
+    set(handles.table_position,'Data', {msg.X msg.Y msg.Theta});
     
 function desiredPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_desired_position)
