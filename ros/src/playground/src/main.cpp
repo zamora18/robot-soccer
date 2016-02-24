@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 140;
-	int ballHighH = 179;
+	int ballLowH = 158;
+	int ballHighH = 175;
 
 	int ballLowS = 41;
 	int ballHighS = 150;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 170;
+	int robot1LowH = 160;
 	int robot1HighH = 179;
 
 	int robot1LowS = 117;
@@ -179,6 +179,8 @@ int main(int argc, char *argv[])
 			break;
 		}
 
+
+		
 		//cout << "cloning" << endl;
 
 		currentImage = imgOriginal.clone();
@@ -261,13 +263,22 @@ int main(int argc, char *argv[])
 
 		line(imgOriginal, robotlocation, end, Scalar(0,0,255), 2);
 
+		circle(imgOriginal, video.fieldToImageTransform(ball.getLocation()), 10, Scalar(0,0,255));
+		
+		stringstream ss, ss1;
+		ss << "(" << (int)ball.getLocation().x << "," << (int)ball.getLocation().y << ")";
+		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+
+		ss1 << "(" << (int)robot.getLocation().x << "," << (int)robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
+		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+
 		//cout << "line drawn" << endl;
 
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
 		//imshow("robotthresh", imgRobotThresh);
-		//imshow("ballthresh", imgBallThresh);
+		imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
