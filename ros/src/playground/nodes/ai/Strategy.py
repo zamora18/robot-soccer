@@ -22,7 +22,9 @@ def _strong_offense(robot, ball):
     #
     # arctan2([y], [x])
     theta_ball_to_goal = np.arctan2([ ball['yhat'] - _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
-    theta_ball_to_goal = theta*180/np.pi
+    theta_ball_to_goal = theta_ball_to_goal*180/np.pi
+    theta_bot_to_goal = np.arctan2([ robot['yhat'] - _goal_position_opp[1] ], [ _goal_position_opp[0] - robot['xhat'] ])
+    theta_bot_to_goal = theta_bot_to_goal*180/np.pi
     dist_from_ball = _get_distance(robot, ball)
 
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
@@ -30,7 +32,9 @@ def _strong_offense(robot, ball):
         return (robot['xhat'], robot['yhat'], robot['thetahat'])
     else:
         # if robot is behind the ball and aligned towards goal
-        if (theta_ball_to_goal == robot['thetahat'] and dist_from_ball <= _dist_behind_ball+_robot_half_width): #taking into account 1/2 robot width
+        if (theta_ball_to_goal == robot['thetahat'] and 
+            theta_bot_to_goal == theta_ball_to_goal and 
+            dist_from_ball <= _dist_behind_ball+_robot_half_width): #taking into account 1/2 robot width
             #kick ball towards goal 6 inches
             x_c = ball['xhat'] + (_dist_behind_ball+_kick_dist)*np.cos(theta)
             y_c = ball['yhat'] + (_dist_behind_ball+_kick_dist)*np.sin(theta)
