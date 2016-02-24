@@ -1,16 +1,16 @@
 import numpy as np
 
-# field constants
-_field_length       = 3.68 # meters (12ft)
-_field_width        = 2.62 # meters (8.58 ft)
-_robot_width        = 0.1841 # meters (7.25in)
+# field constants. Distances measured in meters
+_field_length       = 3.68 # (12ft)
+_field_width        = 2.62 # (8.58 ft)
+_robot_width        = 0.1841 # (7.25 in)
 _robot_half_width   = _robot_width/2
-_goal_width         = _field_width/3
-_goal_box_length    = 0.1143 # meters (4.5 in)
+_goal_box_width     = 0.660 # (26 in)
+_goal_box_length    = 0.1143 #(4.5 in)
 _goal_position_home = [-_field_length/2, 0, 0] #this could change depending on camera
 _goal_position_opp  = [-_goal_position_home[0], 0, 0]
-_dist_behind_ball   = 0.0762 # meters (3.0in)
-_kick_dist          = 0.1524 # meters (6.0in)
+_dist_behind_ball   = 0.0762 #(3.0in)
+_kick_dist          = 0.1524 #(6.0in)
 
 
 def choose_strategy(robot, ball):
@@ -52,7 +52,15 @@ def _strong_defense(robot, ball):
     theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat'] ], [ ball['xhat'] - _goal_position_opp[0] ])
     theta_c_deg = theta_c*180/np.pi
     x_c = _goal_position_home[0] + _goal_box_length + _robot_half_width - 0 #_goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
-    y_c = ball['yhat'] #_goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
+    
+    if (ball['yhat'] > _goal_box_width/2):
+        y_c = _goal_box_width/2
+    else if (ball['yhat'] < -_goal_box_width/2):
+        y_c = -_goal_box_width/2
+    else:
+        y_c = ball['yhat']
+
+    #_goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
     theta_c_deg = 0
     return (x_c, y_c, theta_c_deg)
     
