@@ -12,10 +12,11 @@ _goal_position_opp  = [-_goal_position_home[0], 0, 0]
 _des_dist_from_ball = 0.0762 #(3.0in)
 _kick_dist          = 0.1524 #(6.0in)
 
+_done = False
 
 def choose_strategy(robot, ball):
-    return _strong_defense(robot, ball)
-    #return _strong_offense(robot, ball)
+    #return _strong_defense(robot, ball)
+    return _strong_offense(robot, ball)
 
 
 def _strong_offense(robot, ball):
@@ -82,7 +83,7 @@ def _close(a, b, tolerance=20.0):
 
 def _hack_offense(robot, ball):
 
-    STOP_THRESH = 1.21 # m
+    STOP_THRESH = 1.75 # m
 
     if robot['xhat'] > STOP_THRESH:
         return (0, 0, robot['thetahat'])
@@ -92,12 +93,15 @@ def _hack_offense(robot, ball):
     robot_width = 0.1841
     offset_behind_ball = 2.5*robot_width
 
-    x = offset_behind_ball*cos(theta_ball_to_goal)
-    y = offset_behind_ball*sin(theta_ball_to_goal)
+    global _done
 
-    if not _close(robot['xhat'], x, tolerance=0.100) or not _close(robot['yhat'], y, tolerance=0.100):
+    x = ball['xhat'] - offset_behind_ball*np.cos(theta_ball_to_goal)
+    y = ball['yhat'] - offset_behind_ball*np.sin(-2*theta_ball_to_goal)
+
+    if not _close(robot['xhat'], x, tolerance=0.100) or not _close(robot['yhat'], y, tolerance=0.100) and not _done:
+        _done = True
         return (x, y, robot['thetahat'])
 
     # kick
-    kick_point = (STOP_THRESH, 0)
+    kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
     return kick_point
