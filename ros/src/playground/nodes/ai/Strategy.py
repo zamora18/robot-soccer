@@ -6,7 +6,7 @@ _field_width        = 1.52  # meters (5 ft)
 _robot_width        = 0.1841 # meters (7.25in)
 _robot_half_width   = _robot_width/2
 _goal_width         = _field_width/3
-_goal_box_length    = _field_length/10 + 0.100
+_goal_box_length    = _field_length/10
 _goal_position_home = [-_field_length/2, 0, 0] #this could change depending on camera
 _goal_position_opp  = [-_goal_position_home[0], 0, 0]
 _dist_behind_ball   = 0.0762 # meters (3.0in)
@@ -48,11 +48,11 @@ def _strong_offense(robot, ball):
             
 
 def _strong_defense(robot, ball):
-    #for not we want to make one robot defend the goal
+    #for now we want to make one robot defend the goal
     theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat'] ], [ ball['xhat'] - _goal_position_opp[0] ])
     theta_c_deg = theta_c*180/np.pi
-    x_c = _goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
-    y_c = _goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
+    x_c = _goal_position_home[0] + _goal_box_length + _robot_half_width + 0.2 #_goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
+    y_c = ball['yhat'] #_goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
     return (x_c, y_c, theta_c_deg)
     
 def _get_distance(object_1, object_2):
