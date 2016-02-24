@@ -49,6 +49,8 @@ class ImageProcessor
 
 		void setScalingFactor(double scaling);
 		double getScalingFactor();
+
+		void correctRobotCenter(Robot* robot);
 };
 
 #endif // IMAGEPROCESSOR_H

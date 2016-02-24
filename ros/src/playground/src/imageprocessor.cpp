@@ -5,6 +5,7 @@
 #include <math.h>
 #include <iostream>
 
+#define CENTER_OF_ROBOT_OFFSET_IN_CM 3.175
 
 using namespace cv;
 using namespace std;
@@ -178,10 +179,26 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 	robot->setOrientation(angle);
 	robot->setLocation(imageToFieldTransform(p1));
 
+	//correctRobotCenter(robot);
+
 
 }
 
-
+void ImageProcessor::correctRobotCenter(Robot* robot)
+{
+	Point2d robotcenter = robot->getLocation();
+	double theta = robot->getOrientation();
+	Point2d actualcenter;
+	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_CM * cos(theta*180/M_PI);
+	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_CM * sin(theta*180/M_PI);
+	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_CM || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_CM)
+	{
+		cout << "bad calculation" << endl;
+		cout << actualcenter.x << "," << actualcenter.y << endl;
+		return;
+	}
+	robot->setLocation(actualcenter);
+}
 
 //finds the angle between two points, p1->p2
 double ImageProcessor::findAngleTwoPoints(Point2d p1, Point2d p2)

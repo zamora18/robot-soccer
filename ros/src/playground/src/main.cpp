@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 159;
+	int robot1LowH = 170;
 	int robot1HighH = 179;
 
 	int robot1LowS = 117;
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 		imshow("Raw Image", imgOriginal);
 		//show the new image
 		//imshow("robotthresh", imgRobotThresh);
-		imshow("ballthresh", imgBallThresh);
+		//imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
