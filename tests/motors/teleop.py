@@ -2,13 +2,19 @@ import time
 import sys
 
 import numpy as np
-from Getch import _Getch
 
 from repeated_timer import RepeatedTimer
+
+sys.path.append('../../ros/src/playground/nodes/motion/')
+sys.path.append('../../ros/src/playground/nodes/odometry/')
+sys.path.append('../../ros/src/playground/nodes/controller/')
+sys.path.append('../../ros/src/playground/nodes/teleop/')
+
 import motion
 import wheelbase as w
 import Odometry
 import Controller
+from Getch import _Getch
 
 import calibrator as c
 
@@ -17,13 +23,18 @@ _odom_timer = None
 _ctrl_timer = None
 
 _motion_timer_period = 1.0/6
-_odom_timer_period = 1.0/7
-_ctrl_timer_period = 1.0/10
+_odom_timer_period = 1.0/11
+_ctrl_timer_period = 1.0/8
 
 _vx = 0.5
 _vy = 0.5
-_w = np.pi
+_w = 180
 _velocities = (0, 0, 0)
+
+_xhat = 0
+_yhat = 0
+_thetahat = 0
+_velocityhat = (0, 0, 0, 0, 0, 0)
 
 _set_speed = True
 
@@ -56,36 +67,36 @@ def _action_requires_stop(action):
 
 def _go_home():
     # Get current robot position, rounded to 1 decimal place
-    x = round(Odometry.x, 1)
-    y = round(Odometry.y, 1)
-    theta = round(Odometry.theta, 1)
+    xhat = round(_xhat, 1)
+    yhat = round(_yhat, 1)
+    thetahat = round(_thetahat, 1)
 
     # Set a tolerance
     tolerance = 0.1
 
-    if abs(x) > tolerance:
-        dt = abs(x / _vx)
-        sign = -1 if x > 0 else 1
+    if abs(xhat) > tolerance:
+        dt = abs(xhat / _vx)
+        sign = -1 if xhat > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(sign*_vx, 0, 0, dt))
         motion.drive(sign*_vx, 0, 0)
         time.sleep(dt)
         motion.stop()
         time.sleep(0.5)
 
-    if abs(y) > tolerance:
-        dt = abs(y / _vy)
-        sign = -1 if y > 0 else 1
+    if abs(yhat) > tolerance:
+        dt = abs(yhat / _vy)
+        sign = -1 if yhat > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, sign*_vy, 0, dt))
         motion.drive(0, sign*_vy, 0)
         time.sleep(dt)
         motion.stop()
         time.sleep(0.5)
 
-    if abs(theta) > tolerance:
+    if abs(thetahat) > tolerance*100:
         # since it's periodic...
-#        theta = round(theta%(2*np.pi) ,2)
-        dt = abs(theta / _w)
-        sign = -1 if theta > 0 else 1
+#        thetahat = round(thetahat%(360) ,2)
+        dt = abs(thetahat / _w)
+        sign = -1 if thetahat > 0 else 1
         print("motion.drive({},{},{}) for {} s\r".format(0, 0, sign*_w, dt))
         motion.drive(0, 0, sign*_w)
         time.sleep(dt)
@@ -97,7 +108,7 @@ def _ask_for_point():
     Asks user for a point to go to. User enters three floats, separated
     by spaces, with no other characters; x, y, theta respectively
     """
-    usr = raw_input("Input point, (syntax: \"x y theta\"): ")
+    usr = raw_input("Input point, (syntax: \"x y theta\" [degrees]): ")
 
     usr_list = usr.split()
 
@@ -165,27 +176,34 @@ def _deal_with_calibration():
             M2QPPS = None
             M3QPPS = None
 
-        c.test_calibration(velocity=velocity,sleep_time=sleep_time,
-                            M1QPPS=M1QPPS,M2QPPS=M2QPPS,M3QPPS=M3QPPS)
+        c.test_calibration(velocity=velocity, sleep_time=sleep_time,
+                            M1QPPS=M1QPPS, M2QPPS=M2QPPS, M3QPPS=M3QPPS)
 
 
 def _handle_motion_timer():
-    global _set_speed
+    global _set_speed, _velocityhat
     if _set_speed:
-        motion.drive(*_velocities,smooth=_smooth)
+        motion.drive(*_velocities, smooth=_smooth, theta=_thetahat)
         _set_speed = False
+
+    (vx, vy, w, s1, s2, s3) = motion.get_velocities(theta=_thetahat)
+    _velocityhat = (vx, vy, w, s1, s2, s3)
 
 
 def _handle_odom_timer():
-    global _ctrl_on, _velocities, _set_speed
+    global _ctrl_on, _velocities, _set_speed, _xhat, _yhat, _thetahat
     if _odom_on:
-        odom = Odometry.update(_odom_timer_period)
+        odom = Odometry.update(_odom_timer_period, _velocityhat)
         print "{}\r".format(odom)
+
+        _xhat = odom[0]
+        _yhat = odom[1]
+        _thetahat = odom[2]
 
         if _ctrl_on:
             x_c, y_c, theta_c = Controller.get_commanded_position()
-            if _close(Odometry.x, x_c) and _close(Odometry.y, y_c) and \
-                    _close(Odometry.theta, theta_c, tolerance=1000000*(np.pi/12)):
+            if _close(_xhat, x_c) and _close(_yhat, y_c) and \
+                    _close(_thetahat, theta_c, tolerance=8):
                 _ctrl_on = False
                 print("\r\n*** Reached Set Point within Tolerances ***\r\n")
                 _motion_timer.stop()
@@ -200,7 +218,7 @@ def _handle_ctrl_timer():
     global _set_speed
     global _velocities
     if _ctrl_on:
-        _velocities = Controller.update(_ctrl_timer_period)
+        _velocities = Controller.update(_ctrl_timer_period, _xhat, _yhat, _thetahat)
         #print("Vel: {}\r".format(_velocities))
         _set_speed = True
 

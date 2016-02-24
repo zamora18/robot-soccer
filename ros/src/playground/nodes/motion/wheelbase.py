@@ -18,10 +18,16 @@ _RC = [
 
 _SERIAL_ERR = False
 
+# M1QPPS=231949,M2QPPS=287323,M3QPPS=401121
+# M1QPPS=217545,M2QPPS=287538,M3QPPS=385927
+
 class QPPS:
-	M1 = 198970
-	M2 = 170489
-	M3 = 171568
+        M1 = 217949
+        M2 = 287323
+        M3 = 381121
+	#M1 = 198970
+	#M2 = 170489
+	#M3 = 171568
 
 def __dummy(*args):
 	return False
