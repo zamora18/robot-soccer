@@ -9,7 +9,7 @@ _goal_box_width     = 0.660 # (26 in)
 _goal_box_length    = 0.1143 #(4.5 in)
 _goal_position_home = [-_field_length/2, 0, 0] #this could change depending on camera
 _goal_position_opp  = [-_goal_position_home[0], 0, 0]
-_dist_behind_ball   = 0.0762 #(3.0in)
+_des_dist_from_ball = 0.0762 #(3.0in)
 _kick_dist          = 0.1524 #(6.0in)
 
 
@@ -33,17 +33,17 @@ def _strong_offense(robot, ball):
         return (robot['xhat'], robot['yhat'], robot['thetahat'])
     else:
         # if robot is behind the ball and aligned towards goal
-        if (theta_ball_to_goal_deg == robot['thetahat'] and \
-            theta_bot_to_goal_deg == theta_ball_to_goal_deg and \
-            dist_from_ball <= (_dist_behind_ball+_robot_half_width)): #taking into account 1/2 robot width
+        if ( _close(theta_ball_to_goal_deg, theta_bot_to_goal_deg) and \
+             _close(theta_ball_to_goal_deg, robot['thetahat']) and \
+            dist_from_ball <= (_des_dist_from_ball+_robot_half_width)): #taking into account 1/2 robot width
             #kick ball towards goal 6 inches
-            x_c = ball['xhat'] + (_dist_behind_ball+_kick_dist)*np.cos(theta_ball_to_goal)
-            y_c = ball['yhat'] + (_dist_behind_ball+_kick_dist)*np.sin(theta_ball_to_goal)
+            x_c = ball['xhat'] + (_des_dist_from_ball+_kick_dist)*np.cos(theta_ball_to_goal)
+            y_c = ball['yhat'] + (_des_dist_from_ball+_kick_dist)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg)
         else: 
             #get aligned with ball facing goal
-            x_c = ball['xhat'] - (_dist_behind_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
-            y_c = ball['yhat'] - (_dist_behind_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
+            x_c = ball['xhat'] - (_des_dist_from_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
+            y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg)
             
 
@@ -69,3 +69,7 @@ def _get_distance(object_1, object_2):
     y_dist = object_1['yhat'] - object_2['yhat']
     distance = np.sqrt(x_dist**2 + y_dist**2)
     return distance
+
+
+def _close(a, b, tolerance=5.0):
+    return abs(a - b) <= tolerance
