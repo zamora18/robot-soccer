@@ -14,8 +14,8 @@ _kick_dist          = 0.1524 #(6.0in)
 
 
 def choose_strategy(robot, ball):
-    #return _strong_defense(robot, ball)
-    return _strong_offense(robot, ball)
+    return _strong_defense(robot, ball)
+    #return _strong_offense(robot, ball)
 
 
 def _strong_offense(robot, ball):
