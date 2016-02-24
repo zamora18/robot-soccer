@@ -21,6 +21,7 @@ class ImageProcessor
 	public:
 		ImageProcessor();
 		ImageProcessor(int capnumber);
+		ImageProcessor(double scalingfactor, Point2d center);
 		ImageProcessor(string inputsource);
 
 		vector<vector<Point> >  getContours(Mat contourOutput);
@@ -39,15 +40,15 @@ class ImageProcessor
 
 		bool read(Mat* img);
 
+		void initializeBall(VisionObject* ball, Mat img);
+
+		void initializeCenter(Mat centercircle);
+
 		void setCenter(Point2d centeroffield);
 		Point2d getCenter();
 
 		void setScalingFactor(double scaling);
 		double getScalingFactor();
-
-		void initializeBall(VisionObject* ball, Mat img);
-
-		void initializeCenter(Mat centercircle);
 };
 
 #endif // IMAGEPROCESSOR_H

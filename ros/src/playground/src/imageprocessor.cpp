@@ -16,6 +16,13 @@ ImageProcessor::ImageProcessor()
 	
 }
 
+ImageProcessor::ImageProcessor(double scalingfactor, Point2d center)
+{
+	setCenter(center);
+	setScalingFactor(scalingfactor);
+
+}
+
 ImageProcessor::ImageProcessor(int capnumber)
 {
 	cap.open(capnumber);
@@ -25,23 +32,14 @@ ImageProcessor::ImageProcessor(int capnumber)
 ImageProcessor::ImageProcessor(string inputsource)
 {
 	cap.open(inputsource);
-	center.x = 0;
-	center.y = 0;
+
 }
 
-//reads in the image from the input source
-bool ImageProcessor::read(Mat* img)
-{
-	return cap.read(*img);
-}
-
-//sets the center of the field
 void ImageProcessor::setCenter(Point2d centeroffield)
 {
 	center = centeroffield;
 }
 
-//returns the center
 Point2d ImageProcessor::getCenter()
 {
 	return center;
@@ -54,6 +52,12 @@ void ImageProcessor::setScalingFactor(double scaling)
 double ImageProcessor::getScalingFactor()
 {
 	return scalingfactor;
+}
+
+//reads in the image from the input source
+bool ImageProcessor::read(Mat* img)
+{
+	return cap.read(*img);
 }
 
 //gets the conntours of a thresholded img
@@ -169,6 +173,8 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 
 	double angle = findAngleTwoPoints(p1, p2);
 
+
+
 	robot->setOrientation(angle);
 	robot->setLocation(imageToFieldTransform(p1));
 
@@ -249,6 +255,7 @@ Vec3f ImageProcessor::findCenterCircle(Mat img)
 //returns the transform of a point p in the image to a cartesian plot on the field
 Point2d ImageProcessor::imageToFieldTransform(Point2d p)
 {
+	//cout << scalingfactor << endl;
 	p.x =  (p.x - center.x)*scalingfactor;
 	p.y =  (center.y - p.y)*scalingfactor;
 	return p;
@@ -274,10 +281,10 @@ void ImageProcessor::initializeCenter(Mat centercircle)
 	centercirc = findCenterCircle(centercircle);
 
 	// //set the image center
-	setCenter(Point2d(centercirc[0], centercirc[1]));
+	center = Point2d(centercirc[0], centercirc[1]);
 
 	// //with the center find the scaling factor
-	setScalingFactor(CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2));
+	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
 }
 
 
