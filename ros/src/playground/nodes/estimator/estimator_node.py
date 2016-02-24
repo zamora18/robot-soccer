@@ -31,9 +31,15 @@ def _handle_vision_ball_position(msg):
     _yhat = msg.y
     _thetahat = msg.theta
 
+    when_to_correct = 5
+
+    if _xhat <= -0.75:
+        when_to_correct = 2
+
+
     _last_time = time.time()
     _camera_flag_counter += 1
-    if _camera_flag_counter == 5
+    if _camera_flag_counter >= when_to_correct:
         _camera_flag = 1
         _camera_flag_counter = 0
 
