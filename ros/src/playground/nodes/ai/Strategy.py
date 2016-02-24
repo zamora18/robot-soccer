@@ -28,8 +28,7 @@ def _strong_offense(robot, ball):
     theta_bot_to_goal_deg   = theta_bot_to_goal*180/np.pi
     dist_from_ball          = _get_distance(robot, ball)
 
-    print("theta_ball_to_goal: {}\r".format(theta_ball_to_goal_deg))
-    print("theta_bot_to_goal: {}\r".format(theta_bot_to_goal_deg))
+    print("theta_ball_to_goal: {}\t\ttheta_bot_to_goal: {}\r".format(theta_ball_to_goal_deg, theta_bot_to_goal_deg))
 
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
         #ball is in goal, don't move robot anywhere
