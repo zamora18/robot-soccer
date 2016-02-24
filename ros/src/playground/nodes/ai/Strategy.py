@@ -6,14 +6,15 @@ _field_width        = 1.52  # meters (5 ft)
 _robot_width        = 0.1841 # meters (7.25in)
 _robot_half_width   = _robot_width/2
 _goal_width         = _field_width/3
-_goal_box_length    = _field_length/10
-_goal_position_home = [-_field_length, 0, 0] #this could change depending on camera
+_goal_box_length    = _field_length/10 + 0.100
+_goal_position_home = [-_field_length/2, 0, 0] #this could change depending on camera
 _goal_position_opp  = [-_goal_position_home[0], 0, 0]
 _dist_behind_ball   = 0.0762 # meters (3.0in)
 _kick_dist          = 0.1524 # meters (6.0in)
 
 
 def choose_strategy(robot, ball):
+    return _strong_defense(robot, ball)
     return _strong_offense(robot, ball)
 
 
