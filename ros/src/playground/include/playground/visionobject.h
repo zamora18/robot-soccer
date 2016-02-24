@@ -15,6 +15,8 @@ class VisionObject
 		Point2d location;
 		double speed;
 		double direction;
+		Scalar lowHSV;
+		Scalar highHSV;
 
 
 	public:
@@ -29,7 +31,13 @@ class VisionObject
 		void setSpeed(double value);
 		double getDirection() const;
 		void setDirection(double value);
+		Scalar getLowHSV();
+		void setLowHSV(Scalar hsv);
+		Scalar getHighHSV();
+		void setHighHSV(Scalar hsv);
 		void toString();
+
+		
 };
 
 #endif // VISIONOBJECT_H

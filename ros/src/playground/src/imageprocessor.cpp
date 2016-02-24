@@ -5,23 +5,35 @@
 #include <math.h>
 #include <iostream>
 
+#define CENTER_OF_ROBOT_OFFSET_IN_CM 3.175
 
 using namespace cv;
 using namespace std;
 
+
+//use for webcam, 0 for first webcam, 1 for second
 ImageProcessor::ImageProcessor()
 {
-	cap.open(1);
+	
 }
 
+ImageProcessor::ImageProcessor(double scalingfactor, Point2d center)
+{
+	setCenter(center);
+	setScalingFactor(scalingfactor);
+
+}
+
+ImageProcessor::ImageProcessor(int capnumber)
+{
+	cap.open(capnumber);
+}
+
+//open the input string source
 ImageProcessor::ImageProcessor(string inputsource)
 {
 	cap.open(inputsource);
-}
 
-bool ImageProcessor::read(Mat* img)
-{
-	return cap.read(*img);
 }
 
 void ImageProcessor::setCenter(Point2d centeroffield)
@@ -41,6 +53,12 @@ void ImageProcessor::setScalingFactor(double scaling)
 double ImageProcessor::getScalingFactor()
 {
 	return scalingfactor;
+}
+
+//reads in the image from the input source
+bool ImageProcessor::read(Mat* img)
+{
+	return cap.read(*img);
 }
 
 //gets the conntours of a thresholded img
@@ -156,13 +174,31 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 
 	double angle = findAngleTwoPoints(p1, p2);
 
+
+
 	robot->setOrientation(angle);
 	robot->setLocation(imageToFieldTransform(p1));
+
+	//correctRobotCenter(robot);
 
 
 }
 
-
+void ImageProcessor::correctRobotCenter(Robot* robot)
+{
+	Point2d robotcenter = robot->getLocation();
+	double theta = robot->getOrientation();
+	Point2d actualcenter;
+	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_CM * cos(theta*180/M_PI);
+	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_CM * sin(theta*180/M_PI);
+	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_CM || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_CM)
+	{
+		cout << "bad calculation" << endl;
+		cout << actualcenter.x << "," << actualcenter.y << endl;
+		return;
+	}
+	robot->setLocation(actualcenter);
+}
 
 //finds the angle between two points, p1->p2
 double ImageProcessor::findAngleTwoPoints(Point2d p1, Point2d p2)
@@ -236,6 +272,7 @@ Vec3f ImageProcessor::findCenterCircle(Mat img)
 //returns the transform of a point p in the image to a cartesian plot on the field
 Point2d ImageProcessor::imageToFieldTransform(Point2d p)
 {
+	//cout << scalingfactor << endl;
 	p.x =  (p.x - center.x)*scalingfactor;
 	p.y =  (center.y - p.y)*scalingfactor;
 	return p;
@@ -250,6 +287,21 @@ Point2d ImageProcessor::fieldToImageTransform(Point2d p)
 }
 
 
+void ImageProcessor::initializeCenter(Mat centercircle)
+{
+	//clones image so that we can do operations on it w/o messing up original image
 
+
+	Vec3f centercirc;
+
+	// //locate the center circle of the image
+	centercirc = findCenterCircle(centercircle);
+
+	// //set the image center
+	center = Point2d(centercirc[0], centercirc[1]);
+
+	// //with the center find the scaling factor
+	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
+}
 
 
