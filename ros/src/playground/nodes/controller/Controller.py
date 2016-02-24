@@ -54,7 +54,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=2.5): # degrees
+    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=6): # degrees
         ccw_dist = _ccw_distance(thetahat, theta_c)
         cw_dist  = _cw_distance(thetahat, theta_c)
 
