@@ -7,13 +7,18 @@ project(playground)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  roslaunch
   std_msgs
+  geometry_msgs
   message_generation
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+# Check all *.launch files for common errors
+roslaunch_add_file_check(launch)
 
 find_package(OpenCV)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -52,14 +57,16 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_message_files(
   FILES
   coords.msg
+  EncoderEstimates.msg
+  QPulses.msg
+  WorldVelocities.msg
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  RoboClawRPC.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -72,6 +79,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  std_srvs
 )
 
 ################################################
@@ -106,7 +114,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES playground
- CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+ CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs message_runtime std_srvs
 #  DEPENDS system_lib
 )
 
@@ -201,6 +209,6 @@ add_executable(listener src/listener.cpp)
 target_link_libraries(listener ${catkin_LIBRARIES})
 add_dependencies(listener beginner_tutorials_generate_messages_cpp)
 
-add_executable(vision src/main.cpp src/robot.cpp src/visionobject.cpp)
+add_executable(vision src/main.cpp src/robot.cpp src/visionobject.cpp src/imageprocessor.cpp)
 target_link_libraries(vision ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(vision beginner_tutorials_generate_messages_cpp)

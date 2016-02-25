@@ -1,103 +1,165 @@
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "geometry_msgs/Pose2D.h"
 #include <math.h>
 #include "visionobject.h"
 #include "robot.h"
+#include "imageprocessor.h"
+#include <pthread.h>
 
 #include <ros/ros.h>
 #include "playground/coords.h"
 
-#define CIRCLE_DIAMETER_IN_CM 49.35
+#define ESC 1048603
+
 
 using namespace cv;
 using namespace std;
 
+Mat currentImage;
+pthread_cond_t robot1cond;
+pthread_cond_t robot1done;
+pthread_mutex_t mrobot1cond;
+pthread_mutex_t mrobot1done;
+bool done1, start1;
+
 double scalingfactor;
 Point2d center;
-VideoCapture cap;
 
-vector<vector<Point> >  getContours(Mat contourOutput);
+void* trackRobot(void* robotobject);
 
-bool initializeRobot(Robot* robot1, Mat img);
+void* trackBall(void* ballobject);
 
-double findAngleTwoPoints(Point2d p1, Point2d p2);
-
-void erodeDilate(Mat img);
-
-Vec3f findCenterCircle(Mat img);
-
-Point2d imageToFieldTransform(Point2d center, Point2d p);
-
-Point2d fieldToImageTransform(Point2d center, Point2d p);
 
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "vision_talker");
 
 	ros::NodeHandle n;
-	ros::Publisher pub = n.advertise<playground::coords>("vision", 5);
+	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>("vision_robot_position", 5);
+	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
 
 	// cap;
-	cap.open("http://192.168.1.36:8080/stream?topic=/image&dummy=param.mjpg");
+	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
+
+	ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
+	//ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
 	{
-		cout << "cap is closed" << endl;
+		//cout << "cap is closed" << endl;
 		return -1;
 	}//*/
 
-	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int iLowH = 80;
-	int iHighH = 100;
+	int ballLowH = 158;
+	int ballHighH = 175;
 
-	int iLowS = 47;
-	int iHighS = 241;
+	int ballLowS = 41;
+	int ballHighS = 150;
 
-	int iLowV = 0;
-	int iHighV = 255;
+	int ballLowV = 183;
+	int ballHighV = 255;
+
+
+	int robot1LowH = 137;
+	int robot1HighH = 179;
+
+	int robot1LowS = 136;
+	int robot1HighS = 255;
+
+	int robot1LowV = 229;
+	int robot1HighV = 255;
+
+	int robot2LowH = 76;
+	int robot2HighH = 107;
+
+	int robot2LowS = 168;
+	int robot2HighS = 255;
+
+	int robot2LowV = 189;
+	int robot2HighV = 255;	
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Control", &iHighH, 179);
+	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "BallControl", &ballHighH, 179);
 
-	cvCreateTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Control", &iHighS, 255);
+	cvCreateTrackbar("LowS", "BallControl", &ballLowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "BallControl", &ballHighS, 255);
 
-	cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Control", &iHighV, 255);
+	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
 
+	//Create trackbars in "Control" window
+	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
+
+	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
+
+	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
+
+	/*cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
+
+	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
+
+	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);*/
+
+//	event = 0;
 	Mat imgTemp;
-	cap.read(imgTemp);
+
+	video.read(&imgTemp);
 
 	Mat centercircle = imgTemp.clone();
 
-	Vec3f centercirc;
+	//find the center circle
+	video.initializeCenter(centercircle);
 
-	centercirc = findCenterCircle(centercircle);
+	scalingfactor = video.getScalingFactor();
 
-	center = Point2d(centercirc[0], centercirc[1]);
-
-	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
-
-
-	cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
+	center = video.getCenter();
+	//covert original immage to HSV to find robots
+	//cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
 	Robot robot = Robot();
+	Robot robot2 = Robot();
+
+	VisionObject ball = VisionObject();
 
 	//thresh hold the image
-	inRange(imgTemp, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgTemp);
+	//inRange(imgTemp, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgTemp);
 
+	//get rid of noise
+	//video.erodeDilate(imgTemp);
 
-	erodeDilate(imgTemp);
+	// //find position and angle of robot
+	//video.initializeRobot(&robot, imgTemp);
 
-	initializeRobot(&robot, imgTemp);
+	//initialize threads
+	pthread_t robot1thread;
 
-	//Mat imgLines = Mat::zeros(imgTemp.size(), CV_8UC3);
+	pthread_cond_init(&robot1cond, NULL);
+	pthread_cond_init(&robot1done, NULL);
 
-	cout << "initialized" << endl;
+	pthread_mutex_init(&mrobot1cond, NULL);
+	pthread_mutex_init(&mrobot1done, NULL);
+
+	pthread_create(&robot1thread, NULL, trackRobot, &robot);
+
+	robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
+	robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
+
+	//yay we did it!
+	//cout << "initialized" << endl;
 
 	ros::Rate loop_rate(100);
 
@@ -105,17 +167,33 @@ int main(int argc, char *argv[])
 	{
 		Mat imgOriginal;
 
-
+		//cout << "reading" << endl;
 		//load in the camera image
-		bool readSuccess = cap.read(imgOriginal);
+		bool readSuccess = video.read(&imgOriginal); //check this
 
+	//	event = 1;
 		//if the read failed exit
 		if(!readSuccess)
 		{
-			cout << "could not read frame from camera" << endl;
+			//cout << "could not read frame from camera" << endl;
 			break;
 		}
 
+
+
+		//cout << "cloning" << endl;
+
+		currentImage = imgOriginal.clone();
+
+		//cout << "go threads go" << endl;
+
+		pthread_mutex_lock(&mrobot1cond);
+		done1 = false;
+		start1 = true;
+		pthread_cond_signal(&robot1cond);
+		pthread_mutex_unlock(&mrobot1cond);
+
+		//cout << "done telling threads to go" << endl;
 
 		//blur(imgOriginal, imgOriginal, Size(3,3));
 
@@ -125,14 +203,17 @@ int main(int argc, char *argv[])
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
 
-		Mat imgThresholded, imgBW;
+		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
 
-		centercircle = imgOriginal.clone();
+		//centercircle = imgOriginal.clone();
 
 
 
 		//thresh hold the image
-		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
+		//inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
+		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+
 
 
 
@@ -144,11 +225,27 @@ int main(int argc, char *argv[])
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
-		erodeDilate(imgThresholded);
+		//video.erodeDilate(imgRobotThresh);
+		video.erodeDilate(imgBallThresh);
+		// video.erodeDilate(imgRobot2Thresh);
 
-		initializeRobot(&robot, imgThresholded);		
+		//video.initializeRobot(&robot, imgRobotThresh);		
+		video.initializeBall(&ball, imgBallThresh);
+		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
-		Point2d robotlocation = fieldToImageTransform(center, robot.getLocation());
+
+		//wait for various threads to finish
+
+		////cout << "waiting for thread to finish" << endl;
+
+		pthread_mutex_lock(&mrobot1done);
+		while(!done1)
+			pthread_cond_wait(&robot1done, &mrobot1done);
+		pthread_mutex_unlock(&mrobot1done);
+
+		////cout << "thread finished! finishing and displaying" << endl;
+
+		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
 		Point2d end;
 
 		double angle = robot.getOrientation();
@@ -161,221 +258,113 @@ int main(int argc, char *argv[])
 		end.x = robotlocation.x + 50 * sinx;
 		end.y = robotlocation.y + 50 * siny;
 
-
+		////cout << "robot stuffs done" << endl;
 
 
 		line(imgOriginal, robotlocation, end, Scalar(0,0,255), 2);
 
+		circle(imgOriginal, video.fieldToImageTransform(ball.getLocation()), 10, Scalar(0,0,255));
+		
+		stringstream ss, ss1;
+		ss << "(" << (int)ball.getLocation().x << "," << (int)ball.getLocation().y << ")";
+		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+
+		ss1 << "(" << (int)robot.getLocation().x << "," << (int)robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
+		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+
+		//cout << "line drawn" << endl;
 
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		imshow("thresh", imgThresholded);
-
+		//imshow("robotthresh", imgRobotThresh);
+		//imshow("ballthresh", imgBallThresh);
+		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
 		//imshow("BWOTSU", imgBW);
 
+		//cout << "leaging" << endl;
 
-
-		if(waitKey(1) >= 0)
+		if(waitKey(1) == ESC)
 		{
 			break;
 		}
 
-		Point2d origin = imageToFieldTransform(center, center);
+		//cout << "sending ros message" << endl;
 
 		// -------------------------------------
-		playground::coords msg;
-		msg.robot_x = robot.getLocation().x;
-		msg.robot_y = robot.getLocation().y;
-		msg.robot_theta = robot.getOrientation();
-		msg.center_x = origin.x;
-		msg.center_y = origin.y;
+		geometry_msgs::Pose2D robot1pos;
+		geometry_msgs::Pose2D ballpos;
+		robot1pos.x = robot.getLocation().x;
+		robot1pos.y = robot.getLocation().y;
+		robot1pos.theta = robot.getOrientation();
 
-		pub.publish(msg);
+
+		ballpos.x = ball.getLocation().x;
+		ballpos.y = ball.getLocation().y;
+
+		pubrobot.publish(robot1pos);
+		pubball.publish(ballpos);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+	//pthread_exit(NULL);
+	pthread_mutex_destroy(&mrobot1cond);
+	pthread_mutex_destroy(&mrobot1done);
+	pthread_cond_destroy(&robot1cond);
+	pthread_cond_destroy(&robot1done);
 	return 0;
 }
 
 
-vector<vector<Point> >  getContours(Mat contourOutput)
+
+void* trackRobot(void* robotobject)
 {
-
-	vector<vector<Point> > contours;
-
-	//detect edges
-	//Canny(contourOutput, contourOutput, 0,255,3);
-
-
-	//find countours
-	findContours(contourOutput, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-
-	return contours;
-
-}
-
-bool initializeRobot(Robot *robot, Mat img)
-{
-
-	Mat contourOutput;
-
-	contourOutput = img.clone();
-
-	vector<vector<Point> > contours = getContours(contourOutput);
-
-
-	for(int i = 0; i < contours.size(); i++)
-	{
-		drawContours(img, contours, i, Scalar(0,0,255), 2);
-	}
-
-	vector<Moments> contourmoments = vector<Moments>();
-
-
-
-
-	for(int i = 0; i < contours.size(); i++)
-	{
-		//if(contourArea(contours[i]) > 100)
-		//{
-			contourmoments.push_back(moments(contours[i]));
-		//}
-
-	}
-
-	vector<Point2d> objects = vector<Point2d>();
-
-	for(int i = 0; i < contourmoments.size(); i++)
-	{
-		double x = (contourmoments[i].m10)/(contourmoments[i].m00);
-		double y = (contourmoments[i].m01)/(contourmoments[i].m00);
-		objects.push_back(Point2d(x,y));
-
-		circle(img, objects[i], 5, Scalar(0,0,0), 2,8, 0);
-	}
-
-	Point2d p1, p2;
-
-	if(objects.size() < 2)
-	{
-		return false;
-	}
-
-	if(contourmoments[0].m00 < contourmoments[1].m00)
-	{
-		p1 = objects[0];
-		p2 = objects[1];
-	}
-	else
-	{
-		p2 = objects[0];
-		p1 = objects[1];
-	}
-
-	double angle = findAngleTwoPoints(p1, p2);
-
-	stringstream ss;
-
-	ss << "angle = " << angle;
-
-	line(img, p1, p2, Scalar(0,255,255), 2);
-	line(img, p1, Point(img.size().width, p1.y), Scalar(0,255,255), 2);
-	putText(img, ss.str(), Point(p1.x+50,p1.y-50), FONT_HERSHEY_PLAIN, 1, Scalar(255,255,255),2);
-
-
-	robot->setOrientation(angle);
-	robot->setLocation(imageToFieldTransform(center, p2));
-
-
-}
-
-
-
-
-double findAngleTwoPoints(Point2d p1, Point2d p2)
-{
-
-	double angle;
-	angle = atan2(p2.y - p1.y, p2.x - p1.x)*180/M_PI;
-
-	if (angle < 0)
-		angle +=360;
-
-	angle = 360 - angle;
-
-	return angle;
-}
-
-
-void erodeDilate(Mat img)
-{
-	//averages pixels in ovals to get rid of background noise
-//	morphological opening (remove small objects from the foreground)
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-	//morphological closing (fill small holes in the foreground)
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-}
-
-
-Vec3f findCenterCircle(Mat img)
-{
-	Mat imgclone = img.clone();
-
-	cvtColor(img, img, CV_BGR2GRAY);
-
-	//blur to avoid false detection
-	//blur(img, img, Size(3,3));
-
-	vector<Vec3f> circles;
-
-
-	HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
 	
-	while(circles.size() != 1)
+	Robot* robot = (Robot*)(robotobject);
+	ImageProcessor video = ImageProcessor(scalingfactor, center);
+	int c = 0;
+	while(1)
 	{
-		cap.read(img);
+		Mat robotimage;
+		//insert condwait here
 
-		cvtColor(img, img, CV_BGR2GRAY);
+		//cout << "wait for thread go command" << endl;
 
-		HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
+		pthread_mutex_lock(&mrobot1cond);
+		while(!start1)
+			pthread_cond_wait(&robot1cond, &mrobot1cond);
+		pthread_mutex_unlock(&mrobot1cond);
+
+		//cout << "go command received" << endl;
+
+		//event = 0;
+		cvtColor(currentImage, robotimage, COLOR_BGR2HSV);
+		inRange(robotimage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
+
+
+		video.erodeDilate(robotimage);
+
+		video.initializeRobot(robot, robotimage);
+
+		//cout << "sending thread done command" << endl;
+
+		pthread_mutex_lock(&mrobot1done);
+		done1 = true;
+		start1 = false;
+		pthread_cond_signal(&robot1done);
+		pthread_mutex_unlock(&mrobot1done);
+
+		//cout << "thread done command sent" << endl;
+
+		//cout << ++c << endl;
+		//imshow("robot thread threshold", robotimage);
+
 	}
-
-	for( size_t i = 0; i < circles.size(); i++ )
-	{
-		 Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-		 int radius = cvRound(circles[i][2]);
-		 // circle center
-		 circle( imgclone, center, 3, Scalar(0,255,0), -1, 8, 0 );
-		 // circle outline
-		 circle( imgclone, center, radius, Scalar(0,0,255), 3, 8, 0 );
-	}
-
-	imshow("circles!", imgclone);
-
-	return circles[0];
-
 }
 
-Point2d imageToFieldTransform(Point2d center, Point2d p)
+void* trackBall(void* ballobject)
 {
-	p.x =  (p.x - center.x)*scalingfactor;
-	p.y =  (center.y - p.y)*scalingfactor;
-	return p;
+	VisionObject* ball = (VisionObject*)(ballobject);
 }
-
-Point2d fieldToImageTransform(Point2d center, Point2d p)
-{
-	p.x = (p.x/scalingfactor) + center.x;
-	p.y = center.y - (p.y/scalingfactor) ;
-	return p;
-}
-
-
-
-
