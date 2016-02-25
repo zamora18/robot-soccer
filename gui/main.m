@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 23-Feb-2016 13:25:46
+% Last Modified by GUIDE v2.5 24-Feb-2016 01:19:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,9 @@ handles.output = hObject;
 
 % Setup Position Plot
 handles.plot_position = plot(handles.fig_position,0,0);
+hold(handles.fig_position,'on');
+handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
+handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
 set(handles.fig_position,'XLim',[-1.8 1.8],'YLim',[-1 1]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
@@ -77,12 +80,17 @@ set(handles.table_desired_position,'Data', {0 0 0});
 set(handles.table_velocity,'Data', {0 0 0});
 set(handles.table_position,'Data', {0 0 0});
 set(handles.table_error,'Data', {0 0 0});
+set(handles.table_ball_vision,'Data', {0 0 0});
+set(handles.table_ball_estimate,'Data', {0 0 0});
 
 % Setup ROS Subscribers
 handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
 handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
 handles.sub.error = rossubscriber('/error', 'geometry_msgs/Pose2D', {@errorCallback,handles});
+handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
+handles.sub.estimated_ball_position = rossubscriber('/estimated_ball_position', 'geometry_msgs/Pose2D', {@estimatedBallPositionCallback,handles});
+
 
 % And Publishers
 handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D');
@@ -127,13 +135,13 @@ function visionRobotPositionCallback(src, msg, handles)
 
     x = get(handles.plot_position,'XData');
     y = get(handles.plot_position,'YData');
-    x = [x msg.X/100];
-    y = [y msg.Y/100];
+    x = [x msg.X];
+    y = [y msg.Y];
     set(handles.plot_position,'XData',x,'YData',y);
     
     set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
-    set(handles.table_position,'Data', {msg.X/100 msg.Y/100 msg.Theta});
+    set(handles.table_position,'Data', {msg.X msg.Y msg.Theta});
     
 function desiredPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_desired_position)
@@ -161,6 +169,27 @@ function errorCallback(src, msg, handles)
     end
 
     set(handles.table_error,'Data', {msg.X msg.Y msg.Theta});
+    
+    
+function visionBallPositionCallback(src, msg, handles)
+    if ~ishandle(handles.table_ball_vision)
+        return
+    end
+    
+    set(handles.plot_ball_vision,'XData', msg.X, 'YData', msg.Y);
+
+    set(handles.table_ball_vision,'Data', {msg.X msg.Y});
+    
+    
+function estimatedBallPositionCallback(src, msg, handles)
+    if ~ishandle(handles.table_ball_estimate)
+        return
+    end
+
+    set(handles.plot_ball_estimate,'XData', msg.X, 'YData', msg.Y);
+    
+    set(handles.table_ball_estimate,'Data', {msg.X msg.Y});
+    
 
 
 % --- Executes on button press in btn_clear_position.
@@ -241,8 +270,7 @@ function btn_update_status_Callback(hObject, eventdata, handles)
     
     get_battery = rossvcclient('/motion/main_battery');
     req = rosmessage(get_battery);
-    resp = call(get_battery,req,'Timeout',3)
+    resp = call(get_battery,req,'Timeout',3);
     
     set(handles.lbl_battery,'String',[num2str(resp) 'v']);
     
-

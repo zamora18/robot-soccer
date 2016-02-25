@@ -25,7 +25,8 @@ def main():
     rospy.init_node('ai', anonymous=False)
 
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_robot_position)
-    rospy.Subscriber('estimated_ball_position', Pose2D, _handle_estimated_ball_position)
+   # rospy.Subscriber('estimated_ball_position', Pose2D, _handle_estimated_ball_position)
+    rospy.Subscriber('vision_ball_position', Pose2D, _handle_estimated_ball_position)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     rate = rospy.Rate(100) #100 Hz
