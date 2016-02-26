@@ -12,6 +12,7 @@ _goal_position_opp  = [-_goal_position_home[0], 0, 0]
 _des_dist_from_ball = 0.0762 #(3.0in)
 _kick_dist          = 0.1524 #(6.0in)
 
+_done = False
 
 def choose_strategy(robot, ball):
     #return _strong_defense(robot, ball)
@@ -19,6 +20,9 @@ def choose_strategy(robot, ball):
 
 
 def _strong_offense(robot, ball):
+
+    return _hack_offense(robot, ball)
+
     # for now we want to make one robot kick the ball into the open goal
     #
     # arctan2([y], [x])
@@ -28,13 +32,15 @@ def _strong_offense(robot, ball):
     theta_bot_to_goal_deg   = theta_bot_to_goal*180/np.pi
     dist_from_ball          = _get_distance(robot, ball)
 
+    #print("theta_ball_to_goal: {}\t\ttheta_bot_to_goal: {}\r".format(theta_ball_to_goal_deg, theta_bot_to_goal_deg))
+
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
         #ball is in goal, don't move robot anywhere
         return (robot['xhat'], robot['yhat'], robot['thetahat'])
     else:
         # if robot is behind the ball and aligned towards goal
         if ( _close(theta_ball_to_goal_deg, theta_bot_to_goal_deg) and \
-             _close(theta_ball_to_goal_deg, robot['thetahat']) and \
+             #_close(theta_ball_to_goal_deg, robot['thetahat']) and \
             dist_from_ball <= (_des_dist_from_ball+_robot_half_width)): #taking into account 1/2 robot width
             #kick ball towards goal 6 inches
             x_c = ball['xhat'] + (_des_dist_from_ball+_kick_dist)*np.cos(theta_ball_to_goal)
@@ -71,5 +77,31 @@ def _get_distance(object_1, object_2):
     return distance
 
 
-def _close(a, b, tolerance=5.0):
+def _close(a, b, tolerance=20.0):
     return abs(a - b) <= tolerance
+
+
+def _hack_offense(robot, ball):
+
+    STOP_THRESH = 1.75 # m
+
+    if robot['xhat'] > STOP_THRESH:
+        return (0, 0, robot['thetahat'])
+
+    theta_ball_to_goal      = np.arctan2([ ball['yhat'] - _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
+
+    robot_width = 0.1841
+    offset_behind_ball = 2.5*robot_width
+
+    global _done
+
+    x = ball['xhat'] - offset_behind_ball*np.cos(theta_ball_to_goal)
+    y = ball['yhat'] - offset_behind_ball*np.sin(-2*theta_ball_to_goal)
+
+    if not _close(robot['xhat'], x, tolerance=0.100) or not _close(robot['yhat'], y, tolerance=0.100) and not _done:
+        _done = True
+        return (x, y, robot['thetahat'])
+
+    # kick
+    kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
+    return kick_point

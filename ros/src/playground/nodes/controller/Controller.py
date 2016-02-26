@@ -4,7 +4,7 @@ from controllers import PID
 
 PID_x = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
 PID_y = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_theta = PID(1.5, 0, 0, 180, 0.05, integrator_limit=0.05)
+PID_theta = PID(2, 0, 0, 180, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
@@ -69,7 +69,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
     return velocities
 
-def _close(a, b, tolerance=0.05):
+def _close(a, b, tolerance=0.025):
     return abs(a - b) <= tolerance
 
 def _ccw_distance(x, x_c):
