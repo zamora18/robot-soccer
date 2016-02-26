@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
+	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
 	//ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
 	//video.initializeRobot(&robot, imgTemp);
 
 	//initialize threads
+
 	pthread_t robot1thread;
 
 	pthread_cond_init(&robot1cond, NULL);
@@ -155,11 +156,10 @@ int main(int argc, char *argv[])
 
 	pthread_create(&robot1thread, NULL, trackRobot, &robot);
 
-	robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
-	robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
+
 
 	//yay we did it!
-	//cout << "initialized" << endl;
+	cout << "initialized" << endl;
 
 	ros::Rate loop_rate(100);
 
@@ -180,12 +180,18 @@ int main(int argc, char *argv[])
 		}
 
 
+		robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
+		robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
 
 		//cout << "cloning" << endl;
 
-		currentImage = imgOriginal.clone();
-
 		//cout << "go threads go" << endl;
+
+		Mat imgHSV;
+
+		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
+
+		currentImage = imgHSV.clone();
 
 		pthread_mutex_lock(&mrobot1cond);
 		done1 = false;
@@ -197,10 +203,10 @@ int main(int argc, char *argv[])
 
 		//blur(imgOriginal, imgOriginal, Size(3,3));
 
-		Mat imgHSV;
+		
 
 		//convert from the input image to a HSV image
-		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
+		
 
 
 		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
@@ -286,9 +292,16 @@ int main(int argc, char *argv[])
 
 		//cout << "leaging" << endl;
 
-		if(waitKey(1) == ESC)
+		int keypress = waitKey(1);
+
+		//weird bug in keypress, sometimes returens value that needs to be %256
+		if(keypress == 27 || keypress % 256 == 27) //did we press esc?
 		{
 			break;
+		}
+		else if(keypress >= 0)
+		{
+			cout << keypress << endl;
 		}
 
 		//cout << "sending ros message" << endl;
@@ -310,10 +323,13 @@ int main(int argc, char *argv[])
 		loop_rate.sleep();
 	}
 	//pthread_exit(NULL);
+	int exitstatus = 1;
+	exitstatus = pthread_cancel(robot1thread);
 	pthread_mutex_destroy(&mrobot1cond);
 	pthread_mutex_destroy(&mrobot1done);
 	pthread_cond_destroy(&robot1cond);
 	pthread_cond_destroy(&robot1done);
+	cout << exitstatus << endl;
 	return 0;
 }
 
@@ -340,8 +356,7 @@ void* trackRobot(void* robotobject)
 		//cout << "go command received" << endl;
 
 		//event = 0;
-		cvtColor(currentImage, robotimage, COLOR_BGR2HSV);
-		inRange(robotimage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
+		inRange(currentImage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
 
 
 		video.erodeDilate(robotimage);
@@ -362,6 +377,9 @@ void* trackRobot(void* robotobject)
 		//imshow("robot thread threshold", robotimage);
 
 	}
+	cout << "thread shutting down" << endl;
+
+	return NULL;
 }
 
 void* trackBall(void* ballobject)
