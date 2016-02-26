@@ -71,9 +71,9 @@ int main(int argc, char *argv[])
 	int robot1HighH = 102;
 
 	int robot1LowS = 57;
-	int robot1HighS = 122;
+	int robot1HighS = 176;
 
-	int robot1LowV = 194;
+	int robot1LowV = 137;
 	int robot1HighV = 255;
 
 	int robot2LowH = 76;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
 
 		//thresh hold the image
-		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+		//inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
 		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
-		video.erodeDilate(imgRobotThresh);
+		//video.erodeDilate(imgRobotThresh);
 		video.erodeDilate(imgBallThresh);
 		// video.erodeDilate(imgRobot2Thresh);
 
@@ -266,10 +266,10 @@ int main(int argc, char *argv[])
 		circle(imgOriginal, video.fieldToImageTransform(ball.getLocation()), 10, Scalar(0,0,255));
 		
 		stringstream ss, ss1;
-		ss << "(" << (int)ball.getLocation().x << "," << (int)ball.getLocation().y << ")";
+		ss << "(" << ball.getLocation().x  << "," << ball.getLocation().y << ")";
 		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
-		ss1 << "(" << (int)robot.getLocation().x << "," << (int)robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
+		ss1 << "(" << robot.getLocation().x << "," << robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
 		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
 		//cout << "line drawn" << endl;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		imshow("robotthresh", imgRobotThresh);
+		//imshow("robotthresh", imgRobotThresh);
 		//imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 

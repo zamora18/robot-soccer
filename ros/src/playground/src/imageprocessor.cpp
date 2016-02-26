@@ -5,7 +5,7 @@
 #include <math.h>
 #include <iostream>
 
-#define CENTER_OF_ROBOT_OFFSET_IN_CM 3.175
+#define CENTER_OF_ROBOT_OFFSET_IN_M .03175
 
 using namespace cv;
 using namespace std;
@@ -189,9 +189,9 @@ void ImageProcessor::correctRobotCenter(Robot* robot)
 	Point2d robotcenter = robot->getLocation();
 	double theta = robot->getOrientation();
 	Point2d actualcenter;
-	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_CM * cos(theta*180/M_PI);
-	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_CM * sin(theta*180/M_PI);
-	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_CM || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_CM)
+	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_M * cos(theta*180/M_PI);
+	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_M * sin(theta*180/M_PI);
+	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_M || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_M)
 	{
 		cout << "bad calculation" << endl;
 		cout << actualcenter.x << "," << actualcenter.y << endl;
@@ -301,7 +301,7 @@ void ImageProcessor::initializeCenter(Mat centercircle)
 	center = Point2d(centercirc[0], centercirc[1]);
 
 	// //with the center find the scaling factor
-	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
+	scalingfactor = CIRCLE_DIAMETER_IN_M/(centercirc[2]*2);
 }
 
 
