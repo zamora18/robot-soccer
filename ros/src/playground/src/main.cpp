@@ -12,17 +12,23 @@
 #include "playground/coords.h"
 
 #define ESC 1048603
+#define ROBOT1_TRACKING_MASK 0x1
+#define ROBOT2_TRACKING_MASK 0x2
+#define BALL_TRACKING_MASK 0x4
+#define ALL_THREADS_DONE 0x7
 
 
 using namespace cv;
 using namespace std;
 
 Mat currentImage;
-pthread_cond_t robot1cond;
-pthread_cond_t robot1done;
-pthread_mutex_t mrobot1cond;
-pthread_mutex_t mrobot1done;
-bool done1, start1;
+pthread_cond_t threadsstartcond;
+pthread_cond_t threadsdonecond;
+pthread_mutex_t mthreadsstartcond;
+pthread_mutex_t mthreadsdonecond;
+bool done1, start;
+unsigned threadsdone;
+
 
 double scalingfactor;
 Point2d center;
@@ -44,7 +50,7 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
+	ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
 	//ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
@@ -55,7 +61,7 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
+	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
 	int ballLowH = 158;
 	int ballHighH = 175;
@@ -67,20 +73,20 @@ int main(int argc, char *argv[])
 	int ballHighV = 255;
 
 
-	int robot1LowH = 137;
-	int robot1HighH = 179;
+	int robot1LowH = 79;
+	int robot1HighH = 126;
 
-	int robot1LowS = 136;
-	int robot1HighS = 255;
+	int robot1LowS = 48;
+	int robot1HighS = 140;
 
-	int robot1LowV = 229;
+	int robot1LowV = 171;
 	int robot1HighV = 255;
 
-	int robot2LowH = 76;
-	int robot2HighH = 107;
+	int robot2LowH = 125;
+	int robot2HighH = 154;
 
-	int robot2LowS = 168;
-	int robot2HighS = 255;
+	int robot2LowS = 0;
+	int robot2HighS = 97;
 
 	int robot2LowV = 189;
 	int robot2HighV = 255;	
@@ -95,7 +101,7 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
 
-	//Create trackbars in "Control" window
+	//Create trackbars in "robotControl" window
 	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
 	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
 
@@ -105,14 +111,15 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
 
-	/*cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
+	//create robot2 trackbars
+	cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
 	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
 
 	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
 	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
 
 	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);*/
+	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);
 
 //	event = 0;
 	Mat imgTemp;
@@ -127,13 +134,16 @@ int main(int argc, char *argv[])
 	scalingfactor = video.getScalingFactor();
 
 	center = video.getCenter();
+	
+
 	//covert original immage to HSV to find robots
 	//cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
-	Robot robot = Robot();
-	Robot robot2 = Robot();
+	Robot robot1 = Robot(ROBOT1_TRACKING_MASK);
+	Robot robot2 = Robot(ROBOT2_TRACKING_MASK);
 
 	VisionObject ball = VisionObject();
+	ball.setMask(BALL_TRACKING_MASK);
 
 	//thresh hold the image
 	//inRange(imgTemp, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgTemp);
@@ -146,15 +156,22 @@ int main(int argc, char *argv[])
 
 	//initialize threads
 
+
+	threadsdone = -1;
+
 	pthread_t robot1thread;
+	pthread_t robot2thread;
+	pthread_t ballthread;
 
-	pthread_cond_init(&robot1cond, NULL);
-	pthread_cond_init(&robot1done, NULL);
+	pthread_cond_init(&threadsstartcond, NULL);
+	pthread_cond_init(&threadsdonecond, NULL);
 
-	pthread_mutex_init(&mrobot1cond, NULL);
-	pthread_mutex_init(&mrobot1done, NULL);
+	pthread_mutex_init(&mthreadsstartcond, NULL);
+	pthread_mutex_init(&mthreadsdonecond, NULL);
 
-	pthread_create(&robot1thread, NULL, trackRobot, &robot);
+	pthread_create(&robot1thread, NULL, trackRobot, &robot1);
+	pthread_create(&robot2thread, NULL, trackRobot, &robot2);
+	pthread_create(&ballthread, NULL, trackBall, &ball);
 
 
 
@@ -175,31 +192,43 @@ int main(int argc, char *argv[])
 		//if the read failed exit
 		if(!readSuccess)
 		{
-			//cout << "could not read frame from camera" << endl;
+			cout << "could not read frame from camera" << endl;
 			break;
 		}
 
 
-		robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
-		robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
+		robot1.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
+		robot1.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
 
-		//cout << "cloning" << endl;
+		robot2.setLowHSV(Scalar(robot2LowH, robot2LowS, robot2LowV));
+		robot2.setHighHSV(Scalar(robot2HighH, robot2HighS, robot2HighV));
 
-		//cout << "go threads go" << endl;
+		ball.setHighHSV(Scalar(ballLowH, ballLowS, ballLowV));
+		ball.setHighHSV(Scalar(ballHighH, ballHighS, ballHighV));
 
-		Mat imgHSV;
+		
+
+	
+
+		Mat imgHSV, imgBallThresh;
 
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
+		// cout << "cloning" << endl;
+
 		currentImage = imgHSV.clone();
 
-		pthread_mutex_lock(&mrobot1cond);
-		done1 = false;
-		start1 = true;
-		pthread_cond_signal(&robot1cond);
-		pthread_mutex_unlock(&mrobot1cond);
+		// cout << "go threads go" << endl;
 
-		//cout << "done telling threads to go" << endl;
+		pthread_mutex_lock(&mthreadsstartcond);
+		threadsdone = 0;
+		robot1.setThreadStart(true);
+		robot2.setThreadStart(true);
+		ball.setThreadStart(true);
+		pthread_cond_broadcast(&threadsstartcond);
+		pthread_mutex_unlock(&mthreadsstartcond);
+
+		// cout << "done telling threads to go" << endl;
 
 		//blur(imgOriginal, imgOriginal, Size(3,3));
 
@@ -207,9 +236,9 @@ int main(int argc, char *argv[])
 
 		//convert from the input image to a HSV image
 		
+ 
 
-
-		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
+		//Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
 
 		//centercircle = imgOriginal.clone();
 
@@ -218,7 +247,7 @@ int main(int argc, char *argv[])
 		//thresh hold the image
 		//inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
-		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+		//inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
 
@@ -236,25 +265,31 @@ int main(int argc, char *argv[])
 		// video.erodeDilate(imgRobot2Thresh);
 
 		//video.initializeRobot(&robot, imgRobotThresh);		
-		video.initializeBall(&ball, imgBallThresh);
+		//video.initializeBall(&ball, imgBallThresh);
 		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
 
 		//wait for various threads to finish
 
-		////cout << "waiting for thread to finish" << endl;
+		// cout << "waiting for thread to finish" << endl;
 
-		pthread_mutex_lock(&mrobot1done);
-		while(!done1)
-			pthread_cond_wait(&robot1done, &mrobot1done);
-		pthread_mutex_unlock(&mrobot1done);
+		pthread_mutex_lock(&mthreadsdonecond);
+		while(threadsdone != ALL_THREADS_DONE && !(robot1.getThreadStart() && robot2.getThreadStart() && ball.getThreadStart()))
+		{
+			pthread_cond_wait(&threadsdonecond, &mthreadsdonecond);
+		}
 
-		////cout << "thread finished! finishing and displaying" << endl;
+		threadsdone = 0;
+		pthread_mutex_unlock(&mthreadsdonecond);
 
-		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
+
+		start = false;
+		// cout << "threads finished! finishing and displaying" << endl;
+
+		Point2d robotlocation = video.fieldToImageTransform(robot1.getLocation());
 		Point2d end;
 
-		double angle = robot.getOrientation();
+		double angle = robot1.getOrientation();
 
 		double sinx = (cos(angle * M_PI/180));
 		double siny = (sin(angle * M_PI/180));
@@ -275,8 +310,8 @@ int main(int argc, char *argv[])
 		ss << "(" << (int)ball.getLocation().x << "," << (int)ball.getLocation().y << ")";
 		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
-		ss1 << "(" << (int)robot.getLocation().x << "," << (int)robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
-		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+		ss1 << "(" << (int)robot1.getLocation().x << "," << (int)robot1.getLocation().y << "," << (int)robot1.getOrientation() << ")";
+		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot1.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
 		//cout << "line drawn" << endl;
 
@@ -284,7 +319,7 @@ int main(int argc, char *argv[])
 		imshow("Raw Image", imgOriginal);
 		//show the new image
 		//imshow("robotthresh", imgRobotThresh);
-		//imshow("ballthresh", imgBallThresh);
+		imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
@@ -309,9 +344,9 @@ int main(int argc, char *argv[])
 		// -------------------------------------
 		geometry_msgs::Pose2D robot1pos;
 		geometry_msgs::Pose2D ballpos;
-		robot1pos.x = robot.getLocation().x;
-		robot1pos.y = robot.getLocation().y;
-		robot1pos.theta = robot.getOrientation();
+		robot1pos.x = robot1.getLocation().x;
+		robot1pos.y = robot1.getLocation().y;
+		robot1pos.theta = robot1.getOrientation();
 
 
 		ballpos.x = ball.getLocation().x;
@@ -325,10 +360,12 @@ int main(int argc, char *argv[])
 	//pthread_exit(NULL);
 	int exitstatus = 1;
 	exitstatus = pthread_cancel(robot1thread);
-	pthread_mutex_destroy(&mrobot1cond);
-	pthread_mutex_destroy(&mrobot1done);
-	pthread_cond_destroy(&robot1cond);
-	pthread_cond_destroy(&robot1done);
+	exitstatus |= pthread_cancel(robot2thread);
+	exitstatus |= pthread_cancel(ballthread);
+	pthread_mutex_destroy(&mthreadsstartcond);
+	pthread_mutex_destroy(&mthreadsdonecond);
+	pthread_cond_destroy(&threadsstartcond);
+	pthread_cond_destroy(&threadsdonecond);
 	cout << exitstatus << endl;
 	return 0;
 }
@@ -340,20 +377,28 @@ void* trackRobot(void* robotobject)
 	
 	Robot* robot = (Robot*)(robotobject);
 	ImageProcessor video = ImageProcessor(scalingfactor, center);
+	Mat robotimage;
 	int c = 0;
 	while(1)
 	{
-		Mat robotimage;
+		
 		//insert condwait here
 
-		//cout << "wait for thread go command" << endl;
+		// cout << "wait for thread go command " << robot->getMask() << endl;
 
-		pthread_mutex_lock(&mrobot1cond);
-		while(!start1)
-			pthread_cond_wait(&robot1cond, &mrobot1cond);
-		pthread_mutex_unlock(&mrobot1cond);
+		pthread_mutex_lock(&mthreadsstartcond);
+		threadsdone |= robot->getMask();
+		robot->setThreadStart(false);
+		// cout << "threadsdone = " << threadsdone << endl;
+		pthread_cond_signal(&threadsdonecond);
+		while(threadsdone & robot->getMask() != 0 || !robot->getThreadStart())
+		{
+			// cout <<"waiting " << robot->getMask() << endl;
+			pthread_cond_wait(&threadsstartcond, &mthreadsstartcond);
+		}
+		pthread_mutex_unlock(&mthreadsstartcond);
 
-		//cout << "go command received" << endl;
+		// cout << "go command received " << robot->getMask() << endl;
 
 		//event = 0;
 		inRange(currentImage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
@@ -363,21 +408,19 @@ void* trackRobot(void* robotobject)
 
 		video.initializeRobot(robot, robotimage);
 
-		//cout << "sending thread done command" << endl;
+		// cout << "sending thread done command " << robot->getMask() << endl;
 
-		pthread_mutex_lock(&mrobot1done);
-		done1 = true;
-		start1 = false;
-		pthread_cond_signal(&robot1done);
-		pthread_mutex_unlock(&mrobot1done);
+		/*pthread_mutex_lock(&mthreadsdonecond);
+		
+		pthread_mutex_unlock(&mthreadsdonecond );//*/
 
-		//cout << "thread done command sent" << endl;
+		// cout << "thread done command sent " << robot->getMask() << endl;
 
-		//cout << ++c << endl;
+		// cout << ++c << " " << robot->getMask()<< endl;
 		//imshow("robot thread threshold", robotimage);
 
 	}
-	cout << "thread shutting down" << endl;
+	cout << "thread shutting down " << robot->getMask() << endl;
 
 	return NULL;
 }
@@ -385,4 +428,51 @@ void* trackRobot(void* robotobject)
 void* trackBall(void* ballobject)
 {
 	VisionObject* ball = (VisionObject*)(ballobject);
+	ImageProcessor video = ImageProcessor(scalingfactor, center);
+	Mat ballimage;
+	int c = 0;
+	while(1)
+	{
+		
+		//insert condwait here
+
+		// cout << "wait for thread go command " << ball->getMask() << endl;
+
+		pthread_mutex_lock(&mthreadsstartcond);
+		threadsdone |= ball->getMask();
+		ball->setThreadStart(false);
+		//cout << "threadsdone = " << threadsdone << endl;
+		pthread_cond_signal(&threadsdonecond);
+		while(threadsdone & ball->getMask() != 0 || !ball->getThreadStart())
+		{
+			// cout <<"waiting " << ball->getMask() << endl;
+			pthread_cond_wait(&threadsstartcond, &mthreadsstartcond);
+		}
+		pthread_mutex_unlock(&mthreadsstartcond);
+
+		// cout << "go command received " << ball->getMask() << endl;
+
+		//event = 0;
+		inRange(currentImage, ball->getLowHSV(), ball->getHighHSV(), ballimage);
+
+
+		video.erodeDilate(ballimage);
+
+		video.initializeBall(ball, ballimage);
+
+		// cout << "sending thread done command " << ball->getMask() << endl;
+
+		/*pthread_mutex_lock(&mthreadsdonecond);
+		
+		pthread_mutex_unlock(&mthreadsdonecond );//*/
+
+		// cout << "thread done command sent " << ball->getMask() << endl;
+
+		// cout << ++c << " " << ball->getMask()<< endl;
+		//imshow("robot thread threshold", robotimage);
+
+	}
+	cout << "thread shutting down " << ball->getMask() << endl;
+
+	return NULL;
 }
