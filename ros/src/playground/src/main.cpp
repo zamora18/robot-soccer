@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
 	
 
-		Mat imgHSV, imgBallThresh;
+		Mat imgHSV;
 
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV);
 
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 
 		//thresh hold the image
 		//inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
-		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
+		//inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
 		//inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
 
 		//video.erodeDilate(imgRobotThresh);
-		video.erodeDilate(imgBallThresh);
+		//video.erodeDilate(imgBallThresh);
 		// video.erodeDilate(imgRobot2Thresh);
 
 		//video.initializeRobot(&robot, imgRobotThresh);		
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
 		imshow("Raw Image", imgOriginal);
 		//show the new image
 		//imshow("robotthresh", imgRobotThresh);
-		imshow("ballthresh", imgBallThresh);
+		//imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
