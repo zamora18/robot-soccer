@@ -15,7 +15,7 @@ class BallEstimator(object):
     def __init__(self):
         super(BallEstimator, self).__init__()
 
-        self.update_type = 'DELAYED_CAMERA'
+        self.update_type = 'SIMPLE' #'DELAYED_CAMERA'
 
         # Control loop rate
         self.f_ctrl = 100;
