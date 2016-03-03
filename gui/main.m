@@ -60,7 +60,7 @@ handles.plot_position = plot(handles.fig_position,0,0);
 hold(handles.fig_position,'on');
 handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
 handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
-set(handles.fig_position,'XLim',[-1.8 1.8],'YLim',[-1 1]);
+set(handles.fig_position,'XLim',[-2.5 2.5],'YLim',[-2 2]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
 ylabel(handles.fig_position, 'height (meters)');
