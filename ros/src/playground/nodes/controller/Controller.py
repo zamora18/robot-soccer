@@ -55,15 +55,25 @@ def update(time_since_last_update, xhat, yhat, thetahat):
         vy = PID_y.update(y_c, yhat, Ts)
 
     if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=6): # degrees
-        ccw_dist = _ccw_distance(thetahat, theta_c)
-        cw_dist  = _cw_distance(thetahat, theta_c)
+        # Mark's code, test this
+        if abs(thetahat-theta_c) > 180:
+            if thetahat < theta_c:
+                theta_c = theta_c + 360
+            else
+                theta_c = theta_c - 360
 
-        if (ccw_dist <= cw_dist):
-            # Go CCW (normal)
-            w  = abs(PID_theta.update(theta_c, thetahat, Ts))
-        else:
-            # Go CW (reversed)
-            w  = -1*abs(PID_theta.update(theta_c, thetahat, Ts))
+        w  = abs(PID_theta.update(theta_c, thetahat, Ts))
+
+    # if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=6): # degrees
+    #     ccw_dist = _ccw_distance(thetahat, theta_c)
+    #     cw_dist  = _cw_distance(thetahat, theta_c)
+
+    #     if (ccw_dist <= cw_dist):
+    #         # Go CCW (normal)
+    #         w  = abs(PID_theta.update(theta_c, thetahat, Ts))
+    #     else:
+    #         # Go CW (reversed)
+    #         w  = -1*abs(PID_theta.update(theta_c, thetahat, Ts))
 
     velocities = (vx, vy, w)
 
@@ -72,9 +82,9 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 def _close(a, b, tolerance=0.025):
     return abs(a - b) <= tolerance
 
-def _ccw_distance(x, x_c):
-    return abs((x - (360 + x_c))) % 360
+# def _ccw_distance(x, x_c):
+#     return abs((x - (360 + x_c))) % 360
 
-def _cw_distance(x, x_c):
-    x_c_complement = x_c - 360
-    return abs((x - (x_c_complement))) % 360
+# def _cw_distance(x, x_c):
+#     x_c_complement = x_c - 360
+#     return abs((x - (x_c_complement))) % 360
