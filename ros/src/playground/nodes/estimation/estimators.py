@@ -64,14 +64,17 @@ class BallEstimator(object):
         pos = self.position
 
         # Figure out how many steps of t = T_ctrl to make
-        N = int(np.floor(Ts/self.T_ctrl))
+        N = int(np.floor(t/self.T_ctrl))
 
         # Step into the future N times
         for i in xrange(N):
             pos = pos + self.T_ctrl*self.velocity
 
+        xhat = pos.getA()[0][0]
+        yhat = pos.getA()[0][1]
+
         # return our future position at time t
-        return pos
+        return (xhat, yhat)
 
 
     def _update_simple(self, Ts, ball_x=None, ball_y=None):
@@ -139,11 +142,11 @@ class BallEstimator(object):
             self.position = self.position_d1
 
             # And propagate up to current location
-            self.position = self.predict(Ts)
+            self.position = np.matrix(self.predict(Ts))
 
         else: # prediction
             # propagate prediction ahead one control sample time
-            self.position = self.predict(self.T_ctrl)
+            self.position = np.matrix(self.predict(self.T_ctrl))
 
 
     def _updated_delayed_bounce(Ts, ball_x=None, ball_y=None):

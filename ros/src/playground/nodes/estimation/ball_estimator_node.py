@@ -23,7 +23,7 @@ _last_time = time.time()
 _estimator_on = True
 _predictor_on = True
 
-_predict_forward_seconds = 1
+_predict_forward_seconds = 0.5
 
 def _handle_vision_ball_position(msg):
     global _measured, _last_time
@@ -47,10 +47,9 @@ def main():
 
         if _estimator_on:
             Ts = (time.time() - _last_time)
-            (xhat, yhat) = _ball.update(Ts, _measured(0), _measured(1))
+            (xhat, yhat) = _ball.update(Ts, _measured[0], _measured[1])
 
         if _predictor_on:
-            Ts = (time.time() - _last_time)
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
 
         # Construct ball_state message, BallState

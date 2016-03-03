@@ -55,16 +55,16 @@ def _strong_offense(robot, ball):
 
 def _strong_defense(robot, ball):
     #for now we want to make one robot defend the goal
-    theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat'] ], [ ball['xhat'] - _goal_position_opp[0] ])
+    theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat_future'] ], [ ball['xhat_future'] - _goal_position_opp[0] ])
     theta_c_deg = theta_c*180/np.pi
     x_c = _goal_position_home[0] + _goal_box_length + _robot_half_width #_goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
     
-    if (ball['yhat'] > _goal_box_width/2):
+    if (ball['yhat_future'] > _goal_box_width/2):
         y_c = _goal_box_width/2
-    elif (ball['yhat'] < -_goal_box_width/2):
+    elif (ball['yhat_future'] < -_goal_box_width/2):
         y_c = -_goal_box_width/2
     else:
-        y_c = ball['yhat']
+        y_c = ball['yhat_future']
 
     #_goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
     theta_c_deg = 0
