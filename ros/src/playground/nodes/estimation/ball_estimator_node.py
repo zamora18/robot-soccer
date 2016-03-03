@@ -16,7 +16,7 @@ _ball = BallEstimator()
 _estimator_rate = 100
 
 # (x, y) measured from camera
-_measured = (0, 0)
+_measured = (None, None)
 
 _last_time = time.time()
 
@@ -40,6 +40,8 @@ def main():
     rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
     pub = rospy.Publisher('ball_state', BallState, queue_size=10)
 
+    global _measured
+
     rate = rospy.Rate(_estimator_rate)
     while not rospy.is_shutdown():
 
@@ -48,6 +50,10 @@ def main():
         if _estimator_on:
             Ts = (time.time() - _last_time)
             (xhat, yhat) = _ball.update(Ts, _measured[0], _measured[1])
+
+            # Set measured to None so the ball updater 
+            # knows to predict instead of correcting
+            _measured = (None, None)
 
         if _predictor_on:
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
