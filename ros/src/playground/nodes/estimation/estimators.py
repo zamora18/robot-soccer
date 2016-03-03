@@ -68,7 +68,7 @@ class BallEstimator(object):
 
         # Step into the future N times
         for i in xrange(N):
-            pos = pos + self.T_ctrl*self.velocity
+            pos = pos + (self.T_ctrl)*self.velocity
 
         xhat = pos.getA()[0][0]
         yhat = pos.getA()[0][1]

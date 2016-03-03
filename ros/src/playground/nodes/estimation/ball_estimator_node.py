@@ -23,7 +23,7 @@ _last_time = time.time()
 _estimator_on = True
 _predictor_on = True
 
-_predict_forward_seconds = 0.5
+_predict_forward_seconds = (1/6.0)
 
 def _handle_vision_ball_position(msg):
     global _measured, _last_time
