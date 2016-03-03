@@ -186,9 +186,9 @@ function ballStateCallback(src, msg, handles)
         return
     end
 
-    set(handles.plot_ball_estimate,'XData', msg.xhat_future, 'YData', msg.yhat_future);
+    set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
     
-    set(handles.table_ball_estimate,'Data', {msg.xhat_future msg.yhat_future});
+    set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
     
 
 
