@@ -61,6 +61,7 @@ add_message_files(
   QPulses.msg
   WorldVelocities.msg
   BallState.msg
+  RobotState.msg
 )
 
 ## Generate services in the 'srv' folder
