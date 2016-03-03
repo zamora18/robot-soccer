@@ -89,7 +89,7 @@ handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
 handles.sub.error = rossubscriber('/error', 'geometry_msgs/Pose2D', {@errorCallback,handles});
 handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
-handles.sub.estimated_ball_position = rossubscriber('/estimated_ball_position', 'geometry_msgs/Pose2D', {@estimatedBallPositionCallback,handles});
+handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
 
 % And Publishers
@@ -181,14 +181,14 @@ function visionBallPositionCallback(src, msg, handles)
     set(handles.table_ball_vision,'Data', {msg.X msg.Y});
     
     
-function estimatedBallPositionCallback(src, msg, handles)
+function ballStateCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_estimate)
         return
     end
 
-    set(handles.plot_ball_estimate,'XData', msg.X, 'YData', msg.Y);
+    set(handles.plot_ball_estimate,'XData', msg.xhat_future, 'YData', msg.yhat_future);
     
-    set(handles.table_ball_estimate,'Data', {msg.X msg.Y});
+    set(handles.table_ball_estimate,'Data', {msg.xhat_future msg.yhat_future});
     
 
 

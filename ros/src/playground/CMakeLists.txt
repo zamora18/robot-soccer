@@ -60,6 +60,7 @@ add_message_files(
   EncoderEstimates.msg
   QPulses.msg
   WorldVelocities.msg
+  BallState.msg
 )
 
 ## Generate services in the 'srv' folder

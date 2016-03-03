@@ -1,0 +1,7 @@
+float64 xhat
+float64 yhat
+float64 thetahat
+float64 xhat_future
+float64 yhat_future
+float64 thetahat_future
+float64 predict_forward_seconds
