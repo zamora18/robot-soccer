@@ -202,35 +202,69 @@ class BallEstimator(object):
 
 class RobotEstimator(object):
     """RobotEstimator
+    Uses a Kalman Filter to estimate the robot's state. This implementation
+    depends on knowing the vel_cmds, so this is used for robots on our team
+    as we only know the vel_cmds that we are sending out (i.e., we don't
+    know our opponents vel_cmds... Unless we eavesdrop?).
+
+    Here we use a constant velocity model. Therefore, our states contain
+    positions only, and this estimator is primarily for smoothing noisy
+    camera data and for dealing with camera latency. It may not be useful
+    if vision threshold is done well and there is very low latency.
+
+    State Definition:
+        x = (x y theta)
     """
     def __init__(self, arg):
         super(RobotEstimator, self).__init__()
 
         self.update_type = 'DELAYED_CAMERA'
 
-        # Persistent variables (init better?)
-        self.xhat = np.matrix([0, 0])
+        # Initialize filter's persistent variables
+        self.xhat = np.matrix([0, 0, 0])
         self.xhat_d1 = self.xhat
-        self.S = np.matrix([0, 0])
+        self.S = np.matrix(np.diag([0, 0, 0]))  # should probably use arrays, 
+                                                # but I just learned that and
+                                                # want to be consistent
         self.S_d1 = self.S
+
+        self.max_delay_idx = 1
+
+        # fix this...
         self.vel_cmd_d1 = 0
 
+        # Noise statistics
+        self.Q = np.matrix(np.diag([1**2, 1**2, (2*pi/180)**2]))
+        self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*pi/180)**2]))
 
-    def update(self, xhat=None, yhat=None):
+
+    def update(self, vel_cmd, measurement=None):
         """Update
         """
-        
+       
         # Prediction step between measurements
         N = 10
         for i in xrange(N):
-            pass
+            self.xhat = self.xhat + (T_ctrl/N)*vel_cmd
+            self.S = self.S + (T_ctrl/N)*self.Q
 
         # correction step at measurement
-        if self.update_type == 'SIMPLE':
-            self._update_simple(Ts, ball_x, ball_y)
+        if measurement is not None:
+            # Only update when a camera measurement came in
 
-        elif self.update_type == 'DELAYED_CAMERA':
-            self._update_delayed(Ts, ball_x, ball_y)
+            if self.update_type == 'SIMPLE':
+                self._update_simple(Ts, measurement)
+
+            elif self.update_type == 'DELAYED_CAMERA':
+                self._update_delayed(Ts, measurement)
+
+        # The naming is unfortunate, but self.xhat is the state estimation
+        # while the local xhat is the x-position estimate
+        xhat = self.xhat.getA()[0][0]
+        yhat = self.xhat.getA()[0][1]
+        thetahat = self.xhat.getA()[0][2]
+        
+        return (xhat, yhat, thetahat)
 
     def predict(self):
         """Predict
@@ -238,13 +272,45 @@ class RobotEstimator(object):
         pass
         
 
-    def _update_simple(self, xhat=None, yhat=None):
+    def _update_simple(self, Ts, measurement):
         """Update Simple
         """
-        pass
+        y = measurement
+        y_pred = self.xhat
+
+        # Kalman gain
+        L = self.S/(self.R+self.S)
+
+        # Update estimation error covariance
+        eye3 = np.matrix(np.eye(3))
+        self.S = eye3 - L*self.S
+
+        # Correct state estimate
+        self.xhat = self.xhat + L*(y-y_pred)
 
 
     def _update_delayed(self, xhat=None, yhat=None):
         """Update Delayed
         """
-        pass
+        y = measurement
+        y_pred = self.xhat_d1
+
+        # Kalman gain
+        L = self.S_d1/(self.R+self.S_d1)
+
+        # Update estimation error covariance
+        eye3 = np.matrix(np.eye(3))
+        self.S_d1 = eye3 - L*self.S_d1
+
+        # Correct state estimate
+        self.xhat_d1 = self.xhat_d1 + L*(y-y_pred)
+
+        # Propagate up to current point
+        N = 10
+        for i in xrange(N*self.max_delay_idx):
+            self.xhat_d1 = self.xhat_d1 + (T_ctrl/N)*self.vel_cmd_d1 # fix this at the right index...
+            self.S_d1 = self.S_d1 + (T_ctrl/N)*self.Q
+
+        # Update current estimate
+        self.xhat = self.xhat_d1
+        self.S = self.S_d1
