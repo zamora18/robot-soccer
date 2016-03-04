@@ -17,6 +17,7 @@ class VisionObject
 		Scalar highHSV;
 		unsigned mask;
 		bool threadstart;
+		string nodeIdent;
 
 
 	public:
@@ -32,6 +33,9 @@ class VisionObject
 		Scalar getHighHSV();
 		void setHighHSV(Scalar hsv);
 		void toString();
+
+		void setNodeIdent(string identity);
+		string getNodeIdent();
 
 		void setMask(unsigned MASK);
 		unsigned getMask();

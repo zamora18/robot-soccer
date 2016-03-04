@@ -64,3 +64,15 @@ bool VisionObject::getThreadStart()
 {
 	return threadstart;
 }
+
+void VisionObject::setNodeIdent(string identity)
+{
+	nodeIdent = identity;
+}
+string VisionObject::getNodeIdent()
+{
+	return nodeIdent;
+}
+
+
+
