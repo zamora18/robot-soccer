@@ -185,6 +185,10 @@ function ballStateCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_estimate)
         return
     end
+    
+    % For grabbing ball data ot analyze later
+    global ball
+    ball = [ball msg];
 
     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
     

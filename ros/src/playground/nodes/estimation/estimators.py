@@ -33,6 +33,15 @@ class BallEstimator(object):
         self.velocity = np.matrix([0, 0])
         self.measurement_d1 = self.position
 
+    def get_velocities():
+        """Get Velocities
+        """
+        vx = self.velocity.getA()[0][0]
+        vy = self.velocity.getA()[0][1]
+
+        # return the current velocity estimate
+        return (vx, vy)
+
     def update(self, Ts, ball_x=None, ball_y=None):
         """Update
         """

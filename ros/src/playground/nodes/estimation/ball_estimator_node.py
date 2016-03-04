@@ -58,10 +58,15 @@ def main():
         if _predictor_on:
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
 
+        # Grab the estimated velocities of the ball
+        (vx, vy) = _ball.get_velocity()
+
         # Construct ball_state message, BallState
         msg = BallState()
         msg.xhat = xhat
         msg.yhat = yhat
+        msg.vx = vx
+        msg.vy = vy
         msg.xhat_future = xhat_future
         msg.yhat_future = yhat_future
         msg.predict_forward_seconds = _predict_forward_seconds if _predictor_on else 0
