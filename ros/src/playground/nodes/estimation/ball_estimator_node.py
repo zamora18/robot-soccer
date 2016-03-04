@@ -59,7 +59,7 @@ def main():
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
 
         # Grab the estimated velocities of the ball
-        (vx, vy) = _ball.get_velocity()
+        (vx, vy) = _ball.get_velocities()
 
         # Construct ball_state message, BallState
         msg = BallState()
