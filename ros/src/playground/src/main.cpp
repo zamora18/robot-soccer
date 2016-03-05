@@ -17,6 +17,8 @@
 #define ALLY1_THREAD_MASK 0x1
 #define OPPONENT_THREAD_MASK 0x2
 
+#define THRESHHOLD_BOX_WIDTH 250
+
 
 using namespace cv;
 using namespace std;
@@ -36,13 +38,17 @@ void* trackRobot(void* robotobject);
 
 void* trackBall(void* ballobject);
 
+void drawRobotLine(Mat img, Robot robot);
+
+Point2d threshholdBox(VisionObject obj, Mat* img);
+
 
 
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "vision_talker");
 
-	ros::NodeHandle n("vision_talker");
+	ros::NodeHandle n;
 		
 	
 	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
@@ -51,8 +57,8 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	//ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
-	ImageProcessor video = ImageProcessor(0); //use for webcam
+	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
+	// ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
 	{
@@ -62,34 +68,34 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	//namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
+	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 158;
-	int ballHighH = 175;
+	int ballLowH = 136;
+	int ballHighH = 179;
 
-	int ballLowS = 41;
+	int ballLowS = 26;
 	int ballHighS = 150;
 
 	int ballLowV = 183;
 	int ballHighV = 255;
 
 
-	int robot1LowH = 47;
-	int robot1HighH = 83;
+	int robot1LowH = 78;
+	int robot1HighH = 114;
 
-	int robot1LowS = 49;
-	int robot1HighS = 116;
+	int robot1LowS = 0;
+	int robot1HighS = 130;
 
-	int robot1LowV = 128;
-	int robot1HighV = 224;
+	int robot1LowV = 172;
+	int robot1HighV = 255;
 
-	int robot2LowH = 76;
-	int robot2HighH = 107;
+	int robot2LowH = 53;
+	int robot2HighH = 81;
 
-	int robot2LowS = 168;
-	int robot2HighS = 255;
+	int robot2LowS = 44;
+	int robot2HighS = 121;
 
-	int robot2LowV = 189;
+	int robot2LowV = 188;
 	int robot2HighV = 255;	
 
 	//Create trackbars in "Control" window
@@ -126,15 +132,15 @@ int main(int argc, char *argv[])
 
 	video.read(&imgTemp);
 
-	//Mat centercircle = imgTemp.clone();
+	Mat centercircle = imgTemp.clone();
 
 	//find the center circle
-	//video.initializeCenter(centercircle);
+	video.initializeCenter(centercircle);
 
-	//scalingfactor = video.getScalingFactor();
-	scalingfactor = 1;
+	scalingfactor = video.getScalingFactor();
+	// scalingfactor = 1;
 
-	//center = video.getCenter();
+	center = video.getCenter();
 	//covert original immage to HSV to find robots
 	//cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
@@ -202,8 +208,8 @@ int main(int argc, char *argv[])
 
 		robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
 		robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
-		robot2.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
-		robot2.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
+		robot2.setLowHSV(Scalar(robot2LowH, robot2LowS, robot2LowV));
+		robot2.setHighHSV(Scalar(robot2HighH, robot2HighS, robot2HighV));
 
 		//cout << "cloning" << endl;
 
@@ -217,7 +223,7 @@ int main(int argc, char *argv[])
 
 		pthread_mutex_lock(&mrobot1cond);
 		threadstatus = 0;
-		pthread_cond_signal(&robot1cond);
+		pthread_cond_broadcast(&robot1cond);
 		pthread_mutex_unlock(&mrobot1cond);
 
 		//cout << "done telling threads to go" << endl;
@@ -237,8 +243,8 @@ int main(int argc, char *argv[])
 
 
 		//thresh hold the image
-		inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
-		// inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
+		// inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
 		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
 
 
@@ -252,12 +258,12 @@ int main(int argc, char *argv[])
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
 
-		video.erodeDilate(imgRobotThresh);
-		// video.erodeDilate(imgBallThresh);
+		// video.erodeDilate(imgRobotThresh);
+		 video.erodeDilate(imgBallThresh);
 		// video.erodeDilate(imgRobot2Thresh);
 
-		//video.initializeRobot(&robot, imgRobotThresh);		
-		// video.initializeBall(&ball, imgBallThresh);
+		// video.initializeRobot(&robot, imgRobotThresh);		
+		video.initializeBall(&ball, imgBallThresh);
 		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
 
@@ -267,40 +273,27 @@ int main(int argc, char *argv[])
 
 		////cout << "thread finished! finishing and displaying" << endl;
 
-		Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
-		Point2d end;
 
-		double angle = robot.getOrientation();
-
-		double sinx = (cos(angle * M_PI/180));
-		double siny = (sin(angle * M_PI/180));
-
-		siny *= -1;
-
-		end.x = robotlocation.x + 50 * sinx;
-		end.y = robotlocation.y + 50 * siny;
-
-		////cout << "robot stuffs done" << endl;
-
-
-		line(imgOriginal, robotlocation, end, Scalar(0,0,255), 2);
+		drawRobotLine(imgOriginal, robot);
+		drawRobotLine(imgOriginal, robot2);
 
 		circle(imgOriginal, video.fieldToImageTransform(ball.getLocation()), 10, Scalar(0,0,255));
 		
 		stringstream ss, ss1;
-		ss << "(" << (int)ball.getLocation().x << "," << (int)ball.getLocation().y << ")";
+		ss << "(" << ball.getLocation().x << "," << ball.getLocation().y << ")";
 		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
-		ss1 << "(" << (int)robot.getLocation().x << "," << (int)robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
-		putText(imgOriginal, ss1.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+		
 
 		//cout << "line drawn" << endl;
+
+		//threshholdBox(ball, imgOriginal);
 
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		imshow("robotthresh", imgRobotThresh);
-		//imshow("ballthresh", imgBallThresh);
+		// imshow("robotthresh", imgRobotThresh);
+		// imshow("ballthresh", imgBallThresh);
 		// imshow("robot2thresh", imgRobot2Thresh);//*/
 
 
@@ -355,7 +348,7 @@ void* trackRobot(void* robotobject)
 	
 	Robot* robot = (Robot*)(robotobject);
 	ImageProcessor video = ImageProcessor(scalingfactor, center);
-	ros::NodeHandle n("vision_talker");
+	ros::NodeHandle n;
 	stringstream ss;
 	ss << "vision_" << robot->getNodeIdent() << "_position";
 	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>(ss.str(), 5);
@@ -369,19 +362,23 @@ void* trackRobot(void* robotobject)
 
 		pthread_mutex_lock(&mrobot1cond);
 		while(threadstatus & robot->getMask() == robot->getMask())
+		{
 			pthread_cond_wait(&robot1cond, &mrobot1cond);
+		}
+		threadstatus |= robot->getMask();
+		robotimage = currentImage.clone();
 		pthread_mutex_unlock(&mrobot1cond);
 
-		threadstatus |= robot->getMask();
+		
 		//cout << "go command received" << endl;
-
+		//Point2d boxloc = threshholdBox(*robot, &robotimage);
 		//event = 0;
-		inRange(currentImage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
+		inRange(robotimage, robot->getLowHSV(), robot->getHighHSV(), robotimage);
 
 
 		video.erodeDilate(robotimage);
 
-		video.initializeRobot(robot, robotimage);
+		video.initializeRobot(robot, robotimage, Point2d(0,0)/*boxloc*/);
 
 		//cout << "sending thread done command" << endl;
 
@@ -409,5 +406,68 @@ void* trackRobot(void* robotobject)
 void* trackBall(void* ballobject)
 {
 	VisionObject* ball = (VisionObject*)(ballobject);
+
+}
+
+
+void drawRobotLine(Mat img, Robot robot)
+{
+	ImageProcessor video = ImageProcessor(scalingfactor, center);
+	Point2d robotlocation = video.fieldToImageTransform(robot.getLocation());
+	Point2d end;
+
+	double angle = robot.getOrientation();
+
+	double sinx = (cos(angle * M_PI/180));
+	double siny = (sin(angle * M_PI/180));
+
+	siny *= -1;
+
+	end.x = robotlocation.x + 50 * sinx;
+	end.y = robotlocation.y + 50 * siny;
+
+	////cout << "robot stuffs done" << endl;
+
+
+	line(img, robotlocation, end, Scalar(0,0,255), 2);
+
+	stringstream ss;
+
+	ss << "(" << robot.getLocation().x << "," << robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
+	putText(img, ss.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+}
+
+
+Point2d threshholdBox(VisionObject obj, Mat* img)
+{
+	ImageProcessor video = ImageProcessor(scalingfactor, center);
+	Point2d loc = video.fieldToImageTransform(obj.getLocation());
+
+
+
+	loc.x -= (THRESHHOLD_BOX_WIDTH/2);
+	loc.y -= (THRESHHOLD_BOX_WIDTH/2);
+
+	if(loc.x < 0)
+	{
+		loc.x = 0;
+	}
+	else if(loc.x +THRESHHOLD_BOX_WIDTH > (*img).size().width)
+	{
+		loc.x = (*img).size().width - THRESHHOLD_BOX_WIDTH;
+	}
+
+	if(loc.y < 0)
+	{
+		loc.y = 0;
+	}
+	else if(loc.y + THRESHHOLD_BOX_WIDTH > (*img).size().height)
+	{
+		loc.y = (*img).size().height - THRESHHOLD_BOX_WIDTH;
+	}
+
+	*img = (*img)(Rect(loc.x, loc.y, THRESHHOLD_BOX_WIDTH, THRESHHOLD_BOX_WIDTH));
+
+	return loc;
 
 }
