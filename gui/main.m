@@ -52,6 +52,11 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to main (see VARARGIN)
 
+% Clear globals
+global ball
+ball = [];
+
+
 % Choose default command line output for main
 handles.output = hObject;
 
@@ -175,9 +180,6 @@ function visionBallPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_vision)
         return
     end
-    
-    global vision_ball
-    vision_ball = [vision_ball msg];
     
     set(handles.plot_ball_vision,'XData', msg.X, 'YData', msg.Y);
 
