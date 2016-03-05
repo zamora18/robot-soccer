@@ -5,7 +5,10 @@
 #include <math.h>
 #include <iostream>
 
+
 #define CENTER_OF_ROBOT_OFFSET_IN_M .03175
+#define ERODE_DILATE_SIZE 5
+
 
 using namespace cv;
 using namespace std;
@@ -120,7 +123,7 @@ void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
 	}
 }
 //initializes the robot positions, can be used to update position also
-bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
+bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 {
 
 	Mat contourOutput;
@@ -138,7 +141,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 	for(int i = 0; i < contours.size(); i++)
 	{
 		//eliminates any noise
-		if(contourArea(contours[i]) > 100)
+		if(contourArea(contours[i]) > 50)
 		{
 			contourmoments.push_back(moments(contours[i]));
 		}
@@ -177,6 +180,10 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 
 
 	robot->setOrientation(angle);
+
+	p1.x += boxloc.x;
+	p1.y += boxloc.y;
+
 	robot->setLocation(imageToFieldTransform(p1));
 
 	//correctRobotCenter(robot);
@@ -220,12 +227,12 @@ void ImageProcessor::erodeDilate(Mat img)
 {
 	//averages pixels in ovals to get rid of background noise
 //	morphological opening (remove small objects from the foreground)
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
 
 	//morphological closing (fill small holes in the foreground)
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
 }
 
 //finds the circle in the center of the field and returns it
