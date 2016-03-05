@@ -1,3 +1,5 @@
+float64 vision_x
+float64 vision_y
 float64 xhat
 float64 yhat
 float64 vx

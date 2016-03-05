@@ -59,6 +59,8 @@ def main():
 
         # Construct ball_state message, BallState
         msg = BallState()
+        msg.vision_x = _measured[0]
+        msg.vision_y = _measured[1]
         msg.xhat = xhat
         msg.yhat = yhat
         msg.vx = vx

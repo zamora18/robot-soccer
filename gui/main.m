@@ -176,6 +176,9 @@ function visionBallPositionCallback(src, msg, handles)
         return
     end
     
+    global vision_ball
+    vision_ball = [vision_ball msg];
+    
     set(handles.plot_ball_vision,'XData', msg.X, 'YData', msg.Y);
 
     set(handles.table_ball_vision,'Data', {msg.X msg.Y});
