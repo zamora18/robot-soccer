@@ -51,10 +51,6 @@ def main():
             Ts = (time.time() - _last_time)
             (xhat, yhat) = _ball.update(Ts, _measured[0], _measured[1])
 
-            # Set measured to None so the ball updater 
-            # knows to predict instead of correcting
-            _measured = (None, None)
-
         if _predictor_on:
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
 
@@ -70,7 +66,12 @@ def main():
         msg.xhat_future = xhat_future
         msg.yhat_future = yhat_future
         msg.predict_forward_seconds = _predict_forward_seconds if _predictor_on else 0
+        msg.correction = _measured[0] is not None and _measured[1] is not None
         pub.publish(msg)
+
+        # Set measured to None so the ball updater 
+        # knows to predict instead of correcting
+        _measured = (None, None)
 
 
         rate.sleep()

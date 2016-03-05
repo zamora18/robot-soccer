@@ -5,3 +5,4 @@ float64 vy
 float64 xhat_future
 float64 yhat_future
 float64 predict_forward_seconds
+bool correction
