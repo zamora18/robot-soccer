@@ -59,8 +59,8 @@ def main():
 
         # Construct ball_state message, BallState
         msg = BallState()
-        msg.vision_x = _measured[0]
-        msg.vision_y = _measured[1]
+        msg.vision_x = _measured[0] if _measured[0] is not None else 0
+        msg.vision_y = _measured[1] if _measured[1] is not None else 0
         msg.xhat = xhat
         msg.yhat = yhat
         msg.vx = vx
