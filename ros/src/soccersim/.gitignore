@@ -1,0 +1,5 @@
+*.pyc
+*.*~
+
+# XACRO compiled worlds
+worlds/*.world

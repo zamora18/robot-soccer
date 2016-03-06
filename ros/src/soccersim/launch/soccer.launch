@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Soccer field world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find soccersim)/worlds/soccer_field.world"/>
+  </include>
+
+  <!-- Soccer robots -->
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="home1"/>
+    <arg name="jersey_color" value="Blue"/>
+    <arg name="x" value="-0.5"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="home2"/>
+    <arg name="jersey_color" value="Green"/>
+    <arg name="x" value="-1.0"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="away1"/>
+    <arg name="jersey_color" value="Red"/>
+    <arg name="x" value="0.5"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="away2"/>
+    <arg name="jersey_color" value="Purple"/>
+    <arg name="x" value="1.0"/>
+  </include>
+
+  <!-- Vision -->
+  <node name="vision_sim" pkg="soccersim" type="vision_sim" output="screen"/>
+
+  <!-- Home and away team controllers -->
+  <node name="home" pkg="soccersim" type="controller" args="_team:=home"/>
+  <node name="away" pkg="soccersim" type="controller" args="_team:=away"/>
+
+  <!-- Soccer ball -->
+  <include file="$(find soccersim)/launch/ball.launch">
+  </include>
+</launch>
+
+
+
+
