@@ -38,7 +38,7 @@ def main():
     # ballpub = rospy.Publisher('estimated_ball_position', Pose2D, queue_size=10)
 
     # rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
-    rospy.Subscriber('vision_robot_position', Pose2D, _handle_vision_robot_position)
+    rospy.Subscriber('vision_ally_position', Pose2D, _handle_vision_robot_position)
     # pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     # rate = rospy.Rate(int(1/_hack_period))

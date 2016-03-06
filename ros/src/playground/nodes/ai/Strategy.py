@@ -11,13 +11,24 @@ _goal_position_home = [-_field_length/2, 0, 0] #this could change depending on c
 _goal_position_opp  = [-_goal_position_home[0], 0, 0]
 _des_dist_from_ball = 0.0762 #(3.0in)
 _kick_dist          = 0.1524 #(6.0in)
+_goalie_x_pos       = _goal_position_home[0] + _goal_box_length + _robot_half_width
+
+_ball_defend_position = None
 
 _done = False
-
+  
 def choose_strategy(robot, ball):
-    #return _strong_defense(robot, ball)
-    return _strong_offense(robot, ball)
+    # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
+    return _strong_defense(robot, ball)
+    # else:
+    #     return _strong_offense(robot, ball)
 
+
+def _goal_scored(robot, ball):
+    if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
+        return True
+    else:
+        return False
 
 def _strong_offense(robot, ball):
 
@@ -33,6 +44,11 @@ def _strong_offense(robot, ball):
     dist_from_ball          = _get_distance(robot, ball)
 
     #print("theta_ball_to_goal: {}\t\ttheta_bot_to_goal: {}\r".format(theta_ball_to_goal_deg, theta_bot_to_goal_deg))
+
+    # if ball is past goal (primitive goal scored)
+    #if _goal_scored:
+     #   return  (-(_field_length/4), 0, 0)
+
 
     if (ball['xhat'] > _goal_position_opp[0]): #might have to tweak this a little bit
         #ball is in goal, don't move robot anywhere
@@ -52,19 +68,39 @@ def _strong_offense(robot, ball):
             y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg)
             
-
-def _strong_defense(robot, ball):
-    #for now we want to make one robot defend the goal
-    theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat_future'] ], [ ball['xhat_future'] - _goal_position_opp[0] ])
-    theta_c_deg = theta_c*180/np.pi
-    x_c = _goal_position_home[0] + _goal_box_length + _robot_half_width #_goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
-    
+def _limit_goalie_y(y_c, ball):
+    # keeps robot in goal
     if (ball['yhat_future'] > _goal_box_width/2):
         y_c = _goal_box_width/2
     elif (ball['yhat_future'] < -_goal_box_width/2):
         y_c = -_goal_box_width/2
+
+    return y_c
+
+def _strong_defense(robot, ball):
+    global _ball_defend_position
+
+    #if _goal_scored:
+     #   return  (-(_field_length/4), 0, 0)
+
+    #for now we want to make one robot defend the goal
+    theta_c = np.arctan2([ _goal_position_home[1] + ball['yhat_future'] ], [ ball['xhat_future'] - _goal_position_opp[0] ])
+    theta_c_deg = theta_c*180/np.pi
+    x_c =  _goalie_x_pos#_goal_position_home[0] + (_goal_box_length+_robot_half_width)*np.cos(theta_c)
+
+    # defends at yhat future
+    y_c = ball['yhat_future']
+
+    if ball['xhat_future'] > x_c:
+        if _ball_defend_position is None:
+            _ball_defend_position = ball
     else:
-        y_c = ball['yhat_future']
+        _ball_defend_position = None
+
+    if _ball_defend_position is not None:
+        y_c = _ball_defend_position['yhat_future']
+
+    y_c = _limit_goalie_y(y_c, ball)
 
     #_goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
     theta_c_deg = 0
