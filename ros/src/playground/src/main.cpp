@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
+	ImageProcessor video = ImageProcessor("http://192.168.1.60:8080/stream?topic=/image&dummy=param.mjpg");
 	// ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 136;
+	int ballLowH = 156;
 	int ballHighH = 179;
 
 	int ballLowS = 26;
