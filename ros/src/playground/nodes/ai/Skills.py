@@ -14,7 +14,12 @@ _distance_behind_ball_for_kick = _robot_width/2 + .05 # this is for the jersey b
 def kick():
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
+
 def _find_triangle(x1,y1,x2,y2):
+    """Find Triangle
+
+    returns the triangle's sides (a, b, c) and theta (in radians) between p1 and p2
+    """
     # a, b and c are lengths of the side of a right triangle betweem p1 and p2
     a = x2 - x1
     b = y2 - y1
@@ -64,8 +69,8 @@ def set_up_kick(robot, ball, distance_from_center_of_goal):
     bprime = cprime*np.sin(theta)
 
     x_c = ball['xhat'] - aprime
-    y_c = ball['yhat'] + bprime
+    y_c = ball['yhat'] - bprime
 
-    theta_c = theta
+    theta_c = theta *180/np.pi
 
     return (x_c, y_c, theta_c)
