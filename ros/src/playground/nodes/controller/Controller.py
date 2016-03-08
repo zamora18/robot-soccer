@@ -64,7 +64,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if vx == 0 and vy == 0 and not _close(theta_c, thetahat, tolerance=5): # degrees
+    if not _close(theta_c, thetahat, tolerance=5): # degrees
         # Since the max distance you should ever go is 180 degrees,
         # test to see so that the commanded value is proportional to
         # the error between commanded and actual.
