@@ -26,7 +26,7 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     x_desired = x2 - aprime
     y_desired = x2 - bprime
 
-    return (x_desired, y_desired)
+    return (x_desired, y_desired, theta)
 
 
 
