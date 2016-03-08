@@ -10,7 +10,7 @@ _goal_position_opp  = -_goal_position_home
 
 
 _distance_behind_ball_for_kick = _robot_width/2 + .04 # this is for the jersey being off center
-_distance_from_goal_for_arc_defense = _goal_box_width + _robot_width/2
+_distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 
 # actuates solenoid
 def kick():
@@ -84,7 +84,7 @@ def set_up_kick(ball, distance_from_center_of_goal):
 
 def defend_goal_in_arc(ball):
     a,b,c,theta = _find_triangle(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'])
-    distance = (1- _distance_from_goal_for_arc_defense)/c
+    distance = _distance_from_goal_for_arc_defense/c
 
     return stay_between_points_at_distance(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'], distance)
 
