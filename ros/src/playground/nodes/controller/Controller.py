@@ -84,5 +84,5 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
     return velocities
 
-def _close(a, b, tolerance=0.025):
+def _close(a, b, tolerance=0.04):
     return abs(a - b) <= tolerance
