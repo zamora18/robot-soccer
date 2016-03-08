@@ -23,7 +23,8 @@ def choose_strategy(robot, ball):
     	# return _strong_defense(robot, ball)
     # else:
     	# return _strong_offense(robot, ball)
-    return _aggressive_defense(robot, ball)
+    # return _aggressive_defense(robot, ball)
+    return Skills.set_up_kick(robot, ball, 0)
 
 def _goal_scored(robot, ball):
     if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
