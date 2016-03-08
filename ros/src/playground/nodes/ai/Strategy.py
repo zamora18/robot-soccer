@@ -91,7 +91,7 @@ def _strong_defense(robot, ball):
     # defends at yhat future
     y_c = ball['yhat_future']
 
-    if ball['xhat_future'] > x_c:
+    if abs(ball['xhat_future']) > abs(x_c):
         if _ball_defend_position is None:
             _ball_defend_position = ball
     else:
