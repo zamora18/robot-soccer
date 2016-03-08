@@ -18,13 +18,17 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     # theta is the angle between y=0 line at our goal to the ball
     theta = np.arctan2(b,a)
 
+    cprime = c*(1-distance)
+
     # aprime is the length of the simalar triangle with hypotenous d
-    aprime = distance*np.cos(theta)
+    aprime = cprime*np.cos(theta)
     # bprime is the height of the simalar triangle with hypotenous d
-    bprime = distance*np.sin(theta)
+    bprime = cprime*np.sin(theta)
 
     x_desired = x2 - aprime
-    y_desired = x2 - bprime
+    y_desired = y2 - bprime
+
+    theta = theta*180/np.pi
 
     return (x_desired, y_desired, theta)
 
