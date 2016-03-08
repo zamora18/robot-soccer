@@ -155,7 +155,7 @@ def _aggressive_defense(robot, ball):
 	cprime = c/3
 
 	# theta is the angle between y=0 line at our goal to the ball
-	theta = arctan(b/a)
+	theta = arctan2(b/a)
 
 	# aprime is the length of the simalar triangle with hypotenous d
 	aprime = d*cos(theta)
