@@ -59,7 +59,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
         if abs(thetahat-theta_c) > 180:
             if thetahat < theta_c:
                 theta_c = theta_c + 360
-            else
+            else:
                 theta_c = theta_c - 360
 
         w  = abs(PID_theta.update(theta_c, thetahat, Ts))
