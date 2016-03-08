@@ -19,10 +19,10 @@ _done = False
   
 def choose_strategy(robot, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
-    return _strong_defense(robot, ball)
+    	# return _strong_defense(robot, ball)
     # else:
-    #     return _strong_offense(robot, ball)
-
+    	# return _strong_offense(robot, ball)
+    return _aggressive_defense(robot, ball)
 
 def _goal_scored(robot, ball):
     if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
@@ -141,3 +141,29 @@ def _hack_offense(robot, ball):
     # kick
     kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
     return kick_point
+
+
+def _aggressive_defense(robot, ball):
+
+	# a, b and c are lengths of teh side of a right triangle with its corner in our goal
+	a = _goal_position_home[0] - ball['xhat']
+	b = ball['yhat']
+	c = sqrt(a**2 + b**2)
+
+	# cprime is the distance we want to follow the ball from
+	# right now lets just say a third of how far the ball is from the goal
+	cprime = c/3
+
+	# theta is the angle between y=0 line at our goal to the ball
+	theta = arctan(b/a)
+
+	# aprime is the length of the simalar triangle with hypotenous d
+	aprime = d*cos(theta)
+	# bprime is the height of the simalar triangle with hypotenous d
+	bprime = d*sin(theta)
+
+	x_c = ball['xhat'] - aprime
+	y_c = ball['yhat'] - bprime
+
+	return (x_c, y_c, theta)
+
