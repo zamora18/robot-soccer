@@ -71,19 +71,19 @@ def _handle_ally_position(msg):
         print "You're close to a robot!"
 
     # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=0.005) and desired_msg.x < min_x:
+    if _close(robot[0], min_x, tolerance=_edge_padding) and desired_msg.x < min_x:
         print("{} is close to {}".format(robot[0],min_x))
         desired_msg.x = min_x
 
-    if _close(robot[0], max_x, tolerance=0.005) and desired_msg.x > max_x:
+    if _close(robot[0], max_x, tolerance=_edge_padding) and desired_msg.x > max_x:
         print("{} is close to {}".format(robot[0],max_x))
         desired_msg.x = max_x
 
-    if _close(robot[1], min_y, tolerance=0.005) and desired_msg.y < min_y:
+    if _close(robot[1], min_y, tolerance=_edge_padding) and desired_msg.y < min_y:
         print("{} is close to {}".format(robot[1],min_y))
         desired_msg.y = min_y
 
-    if _close(robot[1], max_y, tolerance=0.005) and desired_msg.y > min_y:
+    if _close(robot[1], max_y, tolerance=_edge_padding) and desired_msg.y > max_y:
         print("{} is close to {}".format(robot[1],max_y))
         desired_msg.y = max_y
 
