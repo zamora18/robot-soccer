@@ -19,14 +19,24 @@ _field_length       = 3.68 # (12ft)
 _field_width        = 2.62 # (8.58 ft)
 
 _opponent = None
+_ally = None
+_robot_desired = None
 
 _pub = None
 
 def _handle_raw_desired_position(msg):
     # Make sure that the robot doesn't hit an obstacle
 
-    robot = (msg.x, msg.y)
-    opponent = (_opponent[0], _opponent[1])
+    if _ally is not None:
+        robot = (_ally[0], _ally[1])
+    else:
+        robot = (0, 0)
+
+    if _opponent is not None:
+        opponent = (_opponent[0], _opponent[1])
+    else:
+        # don't ever be close to this
+        opponent = (100, 100)
 
     # Define field edges
     min_x = -(_field_length/2)
@@ -66,6 +76,12 @@ def _handle_opponent_position(msg):
     # Grab and save the opponent's current location
     _opponent = (msg.x, msg.y, msg.theta)
 
+def _handle_ally_position(msg):
+    global _ally
+
+    # Grab and save the ally's current location
+    _ally = (msg.x, msg.y, msg.theta)
+
 def _close(a, b, tolerance=0.010):
 
     # Demand vals to be lists
@@ -94,6 +110,7 @@ def main():
 
     rospy.Subscriber('desired_position', Pose2D, _handle_raw_desired_position)
     rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
+    rospy.Subscriber('vision_ally_position', Pose2D, _handle_ally_position)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
