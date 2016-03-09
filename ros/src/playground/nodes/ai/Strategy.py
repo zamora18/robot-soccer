@@ -20,11 +20,12 @@ _done = False
   
 def choose_strategy(robot, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
-    	# return _strong_defense(robot, ball)
+    	return _strong_defense(robot, ball)
     # else:
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
-    return Skills.set_up_kick(robot, ball, 0)
+    # return Skills.set_up_kick(ball, 0)
+    # return Skills.defend_goal_in_arc(ball)
 
 def _goal_scored(robot, ball):
     if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
