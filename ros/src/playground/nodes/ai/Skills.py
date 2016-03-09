@@ -9,7 +9,7 @@ _goal_position_home = -_field_length/2
 _goal_position_opp  = -_goal_position_home
 
 
-_distance_behind_ball_for_kick = _robot_width/2 + .03 # this is for the jersey being off center
+_distance_behind_ball_for_kick = _robot_width * 2 + .03 # this is for the jersey being off center
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 
 # actuates solenoid
@@ -17,7 +17,7 @@ def kick():
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 
-def _find_triangle(x1,y1,x2,y2):
+def find_triangle(x1,y1,x2,y2):
     """Find Triangle
 
     returns the triangle's sides (a, b, c) and theta (in radians) between p1 and p2
@@ -36,7 +36,7 @@ def _find_triangle(x1,y1,x2,y2):
 # example follow ball 2/3 distance between goal and ball
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
 
-    a,b,c,theta = _find_triangle(x1,y1,x2,y2)
+    a,b,c,theta = find_triangle(x1,y1,x2,y2)
 
     cprime = c*(1-distance)
 
@@ -65,7 +65,7 @@ def set_up_kick(ball, distance_from_center_of_goal):
     y2 = distance_from_center_of_goal * _goal_box_width/2
     x2 = _goal_position_opp
 
-    a,b,c,theta = _find_triangle(ball['xhat'], ball['yhat'], x2,y2)
+    a,b,c,theta = find_triangle(ball['xhat'], ball['yhat'], x2,y2)
 
     cprime = _distance_behind_ball_for_kick
 
@@ -81,9 +81,16 @@ def set_up_kick(ball, distance_from_center_of_goal):
 
     return (x_c, y_c, theta_c)
 
+def approach_to_kick(robot, ball):
+    a,b,c,theta = find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+    x_c = .1 * np.cos(theta*np.pi/180) + a + ball['xhat']
+    y_c = .1 * np.sin(theta*np.pi/180) + b + ball['yhat']
+
+    return (x_c, y_c, theta)
+
 
 def defend_goal_in_arc(ball):
-    a,b,c,theta = _find_triangle(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'])
+    a,b,c,theta = find_triangle(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'])
     distance = _distance_from_goal_for_arc_defense/c
 
     return stay_between_points_at_distance(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'], distance)
