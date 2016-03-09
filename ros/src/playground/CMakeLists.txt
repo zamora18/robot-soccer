@@ -83,6 +83,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   std_srvs
+  geometry_msgs
 )
 
 ################################################
