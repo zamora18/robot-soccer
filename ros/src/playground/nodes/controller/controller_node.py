@@ -2,8 +2,10 @@
 
 import roslib; roslib.load_manifest('playground')
 import rospy
-from geometry_msgs.msg import Twist, Pose2D, PIDInfo
+from geometry_msgs.msg import Twist, Pose2D
 from std_srvs.srv import Trigger, TriggerResponse
+
+from playground.msg import PIDInfo
 
 import numpy as np
 
@@ -49,7 +51,7 @@ def main():
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_position)
     rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
     pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
-    pub_PIDInfo = rospy.Publisher('pidinfo', Pose2D, queue_size=10)
+    pub_PIDInfo = rospy.Publisher('pidinf', Pose2D, queue_size=10)
 
     # Services
     rospy.Service('/controller/toggle', Trigger, _toggle)

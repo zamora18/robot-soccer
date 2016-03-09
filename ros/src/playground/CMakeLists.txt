@@ -62,6 +62,7 @@ add_message_files(
   WorldVelocities.msg
   BallState.msg
   RobotState.msg
+  PIDInfo.msg
 )
 
 ## Generate services in the 'srv' folder
