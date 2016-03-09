@@ -1,3 +1,5 @@
+from collections import Iterable
+
 import Skills
 
 _robot_width        = 0.1841 # (7.25 in)
@@ -55,6 +57,32 @@ def shoot(robot, ball, distance_from_center):
         return robot['xhat'], robot['yhat'], robot['thetahat']
 
 
+def advance_ball(robot, opponent, ball):
 
+
+
+def _close(a, b, tolerance=0.010):
+    """
+
+    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
+    """
+
+    # Demand vals to be lists
+    a = _demand_list(a)
+    b = _demand_list(b)
+
+    return all(abs(np.subtract(a, b)) <= tolerance)
+
+def _demand_list(a):
+    """
+    Make a non-iterable or a tuple into a list
+    """
+    if not isinstance(a, Iterable):
+        a = [a]
+
+    elif type(a) is tuple:
+        a = list(a)
+
+    return a
 
 

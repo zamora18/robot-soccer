@@ -24,7 +24,7 @@ _ball_defend_position = None
 
 _done = False
   
-def choose_strategy(robot, ball):
+def choose_strategy(robot, opponent, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
     #	return _strong_defense(robot, ball)
     # else:
@@ -32,12 +32,13 @@ def choose_strategy(robot, ball):
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
     # return Skills.defend_goal_in_arc(ball)
-    return Plays.shoot(robot, ball,0)
+    return _aggressive_offense(robot, opponent, ball)
+    #return Plays.shoot(robot, ball,0)
 
 
 
 
-def _strong_offense(robot, ball):
+def _strong_offense(robot, opponent, ball):
 
     return _hack_offense(robot, ball)
 
@@ -75,25 +76,33 @@ def _strong_offense(robot, ball):
             y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
             return (x_c, y_c, theta_ball_to_goal_deg) 
 
-def _aggressive_offense(robot, ball):
+def _aggressive_offense(robot, opponent, ball):
     
     section = _get_field_section(ball['xhat'])
     future_section = _get_field_section(ball['xhat_future'])
 
     if   section == 1:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
             #kick the ball towards the goal
+            Skills.kick()
         else:
             Skills.defend_goal_in_arc(ball)
     elif section == 2:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
             #kick the ball towards the goal
+            Skills.kick()
         else:
             return Skills.stay_between_points_at_distance(ball['xhat_future'], ball['yhat_future'], _goal_position_home[0], _goal_position_home[1], 0.20)
     elif section == 3:
-        
+        if ball['yhat'] < 0:
+            Plays.shoot(robot, ball, -0.75)
+        else:
+            Plays.shoot(robot, ball, 0.75)
     else: #section is 4
-
+        if ball['yhat'] < 0:
+            Plays.shoot(robot, ball, -0.75)
+        else:
+            Plays.shoot(robot, ball, 0.75)
 
 def _hack_offense(robot, ball):
 

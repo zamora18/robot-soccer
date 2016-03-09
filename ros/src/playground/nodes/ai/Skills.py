@@ -9,7 +9,8 @@ _goal_position_home = -_field_length/2
 _goal_position_opp  = -_goal_position_home
 
 
-_distance_behind_ball_for_kick = _robot_width + .03 # this is for the jersey being off center
+_distance_behind_ball_for_kick 		= _robot_width + .03 # this is for the jersey being off center
+_distance_behind_ball_for_dribbling = _robot_width/2 + .05
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 
 # actuates solenoid
@@ -40,9 +41,9 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
 
     cprime = c*(1-distance)
 
-    # aprime is the length of the simalar triangle with hypotenous cprime
+    # aprime is the length of the simalar triangle with hypotenuse cprime
     aprime = cprime*np.cos(theta)
-    # bprime is the height of the simalar triangle with hypotenous cprime
+    # bprime is the height of the simalar triangle with hypotenuse cprime
     bprime = cprime*np.sin(theta)
 
     x_desired = x2 - aprime
@@ -53,7 +54,7 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     return (x_desired, y_desired, theta)
 
 
-def set_up_kick(ball, distance_from_center_of_goal):
+def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     """Set Up kick
 
     puts the robot just behind the ball ready to shoot at the goal
@@ -69,9 +70,9 @@ def set_up_kick(ball, distance_from_center_of_goal):
 
     cprime = _distance_behind_ball_for_kick
 
-    # aprime is the length of the simalar triangle with hypotenous cprime
+    # aprime is the length of the simalar triangle with hypotenuse cprime
     aprime = cprime*np.cos(theta)
-    # bprime is the height of the simalar triangle with hypotenous cprime
+    # bprime is the height of the simalar triangle with hypotenuse cprime
     bprime = cprime*np.sin(theta)
 
     x_c = ball['xhat'] - aprime
@@ -81,7 +82,7 @@ def set_up_kick(ball, distance_from_center_of_goal):
 
     return (x_c, y_c, theta_c)
 
-def approach_to_kick(robot, ball):
+def approach_to_kick_facing_goal(robot, ball):
     a,b,c,theta = find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     x_c = .1 * np.cos(theta*np.pi/180) + a + ball['xhat']
     y_c = .1 * np.sin(theta*np.pi/180) + b + ball['yhat']
@@ -95,4 +96,50 @@ def defend_goal_in_arc(ball):
 
     return stay_between_points_at_distance(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'], distance)
 
+def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
+	if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
 
+
+
+
+def go_behind_ball_facing_target(robot, opponent, ball, des_dist, target_x, target_y):
+	[a,b,c,theta] = find_triangle(ball['xhat'], ball['yhat'], target_x, target_y)
+	
+	hypotenuse = _robot_width/2 + des_dist
+	x_c = ball['xhat'] - hypotenuse*np.cos(theta)
+	y_c = ball['yhat'] - hypotenuse*np.sin(theta)
+
+	return (x_c, y_c, theta)
+
+def push_ball_des_distance (robot, ball, distance):
+	hypotenuse = distance
+	theta_c = robot['thetahat']
+	x_c = ball['xhat'] + hypotenuse*np.cos(theta_c)
+	y_c = ball['yhat'] + hypotenuse*np.sin(theta_c)
+
+	return (x_c, y_c, theta_c)
+
+
+def _close(a, b, tolerance=0.010):
+    """
+
+    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
+    """
+
+    # Demand vals to be lists
+    a = _demand_list(a)
+    b = _demand_list(b)
+
+    return all(abs(np.subtract(a, b)) <= tolerance)
+
+def _demand_list(a):
+    """
+    Make a non-iterable or a tuple into a list
+    """
+    if not isinstance(a, Iterable):
+        a = [a]
+
+    elif type(a) is tuple:
+        a = list(a)
+
+    return a
