@@ -14,9 +14,13 @@ _distance_behind_ball_for_dribbling = _robot_width/2 + .05
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 _distance_behind_ball_approach = .3
 
+_kicker_count = 0
+
 # actuates solenoid
 def kick():
-    print "Actuate"
+    global _kicker_count
+    _kicker_count = _kicker_count + 1
+    print"Actuate: {}".format(_kicker_count))
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 

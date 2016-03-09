@@ -35,7 +35,7 @@ def choose_strategy(robot, opponent, ball, goal):
         _wait_timer = 0
 
     if _going_home:
-        if _wait_timer < 700: # 7 seconds
+        if _wait_timer < 500: # 7 seconds
             _wait_timer = _wait_timer + 1
             return _goal_position_home
         else:

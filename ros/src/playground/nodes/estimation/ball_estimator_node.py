@@ -37,7 +37,7 @@ def _handle_vision_ball_position(msg):
     _last_time = time.time()
 
     # Was there a goal?
-    if abs(msg.x) > 1.79:
+    if abs(msg.x) > 1.79 and (abs(msg.y) < .305):
         msg = Bool()
         msg.data = True
         _goal_pub.publish(msg)
