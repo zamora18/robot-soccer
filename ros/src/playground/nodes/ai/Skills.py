@@ -15,6 +15,7 @@ _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 
 # actuates solenoid
 def kick():
+    print "Actuate"
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 
@@ -96,8 +97,8 @@ def defend_goal_in_arc(ball):
 
     return stay_between_points_at_distance(_goal_position_home, 0, ball['xhat_future'], ball['yhat_future'], distance)
 
-def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
-	if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
+# def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
+	# if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
 
 
 

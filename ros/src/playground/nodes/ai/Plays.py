@@ -1,4 +1,5 @@
 from collections import Iterable
+import numpy as np
 
 import Skills
 
@@ -16,17 +17,17 @@ def _close(a, b, tolerance=20.0):
     return abs(a - b) <= tolerance
 
 def _robot_close(robot, x, y, theta):
-    return _close(x, robot['xhat'], tolerance=.07) and _close(y, robot['yhat'], .07) \
-                and _close(theta, robot['thetahat'], tolerance = 12.5)
+    return _close(x, robot['xhat'], tolerance=.1) and _close(y, robot['yhat'], .1) \
+                and _close(theta, robot['thetahat'], tolerance = 15)
 
 def shoot(robot, ball, distance_from_center):
     global _shoot_state
 
-    desired_c = Skills.set_up_kick(ball, distance_from_center)
+    desired_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
 
     # transition
     if(_shoot_state == ShootState.setup):
-        x, y, theta = Skills.set_up_kick(ball, 0)
+        x, y, theta = Skills.set_up_kick_facing_goal(ball, 0)
         if _robot_close(robot, *desired_c):
             _shoot_state = ShootState.approach
 
@@ -47,7 +48,7 @@ def shoot(robot, ball, distance_from_center):
         return desired_c
 
     elif  _shoot_state == ShootState.approach:
-        return Skills.approach_to_kick(robot, ball)
+        return Skills.approach_to_kick_facing_goal(robot, ball)
 
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
@@ -57,7 +58,7 @@ def shoot(robot, ball, distance_from_center):
         return robot['xhat'], robot['yhat'], robot['thetahat']
 
 
-def advance_ball(robot, opponent, ball):
+# def advance_ball(robot, opponent, ball):
 
 
 
