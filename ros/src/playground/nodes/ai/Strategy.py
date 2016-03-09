@@ -82,17 +82,17 @@ def _aggressive_offense(robot, opponent, ball):
     future_section = _get_field_section(ball['xhat_future'])
 
     if   section == 1:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
             #kick the ball towards the goal
             Skills.kick()
         else:
             Skills.defend_goal_in_arc(ball)
     elif section == 2:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
             #kick the ball towards the goal
             Skills.kick()
         else:
-            return Skills.stay_between_points_at_distance(ball['xhat_future'], ball['yhat_future'], _goal_position_home[0], _goal_position_home[1], 0.20)
+            return Skills.stay_between_points_at_distance(ball['xhat_future'], ball['yhat_future'], _goal_position_home[0], _goal_position_home[1], 0.30)
     elif section == 3:
         if ball['yhat'] < 0:
             Plays.shoot(robot, ball, -0.75)
