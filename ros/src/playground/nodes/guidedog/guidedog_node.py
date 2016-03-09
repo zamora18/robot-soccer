@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+"""
+This node is a guidedog to the robot (i.e., the robot is blind).
+
+It 
+"""
+
+import roslib; roslib.load_manifest('playground')
+import rospy
+from geometry_msgs.msg import Pose2D
+from playground.msg import coords
+
+import numpy as np
+
+_robot_width        = 0.1841 # (7.25 in)
+_robot_half_width   = _robot_width/2
+_field_length       = 3.68 # (12ft)
+_field_width        = 2.62 # (8.58 ft)
+
+_opponent = None
+
+_pub = None
+
+def _handle_raw_desired_position(msg):
+    # Make sure that the robot doesn't hit an obstacle
+
+    robot = (msg.x, msg.y)
+    opponent = (_opponent[0], _opponent[1])
+
+    # Define field edges
+    min_x = -(_field_length/2)
+    max_x = (_field_length/2)
+    min_y = -(_field_width/2)
+    max_y = (_field_width/2)
+
+    # Are we within 10% of the perimeter of the opponent?
+    if _close(robot, opponent, tolerance=1.10*_robot_width):
+        print "You're close to a robot!"
+
+    # Are we about to hit the edge of the field?
+    if _close(robot[0], min_x, tolerance=1.05*_edge_padding):
+        print "You're close to the minimum x edge!"
+
+    if _close(robot[0], max_x, tolerance=1.05*_edge_padding):
+        print "You're close to the maximum x edge!"
+
+    if _close(robot[1], min_y, tolerance=1.05*_edge_padding):
+        print "You're close to the minimum y edge!"
+
+    if _close(robot[1], max_y, tolerance=1.05*_edge_padding):
+        print "You're close to the maximum y edge!"
+
+
+    # robo_msg = Pose2D()
+    # robo_msg.x = msg.x
+    # robo_msg.y = msg.y
+    # robo_msg.theta = msg.theta
+    # robopub.publish(robo_msg)
+
+    _pub.publish(msg)
+
+def _handle_opponent_position(msg):
+    global _opponent
+
+    # Grab and save the opponent's current location
+    _opponent = (msg.x, msg.y, msg.theta)
+
+def _close(a, b, tolerance=0.010):
+
+    # Demand vals to be lists
+    a = _demand_list(a)
+    b = _demand_list(b)
+
+    return all(abs(np.subtract(a, b)) <= tolerance)
+
+def _demand_list(a):
+    """
+    Make a non-iterable or a tuple into a list
+    """
+    if not isinstance(a, Iterable):
+        a = [a]
+
+    elif type(a) is tuple:
+        a = list(a)
+
+    return a
+
+def main():
+    rospy.init_node('guidedog', anonymous=False)
+
+    global _pub
+    _pub = rospy.Publisher('desired_position_safe', Pose2D, queue_size=10)
+
+    rospy.Subscriber('desired_position', Pose2D, _handle_raw_desired_position)
+    rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+
+if __name__ == '__main__':
+    main()
