@@ -23,6 +23,8 @@
 #define THRESHHOLD_BOX_WIDTH 250
 
 
+
+
 using namespace cv;
 using namespace std;
 
@@ -38,6 +40,28 @@ bool away;
 double scalingfactor;
 Point2d center;
 
+int ballLowH;
+int ballHighH;
+int ballLowS;
+int ballHighS;
+int ballLowV;
+int ballHighV;
+
+
+int robot1LowH;
+int robot1HighH;
+int robot1LowS;
+int robot1HighS;
+int robot1LowV;
+int robot1HighV;
+
+int robot2LowH;
+int robot2HighH;
+int robot2LowS;
+int robot2HighS;
+int robot2LowV;
+int robot2HighV;	
+
 void* trackRobot(void* robotobject);
 
 void* trackBall(void* ballobject);
@@ -46,7 +70,7 @@ void drawRobotLine(Mat img, Robot robot);
 
 Point2d threshholdBox(VisionObject obj, Mat* img);
 
-
+bool initColors();
 
 int main(int argc, char *argv[])
 {
@@ -75,62 +99,9 @@ int main(int argc, char *argv[])
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 160;
-	int ballHighH = 179;
-
-	int ballLowS = 46;
-	int ballHighS = 200;
-
-	int ballLowV = 132;
-	int ballHighV = 255;
 
 
-	int robot1LowH = 108;
-	int robot1HighH = 164;
 
-	int robot1LowS = 0;
-	int robot1HighS = 78;
-
-	int robot1LowV = 172;
-	int robot1HighV = 255;
-
-	int robot2LowH = 53;
-	int robot2HighH = 81;
-
-	int robot2LowS = 44;
-	int robot2HighS = 121;
-
-	int robot2LowV = 188;
-	int robot2HighV = 255;	
-
-	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "BallControl", &ballHighH, 179);
-
-	cvCreateTrackbar("LowS", "BallControl", &ballLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "BallControl", &ballHighS, 255);
-
-	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
-
-	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
-
-	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
-
-	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
-
-	cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
-
-	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
-
-	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);
 
 //	event = 0;
 	Mat imgTemp;
@@ -170,6 +141,45 @@ int main(int argc, char *argv[])
 	// //find position and angle of robot
 	//video.initializeRobot(&robot, imgTemp);
 
+	if(!initColors())
+		exit(-1);
+
+	ballLowH = 160;
+	ballHighH = 175;
+	ballLowS = 46;
+	ballHighS = 200;
+	ballLowV = 132;
+	ballHighV = 255;
+
+	//Create trackbars in "Control" window
+	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "BallControl", &ballHighH, 179);
+
+	cvCreateTrackbar("LowS", "BallControl", &ballLowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "BallControl", &ballHighS, 255);
+
+	cvCreateTrackbar("LowV", "BallControl", &ballLowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
+
+	//Create trackbars in "Control" window
+	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
+
+	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
+
+	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
+
+	cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
+
+	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
+
+	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);
+
 	//initialize threads
 
 	threadstatus = ALL_THREADS_DONE_MASK;
@@ -186,6 +196,7 @@ int main(int argc, char *argv[])
 
 	pthread_create(&robot1thread, NULL, trackRobot, &robot);
 	pthread_create(&robotoppthread, NULL, trackRobot, &robot2);
+
 
 
 
@@ -491,4 +502,138 @@ Point2d threshholdBox(VisionObject obj, Mat* img)
 
 	return loc;
 
+}
+
+
+
+bool initColors()
+{
+		// put in the values of the thing
+	string allycolor, opponentcolor;
+	cout << "Ally1 Color :";
+	cin >> allycolor;
+
+	cout << "OPP1 Color :";
+	cin >> opponentcolor;
+
+	if (allycolor == "r")
+	{
+		robot1LowH = 0;
+		robot1HighH = 179;
+
+		robot1LowS = 109;
+		robot1HighS = 166;
+
+		robot1LowV = 208;
+		robot1HighV = 251;
+	}
+	else if (allycolor == "o")
+	{
+		robot1LowH = 8;
+		robot1HighH = 24;
+
+		robot1LowS = 86;
+		robot1HighS = 216;
+
+		robot1LowV = 24;
+		robot1HighV = 255;
+	}
+	else if (allycolor == "p")
+	{
+		robot1LowH = 125;
+		robot1HighH = 164;
+
+		robot1LowS = 0;
+		robot1HighS = 78;
+
+		robot1LowV = 172;
+		robot1HighV = 255;
+	}
+	else if (allycolor == "b")
+	{
+		robot1LowH = 77;
+		robot1HighH = 131;
+
+		robot1LowS = 19;
+		robot1HighS = 255;
+
+		robot1LowV = 199;
+		robot1HighV = 255;
+	}
+	else if (allycolor == "g")
+	{
+		robot1LowH = 46;
+		robot1HighH = 94;
+
+		robot1LowS = 0;
+		robot1HighS = 255;
+
+		robot1LowV = 186;
+		robot1HighV = 255;
+	}
+	else
+		return false;
+
+	// opponent colors
+	if (opponentcolor == "r")
+	{
+		robot2LowH = 0;
+		robot2HighH = 179;
+
+		robot2LowS = 109;
+		robot2HighS = 166;
+
+		robot2LowV = 208;
+		robot2HighV = 251;
+	}
+	else if (opponentcolor == "o")
+	{
+		robot2LowH = 8;
+		robot2HighH = 24;
+
+		robot2LowS = 86;
+		robot2HighS = 216;
+
+		robot2LowV = 24;
+		robot2HighV = 255;
+	}
+	else if (opponentcolor == "p")
+	{
+		robot2LowH = 125;
+		robot2HighH = 164;
+
+		robot2LowS = 0;
+		robot2HighS = 78;
+
+		robot2LowV = 172;
+		robot2HighV = 255;
+	}
+	else if (opponentcolor == "b")
+	{
+		robot2LowH = 77;
+		robot2HighH = 131;
+
+		robot2LowS = 19;
+		robot2HighS = 255;
+
+		robot2LowV = 199;
+		robot2HighV = 255;
+	}
+	else if (opponentcolor == "g")
+	{
+		robot2LowH = 46;
+		robot2HighH = 94;
+
+		robot2LowS = 0;
+		robot2HighS = 255;
+
+		robot2LowV = 186;
+		robot2HighV = 255;
+	}
+	else
+		return false;
+
+	if(allycolor == opponentcolor)
+		return false;
+	return true;
 }
