@@ -12,6 +12,7 @@ _goal_position_opp  = -_goal_position_home
 _distance_behind_ball_for_kick 		= _robot_width + .03 # this is for the jersey being off center
 _distance_behind_ball_for_dribbling = _robot_width/2 + .05
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
+_distance_behind_ball_approach = .3
 
 # actuates solenoid
 def kick():
@@ -85,8 +86,8 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
 
 def approach_to_kick_facing_goal(robot, ball):
     a,b,c,theta = find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-    x_c = .1 * np.cos(theta*np.pi/180) + a + ball['xhat']
-    y_c = .1 * np.sin(theta*np.pi/180) + b + ball['yhat']
+    x_c = _distance_behind_ball_approach * np.cos(theta*np.pi/180) + a + ball['xhat']
+    y_c = _distance_behind_ball_approach * np.sin(theta*np.pi/180) + b + ball['yhat']
 
     return (x_c, y_c, theta)
 
