@@ -23,8 +23,23 @@ _half_field          = 0
 _ball_defend_position = None
 
 _done = False
+
+_going_home = False
+_wait_timer = 0
   
-def choose_strategy(robot, opponent, ball):
+def choose_strategy(robot, opponent, ball, goal):
+    global _going_home, _wait_timer
+    if goal:
+        _going_home = True
+        _wait_timer = 0
+
+    if _going_home:
+        if _wait_timer < 700: # 7 seconds
+            _wait_timer = _wait_timer + 1
+            return _goal_position_home
+        else:
+            _going_home = False
+
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
     #	return _strong_defense(robot, ball)
     # else:
