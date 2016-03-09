@@ -1,3 +1,5 @@
+from collections import Iterable
+
 import numpy as np
 import Skills
 
@@ -14,6 +16,9 @@ _des_dist_from_ball = 0.0762 #(3.0in)
 _kick_dist          = 0.1524 #(6.0in)
 _goalie_x_pos       = _goal_position_home[0] + _goal_box_length + _robot_half_width
 
+_fourth_field_length = _field_length/4
+_half_field          = 0
+
 _ball_defend_position = None
 
 _done = False
@@ -27,11 +32,8 @@ def choose_strategy(robot, ball):
     # return Skills.set_up_kick(ball, 0)
     # return Skills.defend_goal_in_arc(ball)
 
-def _goal_scored(robot, ball):
-    if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
-        return True
-    else:
-        return False
+
+
 
 def _strong_offense(robot, ball):
 
@@ -69,16 +71,56 @@ def _strong_offense(robot, ball):
             #get aligned with ball facing goal
             x_c = ball['xhat'] - (_des_dist_from_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
             y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
-            return (x_c, y_c, theta_ball_to_goal_deg)
-            
-def _limit_goalie_y(y_c, ball):
-    # keeps robot in goal
-    if (ball['yhat_future'] > _goal_box_width/2):
-        y_c = _goal_box_width/2
-    elif (ball['yhat_future'] < -_goal_box_width/2):
-        y_c = -_goal_box_width/2
+            return (x_c, y_c, theta_ball_to_goal_deg) 
 
-    return y_c
+def _aggressive_offense(robot, ball):
+    
+    section = _get_field_section(ball['xhat'])
+    future_section = _get_field_section(ball['xhat_future'])
+
+    if   section == 1:
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):
+            #kick the ball towards the goal
+        else:
+            Skills.defend_goal_in_arc(ball)
+    elif section == 2:
+        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1):
+            #kick the ball towards the goal
+        else:
+            return Skills.stay_between_points_at_distance(ball['xhat_future'], ball['yhat_future'], _goal_position_home[0], _goal_position_home[1], 0.20)
+    elif section == 3:
+        
+    else: #section is 4
+
+
+def _hack_offense(robot, ball):
+
+    STOP_THRESH = 1.75 # m
+
+    if robot['xhat'] > STOP_THRESH:
+        return (0, 0, robot['thetahat'])
+
+    theta_ball_to_goal      = np.arctan2([ ball['yhat'] - _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
+
+    robot_width = 0.1841
+    offset_behind_ball = 2.5*robot_width
+
+    global _done
+
+    x = ball['xhat'] - offset_behind_ball*np.cos(theta_ball_to_goal)
+    y = ball['yhat'] - offset_behind_ball*np.sin(-2*theta_ball_to_goal)
+
+    if not _close(robot['xhat'], x, tolerance=0.100) or not _close(robot['yhat'], y, tolerance=0.100) and not _done:
+        _done = True
+        return (x, y, robot['thetahat'])
+
+    # kick
+    kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
+    return kick_point
+
+
+
+
 
 def _strong_defense(robot, ball):
     global _ball_defend_position
@@ -109,41 +151,62 @@ def _strong_defense(robot, ball):
     theta_c_deg = 0
     return (x_c, y_c, theta_c_deg)
     
+def _aggressive_defense(robot, ball):
+
+    x_c, y_c, theta_c = Skills.stay_between_points_at_distance(_goal_position_home[0], 0, ball['xhat_future'], ball['yhat_future'], 2.0/3)
+
+    return (x_c, y_c, theta_c)
+
+
+
+
+
 def _get_distance(object_1, object_2):
     x_dist = object_1['xhat'] - object_2['xhat']
     y_dist = object_1['yhat'] - object_2['yhat']
     distance = np.sqrt(x_dist**2 + y_dist**2)
     return distance
 
+def _get_field_section(x_pos):
+        #Field is divided into 4 sections. 2 back half, 2 front half.
+        home_back_fourth     = -_fourth_field_length 
+        home_front_fourth    = _half_field
+        away_back_fourth     = _fourth_field_length
+        away_front_fourth    = _field_length/2
 
-def _close(a, b, tolerance=20.0):
+        if x_pos < _half_field:
+            if x_pos < home_back_fourth:
+                return 1
+            else: # home_front_fourth
+                return 2
+        else: # ball is in away half
+            if x_pos < away_back_fourth:
+                return 3
+            else:
+                return 4
+
+
+
+
+def _goal_scored(robot, ball):
+    if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
+        return True
+    else:
+        return False
+
+def _close(a, b, tolerance):
     return abs(a - b) <= tolerance
 
 
-def _hack_offense(robot, ball):
 
-    STOP_THRESH = 1.75 # m
+def _limit_goalie_y(y_c, ball):
+    # keeps robot in goal
+    if (ball['yhat_future'] > _goal_box_width/2):
+        y_c = _goal_box_width/2
+    elif (ball['yhat_future'] < -_goal_box_width/2):
+        y_c = -_goal_box_width/2
 
-    if robot['xhat'] > STOP_THRESH:
-        return (0, 0, robot['thetahat'])
-
-    theta_ball_to_goal      = np.arctan2([ ball['yhat'] - _goal_position_opp[1] ], [ _goal_position_opp[0] - ball['xhat'] ])
-
-    robot_width = 0.1841
-    offset_behind_ball = 2.5*robot_width
-
-    global _done
-
-    x = ball['xhat'] - offset_behind_ball*np.cos(theta_ball_to_goal)
-    y = ball['yhat'] - offset_behind_ball*np.sin(-2*theta_ball_to_goal)
-
-    if not _close(robot['xhat'], x, tolerance=0.100) or not _close(robot['yhat'], y, tolerance=0.100) and not _done:
-        _done = True
-        return (x, y, robot['thetahat'])
-
-    # kick
-    kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
-    return kick_point
+    return y_c
 
 # limits robot to not hit walls
 def _keep_inside_field(x_c, y_c):
@@ -160,9 +223,26 @@ def _keep_inside_field(x_c, y_c):
 
     return (x_c, y_c)
 
-def _aggressive_defense(robot, ball):
+def _close(a, b, tolerance=0.010):
+    """
 
-    x_c, y_c, theta_c = Skills.stay_between_points_at_distance(_goal_position_home[0], 0, ball['xhat_future'], ball['yhat_future'], 2.0/3)
+    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
+    """
 
-    return (x_c, y_c, theta_c)
+    # Demand vals to be lists
+    a = _demand_list(a)
+    b = _demand_list(b)
 
+    return all(abs(np.subtract(a, b)) <= tolerance)
+
+def _demand_list(a):
+    """
+    Make a non-iterable or a tuple into a list
+    """
+    if not isinstance(a, Iterable):
+        a = [a]
+
+    elif type(a) is tuple:
+        a = list(a)
+
+    return a
