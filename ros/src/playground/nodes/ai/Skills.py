@@ -9,7 +9,7 @@ _goal_position_home = -_field_length/2
 _goal_position_opp  = -_goal_position_home
 
 
-_distance_behind_ball_for_kick = _robot_width/2 + .04 # this is for the jersey being off center
+_distance_behind_ball_for_kick = _robot_width/2 + .03 # this is for the jersey being off center
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 
 # actuates solenoid

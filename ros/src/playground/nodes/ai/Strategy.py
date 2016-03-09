@@ -1,5 +1,6 @@
 import numpy as np
 import Skills
+import Plays
 
 # field constants. Distances measured in meters
 _field_length       = 3.68 # (12ft)
@@ -20,12 +21,13 @@ _done = False
   
 def choose_strategy(robot, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
-    	return _strong_defense(robot, ball)
+    #	return _strong_defense(robot, ball)
     # else:
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
     # return Skills.defend_goal_in_arc(ball)
+    return Plays.shoot(robot,0)
 
 def _goal_scored(robot, ball):
     if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
@@ -114,10 +116,6 @@ def _get_distance(object_1, object_2):
     y_dist = object_1['yhat'] - object_2['yhat']
     distance = np.sqrt(x_dist**2 + y_dist**2)
     return distance
-
-
-def _close(a, b, tolerance=20.0):
-    return abs(a - b) <= tolerance
 
 
 def _hack_offense(robot, ball):
