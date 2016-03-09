@@ -43,6 +43,8 @@ def _handle_raw_desired_position(msg):
     max_x = (_field_length/2)
     min_y = -(_field_width/2)
     max_y = (_field_width/2)
+  
+    _edge_padding = 1
 
     # Are we within 10% of the perimeter of the opponent?
     if _close(robot, opponent, tolerance=1.10*_robot_width):
@@ -104,6 +106,8 @@ def _demand_list(a):
 
 def main():
     rospy.init_node('guidedog', anonymous=False)
+
+    print("Woof! Woof!")
 
     global _pub
     _pub = rospy.Publisher('desired_position_safe', Pose2D, queue_size=10)
