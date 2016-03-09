@@ -14,8 +14,8 @@ def _close(a, b, tolerance=20.0):
     return abs(a - b) <= tolerance
 
 def _robot_close(robot, x, y, theta):
-    return _close(x, robot['xhat']) and _close(y, robot['yhat']) \
-                and _close(theta, robot['thetahat'])
+    return _close(x, robot['xhat'], tolerance=.03) and _close(y, robot['yhat'], .03) \
+                and _close(theta, robot['thetahat'], tolerance = 10)
 
 def shoot(robot, ball, distance_from_center):
     global _shoot_state
