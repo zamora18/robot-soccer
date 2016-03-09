@@ -1,4 +1,5 @@
 import numpy as np
+import Skills
 
 # field constants. Distances measured in meters
 _field_length       = 3.68 # (12ft)
@@ -19,10 +20,10 @@ _done = False
   
 def choose_strategy(robot, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
-    return _strong_defense(robot, ball)
+    	# return _strong_defense(robot, ball)
     # else:
-    #     return _strong_offense(robot, ball)
-
+    	# return _strong_offense(robot, ball)
+    return _aggressive_defense(robot, ball)
 
 def _goal_scored(robot, ball):
     if ball['xhat'] > _goal_position_opp[0] or ball['xhat'] < _goal_position_home[0]:
@@ -91,7 +92,7 @@ def _strong_defense(robot, ball):
     # defends at yhat future
     y_c = ball['yhat_future']
 
-    if ball['xhat_future'] > x_c:
+    if abs(ball['xhat_future']) > abs(x_c):
         if _ball_defend_position is None:
             _ball_defend_position = ball
     else:
@@ -141,3 +142,25 @@ def _hack_offense(robot, ball):
     # kick
     kick_point = (STOP_THRESH+.500, 0, robot['thetahat'])
     return kick_point
+
+# limits robot to not hit walls
+def _keep_inside_field(x_c, y_c):
+    
+    if x_c > _goal_position_opp[0]:
+        x_c = -_goalie_x_pos
+    elif x_c < _goal_position_home[0]:
+        x_c = _goal_position_home
+
+    if y_c > _field_width/2:
+        y_c = _field_width/2 - _robot_width
+    elif y_c < -_field_width/2:
+        y_c = -_field_width/2 + _robot_width
+
+    return (x_c, y_c)
+
+def _aggressive_defense(robot, ball):
+
+    x_c, y_c, theta_c = Skills.stay_between_points_at_distance(_goal_position_home[0], 0, ball['xhat_future'], ball['yhat_future'], 2.0/3)
+
+    return (x_c, y_c, theta_c)
+
