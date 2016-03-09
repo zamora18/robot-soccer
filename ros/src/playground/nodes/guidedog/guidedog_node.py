@@ -72,16 +72,20 @@ def _handle_ally_position(msg):
 
     # Are we about to hit the edge of the field?
     if _close(robot[0], min_x, tolerance=_edge_padding):
-        desired_msg.x = min_x
+        print("{} is close to {}".format(robot[0],min_x))
+        desired_msg.x = min_x + _edge_padding
 
     if _close(robot[0], max_x, tolerance=_edge_padding):
-        desired_msg.x = max_x
+        print("{} is close to {}".format(robot[0],max_x))
+        desired_msg.x = max_x - _edge_padding
 
     if _close(robot[1], min_y, tolerance=_edge_padding):
-        desired_msg.y = min_y
+        print("{} is close to {}".format(robot[1],min_y))
+        desired_msg.y = min_y + _edge_padding
 
     if _close(robot[1], max_y, tolerance=_edge_padding):
-        desired_msg.y = max_y
+        print("{} is close to {}".format(robot[1],max_y))
+        desired_msg.y = max_y - _edge_padding
 
     _pub.publish(desired_msg)
 
