@@ -177,38 +177,47 @@ function pidInfoCB(src, msg, handles)
         return
     end
     
-    handles = guidata(hObject);
+%     handles = guidata(hObject);
     
-    set(handles.table_error,'Data', {msg.error.X msg.error.Y msg.error.Theta});
+    set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
     
     global view_resp
+    global view_resp_start
+    global step_resp_fig
+    global step_resp_plot
+    global step_resp_plot_desired
     if view_resp
         
-        desired = msg.desired.x;
-        actual = msg.actual.x;
+        desired = msg.Desired.X;
+        actual = msg.Actual.X;
         
         
-        if ~isfield(handles,'step_resp_plot') || ~ishandle(handles.step_resp_plot)
-            handles.step_resp_fig = figure(2);
-            handles.step_resp_plot = plot(0,actual);
-            handles.step_resp_plot_desired = plot(0,desired);
+        if view_resp_start
+            view_resp_start = false;
+            disp('start!');
+            step_resp_fig = figure(2);
+            
+            step_resp_plot = plot(0,actual);
+            hold on;
+            step_resp_plot_desired = plot(0,desired);
         else
-            ydat = get(handles.step_resp_plot,'YData');
+%             disp('hi');
+            ydat = get(step_resp_plot,'YData');
             ydat = [ydat actual];
             t = 0:length(ydat)-1;
-            set(handles.step_resp_plot,'XData',t,'YData',ydat);
+            set(step_resp_plot,'XData',t,'YData',ydat);
            
-            ydat = get(handles.step_resp_plot_desired,'YData');
+            ydat = get(step_resp_plot_desired,'YData');
             ydat = [ydat desired];
             t = 0:length(ydat)-1;
-            set(handles.step_resp_plot_desired,'XData',t,'YData',ydat);
+            set(step_resp_plot_desired,'XData',t,'YData',ydat);
         end
         
         
     end
     
     % Update handles structure
-    guidata(hObject, handles);
+%     guidata(handles.table_error, handles);
     
     
 function visionBallPositionCallback(src, msg, handles)
@@ -391,7 +400,9 @@ function btn_step_resp_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global view_resp
+global view_resp_start
 
+view_resp_start = true;
 view_resp = ~view_resp;
 
 disp(view_resp);
