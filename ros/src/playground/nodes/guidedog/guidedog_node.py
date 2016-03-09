@@ -4,6 +4,7 @@ This node is a guidedog to the robot (i.e., the robot is blind).
 
 It 
 """
+from collections import Iterable
 
 import roslib; roslib.load_manifest('playground')
 import rospy
