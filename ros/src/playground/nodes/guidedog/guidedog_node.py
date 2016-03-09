@@ -41,12 +41,6 @@ def _handle_ally_position(msg):
     # Grab and save the ally's current location
     _ally = (msg.x, msg.y, msg.theta)
 
-    # Create desired message
-    desired_msg = Pose2D()
-    desired_msg.x = _robot_desired[0] if _robot_desired is not None else msg.x
-    desired_msg.y = _robot_desired[1] if _robot_desired is not None else msg.y
-    desired_msg.theta = _robot_desired[2] if _robot_desired is not None else msg.theta
-
     if _ally is not None:
         robot = (_ally[0], _ally[1])
     else:
@@ -58,6 +52,11 @@ def _handle_ally_position(msg):
         # don't ever be close to this
         opponent = (100, 100)
 
+    if _robot_desired is not None:
+        desired = (_robot_desired[0], _robot_desired[1], _robot_desired[2])
+    else:
+        desired = (msg.x, msg.y, msg.theta)
+
     _edge_padding = 0.25
 
     # Define field edges
@@ -66,30 +65,72 @@ def _handle_ally_position(msg):
     min_y = -((_field_width/2) - _edge_padding)
     max_y = ((_field_width/2) - _edge_padding)
 
-    # Are we within 10% of the perimeter of the opponent?
-    if _close(robot, opponent, tolerance=1.60*_robot_width):
-        print "You're close to a robot!"
+    # # Are we within 10% of the perimeter of the opponent?
+    # if _close(robot, opponent, tolerance=1.60*_robot_width):
+    #     # Go to the closest defensive side.
+    #     print "You're close to a robot!"
+
+    
+    # if _is_opponent_in_path(robot, opponent, desired, buffer=1.60*_robot_width):
+    #     desired = _choose_offset_point(robot, opponent, desired)
 
     # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=_edge_padding) and desired_msg.x < min_x:
-        print("{} is close to {}".format(robot[0],min_x))
-        desired_msg.x = min_x
+    if _close(robot[0], min_x, tolerance=_edge_padding) and desired[0] < min_x:
+        # print("{} is close to {}".format(robot[0],min_x))
+        desired[0] = min_x
 
-    if _close(robot[0], max_x, tolerance=_edge_padding) and desired_msg.x > max_x:
-        print("{} is close to {}".format(robot[0],max_x))
-        desired_msg.x = max_x
+    if _close(robot[0], max_x, tolerance=_edge_padding) and desired[0] > max_x:
+        # print("{} is close to {}".format(robot[0],max_x))
+        desired[0] = max_x
 
-    if _close(robot[1], min_y, tolerance=_edge_padding) and desired_msg.y < min_y:
-        print("{} is close to {}".format(robot[1],min_y))
-        desired_msg.y = min_y
+    if _close(robot[1], min_y, tolerance=_edge_padding) and desired[1] < min_y:
+        # print("{} is close to {}".format(robot[1],min_y))
+        desired[1] = min_y
 
-    if _close(robot[1], max_y, tolerance=_edge_padding) and desired_msg.y > max_y:
-        print("{} is close to {}".format(robot[1],max_y))
-        desired_msg.y = max_y
+    if _close(robot[1], max_y, tolerance=_edge_padding) and desired[1] > max_y:
+        # print("{} is close to {}".format(robot[1],max_y))
+        desired[1] = max_y
+
+    # Create desired message
+    desired_msg = Pose2D()
+    desired_msg.x = desired[0]
+    desired_msg.y = desired[1]
+    desired_msg.theta = desired[2]
 
     _pub.publish(desired_msg)
 
 
+def _is_opponent_in_path(robot, opponent, desired, buffer=None):
+    
+    p1 = robot[0:2]
+    p2 = desired[0:2]
+    p3 = opponent[0:2]
+
+    if buffer is None:
+        buffer = 1.0
+
+    return _is_between(p1, p2, p3, epsilon=buffer)
+
+
+def _choose_offset_point(robot, opponent, desired):
+    pass
+
+def _is_between(p1, p2, p3, epsilon=1.0):
+    """Is Between
+
+    p1, p2, p3 are in the form (x, y).
+    """
+    crossproduct = (c[1] - a[1]) * (b[0] - a[0]) - (c[0] - a[0]) * (b[1] - a[1])
+    if abs(crossproduct) > epsilon : return False   # (or != 0 if using integers)
+
+    dotproduct = (c[0] - a[0]) * (b[0] - a[0]) + (c[1] - a[1])*(b[1] - a[1])
+    if dotproduct < 0 : return False
+
+    squaredlengthba = (b[0] - a[0])*(b[0] - a[0]) + (b[1] - a[1])*(b[1] - a[1])
+    if dotproduct > squaredlengthba: return False
+
+    return True
+    # return (True, crossproduct, dotproduct, squaredlengthba)
 
 
 def _close(a, b, tolerance=0.010):
