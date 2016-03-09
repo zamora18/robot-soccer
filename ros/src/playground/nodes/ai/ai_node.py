@@ -11,12 +11,18 @@ import Strategy
 
 _robot = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
 _ball  = { 'xhat': 0, 'yhat': 0, 'xhat_future': 0, 'yhat_future': 0 }
+_opponent = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
 
 
 def _handle_estimated_robot_position(msg):
     _robot['xhat'] = msg.x
     _robot['yhat'] = msg.y
     _robot['thetahat'] = msg.theta
+
+def _handle_opponent_position(msg):
+    _opponent['xhat'] = msg.x
+    _opponent['yhat'] = msg.y
+    _opponent['thetahat'] = msg.theta
 
 def _handle_ball_state(msg):
     _ball['xhat'] = msg.xhat
@@ -28,13 +34,14 @@ def main():
     rospy.init_node('ai', anonymous=False)
 
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_robot_position)
+    rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _ball)
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball)
         msg = Pose2D()
         msg.x = x_c
         msg.y = y_c
