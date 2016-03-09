@@ -31,7 +31,7 @@ def shoot(robot, ball, distance_from_center):
     elif _shoot_state == ShootState.approach:
         a,b,c,theta = Skills.find_triangle(robot['xhat'], robot['yhat'], \
                                 ball['xhat'], ball['yhat'])
-        if(c < _robot_width * (3/4)):
+        if(c < _robot_width * (3.0/4.0)):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
@@ -48,6 +48,7 @@ def shoot(robot, ball, distance_from_center):
         return Skills.approach_to_kick(robot, ball)
 
     elif _shoot_state == ShootState.shoot:
+        print "KICKING"
         Skills.kick()
         return desired_c
     else:
