@@ -58,34 +58,34 @@ def _handle_ally_position(msg):
         # don't ever be close to this
         opponent = (100, 100)
 
-    # Define field edges
-    min_x = -(_field_length/2)
-    max_x = (_field_length/2)
-    min_y = -(_field_width/2)
-    max_y = (_field_width/2)
-    
     _edge_padding = 0.25
+
+    # Define field edges
+    min_x = -((_field_length/2) - _edge_padding)
+    max_x = ((_field_length/2) - _edge_padding)
+    min_y = -((_field_width/2) - _edge_padding)
+    max_y = ((_field_width/2) - _edge_padding)
 
     # Are we within 10% of the perimeter of the opponent?
     if _close(robot, opponent, tolerance=1.60*_robot_width):
         print "You're close to a robot!"
 
     # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=_edge_padding):
+    if _close(robot[0], min_x, tolerance=0.005) and desired_msg.x < min_x:
         print("{} is close to {}".format(robot[0],min_x))
-        desired_msg.x = min_x + _edge_padding
+        desired_msg.x = min_x
 
-    if _close(robot[0], max_x, tolerance=_edge_padding):
+    if _close(robot[0], max_x, tolerance=0.005) and desired_msg.x > max_x:
         print("{} is close to {}".format(robot[0],max_x))
-        desired_msg.x = max_x - _edge_padding
+        desired_msg.x = max_x
 
-    if _close(robot[1], min_y, tolerance=_edge_padding):
+    if _close(robot[1], min_y, tolerance=0.005) and desired_msg.y < min_y:
         print("{} is close to {}".format(robot[1],min_y))
-        desired_msg.y = min_y + _edge_padding
+        desired_msg.y = min_y
 
-    if _close(robot[1], max_y, tolerance=_edge_padding):
+    if _close(robot[1], max_y, tolerance=0.005) and desired_msg.y > min_y:
         print("{} is close to {}".format(robot[1],max_y))
-        desired_msg.y = max_y - _edge_padding
+        desired_msg.y = max_y
 
     _pub.publish(desired_msg)
 
