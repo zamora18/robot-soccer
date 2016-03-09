@@ -65,6 +65,13 @@ def _handle_ally_position(msg):
     min_y = -((_field_width/2) - _edge_padding)
     max_y = ((_field_width/2) - _edge_padding)
 
+    # Create desired message
+    desired_msg = Pose2D()
+    desired_msg.x = desired[0]
+    desired_msg.y = desired[1]
+    desired_msg.theta = desired[2]
+
+
     # # Are we within 10% of the perimeter of the opponent?
     # if _close(robot, opponent, tolerance=1.60*_robot_width):
     #     # Go to the closest defensive side.
@@ -77,25 +84,19 @@ def _handle_ally_position(msg):
     # Are we about to hit the edge of the field?
     if _close(robot[0], min_x, tolerance=_edge_padding) and desired[0] < min_x:
         # print("{} is close to {}".format(robot[0],min_x))
-        desired[0] = min_x
+        desired_msg.x = min_x
 
     if _close(robot[0], max_x, tolerance=_edge_padding) and desired[0] > max_x:
         # print("{} is close to {}".format(robot[0],max_x))
-        desired[0] = max_x
+        desired_msg.x = max_x
 
     if _close(robot[1], min_y, tolerance=_edge_padding) and desired[1] < min_y:
         # print("{} is close to {}".format(robot[1],min_y))
-        desired[1] = min_y
+        desired_msg.y = min_y
 
     if _close(robot[1], max_y, tolerance=_edge_padding) and desired[1] > max_y:
         # print("{} is close to {}".format(robot[1],max_y))
-        desired[1] = max_y
-
-    # Create desired message
-    desired_msg = Pose2D()
-    desired_msg.x = desired[0]
-    desired_msg.y = desired[1]
-    desired_msg.theta = desired[2]
+        desired_msg.y = max_y
 
     _pub.publish(desired_msg)
 
