@@ -82,7 +82,7 @@ vector<vector<Point> >  ImageProcessor::getContours(Mat contourOutput)
 }
 
 
-void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
+bool ImageProcessor::initializeBall(VisionObject* ball, Mat img)
 {
 	Mat contourOutput;
 
@@ -116,10 +116,12 @@ void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
 	if(objects.size() != 1)
 	{
 		cout << "CANT FIND BALL" << endl;
+		return false;
 	}
 	else
 	{
 		ball->setLocation(imageToFieldTransform(objects[0]));
+		return true;
 	}
 }
 //initializes the robot positions, can be used to update position also
@@ -159,7 +161,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 
 	Point2d p1, p2;
 
-	if(objects.size() < 2)
+	if(objects.size() != 2)
 	{
 		return false;
 	}
@@ -188,6 +190,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 
 	//correctRobotCenter(robot);
 
+	return true;
 
 }
 

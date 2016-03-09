@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 
 	ballLowH = 160;
-	ballHighH = 175;
+	ballHighH = 178;
 	ballLowS = 46;
 	ballHighS = 200;
 	ballLowV = 132;
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 		// video.erodeDilate(imgRobot2Thresh);
 
 		// video.initializeRobot(&robot, imgRobotThresh);		
-		video.initializeBall(&ball, imgBallThresh);
+		
 		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
 
@@ -293,6 +293,9 @@ int main(int argc, char *argv[])
 		drawRobotLine(imgOriginal, robot);
 		drawRobotLine(imgOriginal, robot2);
 		
+		if(!video.initializeBall(&ball, imgBallThresh) && away)
+			video.invertObjForAway(&ball);
+
 		if(away)
 			video.invertObjForAway(&ball);
 
@@ -407,7 +410,8 @@ void* trackRobot(void* robotobject)
 
 		video.erodeDilate(robotimage);
 
-		video.initializeRobot(robot, robotimage, Point2d(0,0)/*boxloc*/);
+		if(!(video.initializeRobot(robot, robotimage, Point2d(0,0)/*boxloc*/)) && away)
+			video.invertRobotForAway(robot);
 
 		//cout << "sending thread done command" << endl;
 
@@ -529,13 +533,13 @@ bool initColors()
 	}
 	else if (allycolor == "o")
 	{
-		robot1LowH = 8;
-		robot1HighH = 24;
+		robot1LowH = 10;
+		robot1HighH = 30;
 
-		robot1LowS = 86;
-		robot1HighS = 216;
+		robot1LowS = 58;
+		robot1HighS = 255;
 
-		robot1LowV = 24;
+		robot1LowV = 207;
 		robot1HighV = 255;
 	}
 	else if (allycolor == "p")
@@ -554,8 +558,8 @@ bool initColors()
 		robot1LowH = 77;
 		robot1HighH = 131;
 
-		robot1LowS = 19;
-		robot1HighS = 255;
+		robot1LowS = 0;
+		robot1HighS = 50;
 
 		robot1LowV = 199;
 		robot1HighV = 255;
@@ -588,13 +592,13 @@ bool initColors()
 	}
 	else if (opponentcolor == "o")
 	{
-		robot2LowH = 8;
-		robot2HighH = 24;
+		robot2LowH = 10;
+		robot2HighH = 30;
 
-		robot2LowS = 86;
-		robot2HighS = 216;
+		robot2LowS = 58;
+		robot2HighS = 255;
 
-		robot2LowV = 24;
+		robot2LowV = 207;
 		robot2HighV = 255;
 	}
 	else if (opponentcolor == "p")
@@ -613,8 +617,8 @@ bool initColors()
 		robot2LowH = 77;
 		robot2HighH = 131;
 
-		robot2LowS = 19;
-		robot2HighS = 255;
+		robot2LowS = 0;
+		robot2HighS = 50;
 
 		robot2LowV = 199;
 		robot2HighV = 255;

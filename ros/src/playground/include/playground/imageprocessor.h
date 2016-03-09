@@ -42,7 +42,7 @@ class ImageProcessor
 
 		bool read(Mat* img);
 
-		void initializeBall(VisionObject* ball, Mat img);
+		bool initializeBall(VisionObject* ball, Mat img);
 
 		void initializeCenter(Mat centercircle);
 
