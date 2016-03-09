@@ -2,6 +2,7 @@ from collections import Iterable
 
 import numpy as np
 import Skills
+import Plays
 
 # field constants. Distances measured in meters
 _field_length       = 3.68 # (12ft)
@@ -25,12 +26,13 @@ _done = False
   
 def choose_strategy(robot, ball):
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
-    	return _strong_defense(robot, ball)
+    #	return _strong_defense(robot, ball)
     # else:
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
     # return Skills.defend_goal_in_arc(ball)
+    return Plays.shoot(robot, ball,0)
 
 
 
@@ -184,8 +186,6 @@ def _get_field_section(x_pos):
                 return 3
             else:
                 return 4
-
-
 
 
 def _goal_scored(robot, ball):
