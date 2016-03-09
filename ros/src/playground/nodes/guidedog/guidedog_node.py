@@ -25,52 +25,9 @@ _robot_desired = None
 _pub = None
 
 def _handle_raw_desired_position(msg):
-    # Make sure that the robot doesn't hit an obstacle
+    global _robot_desired
 
-    if _ally is not None:
-        robot = (_ally[0], _ally[1])
-    else:
-        robot = (0, 0)
-
-    if _opponent is not None:
-        opponent = (_opponent[0], _opponent[1])
-    else:
-        # don't ever be close to this
-        opponent = (100, 100)
-
-    # Define field edges
-    min_x = -(_field_length/2)
-    max_x = (_field_length/2)
-    min_y = -(_field_width/2)
-    max_y = (_field_width/2)
-  
-    _edge_padding = 1
-
-    # Are we within 10% of the perimeter of the opponent?
-    if _close(robot, opponent, tolerance=1.10*_robot_width):
-        print "You're close to a robot!"
-
-    # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=1.05*_edge_padding):
-        print "You're close to the minimum x edge!"
-
-    if _close(robot[0], max_x, tolerance=1.05*_edge_padding):
-        print "You're close to the maximum x edge!"
-
-    if _close(robot[1], min_y, tolerance=1.05*_edge_padding):
-        print "You're close to the minimum y edge!"
-
-    if _close(robot[1], max_y, tolerance=1.05*_edge_padding):
-        print "You're close to the maximum y edge!"
-
-
-    # robo_msg = Pose2D()
-    # robo_msg.x = msg.x
-    # robo_msg.y = msg.y
-    # robo_msg.theta = msg.theta
-    # robopub.publish(robo_msg)
-
-    _pub.publish(msg)
+    _robot_desired = (msg.x, msg.y, msg.theta)
 
 def _handle_opponent_position(msg):
     global _opponent
@@ -102,27 +59,29 @@ def _handle_ally_position(msg):
     min_y = -(_field_width/2)
     max_y = (_field_width/2)
     
-    _edge_padding = 1
+    _edge_padding = 0.25
 
     # Are we within 10% of the perimeter of the opponent?
     if _close(robot, opponent, tolerance=1.10*_robot_width):
         print "You're close to a robot!"
 
     # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=1.05*_edge_padding):
+    if _close(robot[0], min_x, tolerance=_edge_padding):
         print "You're close to the minimum x edge!"
 
-    if _close(robot[0], max_x, tolerance=1.05*_edge_padding):
+    if _close(robot[0], max_x, tolerance=_edge_padding):
         print "You're close to the maximum x edge!"
 
-    if _close(robot[1], min_y, tolerance=1.05*_edge_padding):
+    if _close(robot[1], min_y, tolerance=_edge_padding):
         print "You're close to the minimum y edge!"
 
-    if _close(robot[1], max_y, tolerance=1.05*_edge_padding):
+    if _close(robot[1], max_y, tolerance=_edge_padding):
         print "You're close to the maximum y edge!"
 
+    _pub.publish(msg)
 
-    
+
+
 
 def _close(a, b, tolerance=0.010):
 
