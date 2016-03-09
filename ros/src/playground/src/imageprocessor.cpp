@@ -311,4 +311,25 @@ void ImageProcessor::initializeCenter(Mat centercircle)
 	scalingfactor = CIRCLE_DIAMETER_IN_M/(centercirc[2]*2);
 }
 
+void ImageProcessor::invertObjForAway(VisionObject* obj)
+{
+	Point2d p = obj->getLocation();
+	p.x = -p.x;
+	p.y = -p.y;
+	obj->setLocation(p);
 
+}
+
+void ImageProcessor::invertRobotForAway(Robot* robot)
+{
+	double theta = robot->getOrientation();
+
+	if (theta < 180)
+		theta += 180;
+	else
+		theta -= 180;
+
+	robot->setOrientation(theta);
+
+	invertObjForAway(robot);
+}

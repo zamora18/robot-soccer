@@ -53,6 +53,9 @@ class ImageProcessor
 		double getScalingFactor();
 
 		void correctRobotCenter(Robot* robot);
+
+		void invertObjForAway(VisionObject* obj);
+		void invertRobotForAway(Robot* robot);
 };
 
 #endif // IMAGEPROCESSOR_H

@@ -12,6 +12,9 @@
 #include "playground/coords.h"
 
 #define ESC 1048603
+#define a_KEY 1048673
+#define h_KEY 1048680
+
 #define ALL_THREADS_DONE_MASK 0x3
 #define BALL_THREAD_MASK 0x4
 #define ALLY1_THREAD_MASK 0x1
@@ -30,6 +33,7 @@ pthread_mutex_t mrobot1cond;
 pthread_mutex_t mrobot1done;
 bool done1, start1;
 int threadstatus;
+bool away;
 
 double scalingfactor;
 Point2d center;
@@ -53,11 +57,12 @@ int main(int argc, char *argv[])
 	
 	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
+	away = false;
 
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	ImageProcessor video = ImageProcessor("http://192.168.1.60:8080/stream?topic=/image&dummy=param.mjpg");
+	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
 	// ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
@@ -70,21 +75,21 @@ int main(int argc, char *argv[])
 	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
 
-	int ballLowH = 156;
+	int ballLowH = 160;
 	int ballHighH = 179;
 
-	int ballLowS = 26;
-	int ballHighS = 150;
+	int ballLowS = 46;
+	int ballHighS = 200;
 
-	int ballLowV = 183;
+	int ballLowV = 132;
 	int ballHighV = 255;
 
 
-	int robot1LowH = 78;
-	int robot1HighH = 114;
+	int robot1LowH = 108;
+	int robot1HighH = 164;
 
 	int robot1LowS = 0;
-	int robot1HighS = 130;
+	int robot1HighS = 78;
 
 	int robot1LowV = 172;
 	int robot1HighV = 255;
@@ -276,6 +281,9 @@ int main(int argc, char *argv[])
 
 		drawRobotLine(imgOriginal, robot);
 		drawRobotLine(imgOriginal, robot2);
+		
+		if(away)
+			video.invertObjForAway(&ball);
 
 		circle(imgOriginal, video.fieldToImageTransform(ball.getLocation()), 10, Scalar(0,0,255));
 		
@@ -283,6 +291,8 @@ int main(int argc, char *argv[])
 
 		ss << "(" << ball.getLocation().x << "," << ball.getLocation().y << ")";
 		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+
+
 
 
 		//cout << "line drawn" << endl;
@@ -307,6 +317,14 @@ int main(int argc, char *argv[])
 		if(keypress == 27 || keypress % 256 == 27) //did we press esc?
 		{
 			break;
+		}
+		else if(keypress == 'a' ||keypress % 256 == 'a')
+		{
+			away = true;
+		}
+		else if(keypress % 256 == 'h' || keypress == 'h')
+		{
+			away = false;
 		}
 		else if(keypress >= 0)
 		{
@@ -382,6 +400,9 @@ void* trackRobot(void* robotobject)
 
 		//cout << "sending thread done command" << endl;
 
+
+		if(away)
+			video.invertRobotForAway(robot);
 
 
 		geometry_msgs::Pose2D robot1pos;
