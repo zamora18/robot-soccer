@@ -1,8 +1,11 @@
 <launch>
 	<node name="motion" pkg="playground" type="motion_node.py" />
 	<!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->
-    <node name="controller" pkg="playground" type="controller_node.py" />
+    <node name="controller" pkg="playground" type="controller_node.py">
+        <remap from="desired_position" to="desired_position_safe"/>
+    </node>
 	<node name="ball_estimator" pkg="playground" type="ball_estimator_node.py" />
-	<node name="hack" pkg="playground" type="hack_node.py" />
+    <node name="hack" pkg="playground" type="hack_node.py" />
+	<node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen"/>
     <!-- <node name="teleop" pkg="playground" type="teleop_node.py" /> -->
 </launch>
