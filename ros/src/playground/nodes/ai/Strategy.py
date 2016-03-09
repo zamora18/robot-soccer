@@ -30,6 +30,7 @@ _wait_timer = 0
 def choose_strategy(robot, opponent, ball, goal):
     global _going_home, _wait_timer
     if goal:
+        print "***** GOAL!! ****** (maybe this is sad...)"
         _going_home = True
         _wait_timer = 0
 
@@ -38,6 +39,7 @@ def choose_strategy(robot, opponent, ball, goal):
             _wait_timer = _wait_timer + 1
             return _goal_position_home
         else:
+            print "ready to start"
             _going_home = False
 
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
@@ -104,7 +106,7 @@ def _aggressive_offense(robot, opponent, ball):
             #kick the ball towards the goal
             Skills.kick()
         elif (allytoball < opptoball):
-            Skills._to_kick_facing_goal(robot, ball)
+            return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return _strong_defense(robot, ball)
     elif section == 2:
@@ -112,7 +114,7 @@ def _aggressive_offense(robot, opponent, ball):
             #kick the ball towards the goal
             Skills.kick()
         elif (allytoball < opptoball):
-            Skills._to_kick_facing_goal(robot, ball)
+            return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return Skills.stay_between_points_at_distance(_goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'], 0.70)
     elif section == 3:
