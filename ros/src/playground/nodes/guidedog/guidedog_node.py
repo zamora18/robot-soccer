@@ -57,6 +57,16 @@ def _handle_ally_position(msg):
     else:
         desired = (msg.x, msg.y, msg.theta)
 
+    # Create desired message
+    desired_msg = Pose2D()
+    desired_msg.x = desired[0]
+    desired_msg.y = desired[1]
+    desired_msg.theta = desired[2]
+
+    _pub.publish(desired_msg)
+
+    return
+
     _edge_padding = 0.25
 
     # Define field edges
