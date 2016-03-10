@@ -525,16 +525,16 @@ bool initColors()
 		robot1LowH = 0;
 		robot1HighH = 179;
 
-		robot1LowS = 109;
-		robot1HighS = 166;
+		robot1LowS = 81;
+		robot1HighS = 105;
 
-		robot1LowV = 208;
-		robot1HighV = 251;
+		robot1LowV = 226;
+		robot1HighV = 255;
 	}
 	else if (allycolor == "o")
 	{
 		robot1LowH = 10;
-		robot1HighH = 30;
+		robot1HighH = 24;
 
 		robot1LowS = 58;
 		robot1HighS = 255;
@@ -550,16 +550,16 @@ bool initColors()
 		robot1LowS = 0;
 		robot1HighS = 78;
 
-		robot1LowV = 172;
+		robot1LowV = 110;
 		robot1HighV = 255;
 	}
 	else if (allycolor == "b")
 	{
 		robot1LowH = 77;
-		robot1HighH = 131;
+		robot1HighH = 117;
 
 		robot1LowS = 0;
-		robot1HighS = 50;
+		robot1HighS = 100;
 
 		robot1LowV = 199;
 		robot1HighV = 255;
@@ -584,16 +584,16 @@ bool initColors()
 		robot2LowH = 0;
 		robot2HighH = 179;
 
-		robot2LowS = 109;
-		robot2HighS = 166;
+		robot2LowS = 81;
+		robot2HighS = 105;
 
-		robot2LowV = 208;
-		robot2HighV = 251;
+		robot2LowV = 226;
+		robot2HighV = 255;
 	}
 	else if (opponentcolor == "o")
 	{
 		robot2LowH = 10;
-		robot2HighH = 30;
+		robot2HighH = 24;
 
 		robot2LowS = 58;
 		robot2HighS = 255;
@@ -609,16 +609,16 @@ bool initColors()
 		robot2LowS = 0;
 		robot2HighS = 78;
 
-		robot2LowV = 172;
+		robot2LowV = 110;
 		robot2HighV = 255;
 	}
 	else if (opponentcolor == "b")
 	{
 		robot2LowH = 77;
-		robot2HighH = 131;
+		robot2HighH = 117;
 
 		robot2LowS = 0;
-		robot2HighS = 50;
+		robot2HighS = 100;
 
 		robot2LowV = 199;
 		robot2HighV = 255;
