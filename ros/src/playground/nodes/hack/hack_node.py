@@ -10,6 +10,7 @@ import numpy as np
 _hack_period = 1.0/100
 
 robopub = None
+visionpub = None
 ballpub = None
 
 def _handle_vision_robot_position(msg):
@@ -19,6 +20,8 @@ def _handle_vision_robot_position(msg):
     robo_msg.y = msg.y
     robo_msg.theta = msg.theta
     robopub.publish(robo_msg)
+
+    visionpub.publish(robo_msg)
 
 def _handle_vision_ball_position(msg):
     # ... and ball position
@@ -33,12 +36,13 @@ def main():
     rospy.init_node('hack', anonymous=False)
 
     # Don't use odom node with this
-    global robopub, ballpub
+    global robopub, ballpub, visionpub
     robopub = rospy.Publisher('estimated_robot_position', Pose2D, queue_size=10)
+    visionpub = rospy.Publisher('vision_robot_position', Pose2D, queue_size=10)
     # ballpub = rospy.Publisher('estimated_ball_position', Pose2D, queue_size=10)
 
     # rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
-    rospy.Subscriber('vision_robot_position', Pose2D, _handle_vision_robot_position)
+    rospy.Subscriber('vision_ally_position', Pose2D, _handle_vision_robot_position)
     # pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     # rate = rospy.Rate(int(1/_hack_period))

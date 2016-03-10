@@ -8,6 +8,9 @@ PID_theta = PID(2, 0, 0, 180, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
+# A flag to determine whether or not we are at our set point
+_arrived = False
+
 velocities = (0, 0, 0)
 
 def init():
@@ -22,7 +25,10 @@ def set_commanded_position(x, y, theta):
     This function can also receive theta from [-360, 0].
 
     """
-    global _set_point
+    global _set_point, _arrived
+
+    # We aren't there yet!
+    _arrived = False
 
     # Because theta is periodic with 360 degrees
     # This also deals with theta being negative
@@ -35,7 +41,11 @@ def get_commanded_position():
     return _set_point
 
 def update(time_since_last_update, xhat, yhat, thetahat):
-    global velocities
+    global velocities, _arrived
+
+    if _arrived:
+        # Don't even try
+        return (0, 0, 0)
 
     # Break out variables for easy access
     x_c = _set_point[0]
@@ -54,27 +64,25 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if vy == 0 and vx == 0 and not _close(theta_c, thetahat, tolerance=6): # degrees
-        ccw_dist = _ccw_distance(thetahat, theta_c)
-        cw_dist  = _cw_distance(thetahat, theta_c)
+    if not _close(theta_c, thetahat, tolerance=5): # degrees
+        # Since the max distance you should ever go is 180 degrees,
+        # test to see so that the commanded value is proportional to
+        # the error between commanded and actual.
+        # Basicaly, this makes going in circles cooler.
+        if abs(thetahat-theta_c) > 180:
+            if theta_c < thetahat:
+                theta_c = theta_c + 360
+            else:
+                theta_c = theta_c - 360
 
-        if (ccw_dist <= cw_dist):
-            # Go CCW (normal)
-            w  = abs(PID_theta.update(theta_c, thetahat, Ts))
-        else:
-            # Go CW (reversed)
-            w  = -1*abs(PID_theta.update(theta_c, thetahat, Ts))
+        w  = PID_theta.update(theta_c, thetahat, Ts)
+
+    # Are we there yet?
+    _arrived = (vx == 0 and vy == 0 and w == 0)
 
     velocities = (vx, vy, w)
 
     return velocities
 
-def _close(a, b, tolerance=0.025):
+def _close(a, b, tolerance=0.04):
     return abs(a - b) <= tolerance
-
-def _ccw_distance(x, x_c):
-    return abs((x - (360 + x_c))) % 360
-
-def _cw_distance(x, x_c):
-    x_c_complement = x_c - 360
-    return abs((x - (x_c_complement))) % 360

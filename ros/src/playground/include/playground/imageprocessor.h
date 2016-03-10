@@ -5,7 +5,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#define CIRCLE_DIAMETER_IN_CM 50
+
+#define CIRCLE_DIAMETER_IN_M .50
+
 
 using namespace cv;
 using namespace std;
@@ -26,7 +28,7 @@ class ImageProcessor
 
 		vector<vector<Point> >  getContours(Mat contourOutput);
 
-		bool initializeRobot(Robot* robot1, Mat img);
+		bool initializeRobot(Robot* robot1, Mat img, Point2d boxloc);
 
 		double findAngleTwoPoints(Point2d p1, Point2d p2);
 
@@ -40,7 +42,7 @@ class ImageProcessor
 
 		bool read(Mat* img);
 
-		void initializeBall(VisionObject* ball, Mat img);
+		bool initializeBall(VisionObject* ball, Mat img);
 
 		void initializeCenter(Mat centercircle);
 
@@ -51,6 +53,9 @@ class ImageProcessor
 		double getScalingFactor();
 
 		void correctRobotCenter(Robot* robot);
+
+		void invertObjForAway(VisionObject* obj);
+		void invertRobotForAway(Robot* robot);
 };
 
 #endif // IMAGEPROCESSOR_H

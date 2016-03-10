@@ -63,9 +63,9 @@ def main():
         if _ctrl_on:
             (vx, vy, w) = Controller.update(_ctrl_period, _xhat, _yhat, _thetahat)
 
-            if vx == 0 and vy == 0 and w == 0:
-                _ctrl_on = False
-                continue
+            #if vx == 0 and vy == 0 and w == 0:
+                #_ctrl_on = False
+                #continue
 
             msg = Twist()
             msg.linear.x = vx

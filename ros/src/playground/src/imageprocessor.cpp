@@ -5,7 +5,10 @@
 #include <math.h>
 #include <iostream>
 
-#define CENTER_OF_ROBOT_OFFSET_IN_CM 3.175
+
+#define CENTER_OF_ROBOT_OFFSET_IN_M .03175
+#define ERODE_DILATE_SIZE 5
+
 
 using namespace cv;
 using namespace std;
@@ -79,7 +82,7 @@ vector<vector<Point> >  ImageProcessor::getContours(Mat contourOutput)
 }
 
 
-void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
+bool ImageProcessor::initializeBall(VisionObject* ball, Mat img)
 {
 	Mat contourOutput;
 
@@ -113,14 +116,16 @@ void ImageProcessor::initializeBall(VisionObject* ball, Mat img)
 	if(objects.size() != 1)
 	{
 		cout << "CANT FIND BALL" << endl;
+		return false;
 	}
 	else
 	{
 		ball->setLocation(imageToFieldTransform(objects[0]));
+		return true;
 	}
 }
 //initializes the robot positions, can be used to update position also
-bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
+bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 {
 
 	Mat contourOutput;
@@ -138,7 +143,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 	for(int i = 0; i < contours.size(); i++)
 	{
 		//eliminates any noise
-		if(contourArea(contours[i]) > 100)
+		if(contourArea(contours[i]) > 50)
 		{
 			contourmoments.push_back(moments(contours[i]));
 		}
@@ -156,7 +161,7 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 
 	Point2d p1, p2;
 
-	if(objects.size() < 2)
+	if(objects.size() != 2)
 	{
 		return false;
 	}
@@ -177,10 +182,15 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img)
 
 
 	robot->setOrientation(angle);
+
+	p1.x += boxloc.x;
+	p1.y += boxloc.y;
+
 	robot->setLocation(imageToFieldTransform(p1));
 
 	//correctRobotCenter(robot);
 
+	return true;
 
 }
 
@@ -189,9 +199,9 @@ void ImageProcessor::correctRobotCenter(Robot* robot)
 	Point2d robotcenter = robot->getLocation();
 	double theta = robot->getOrientation();
 	Point2d actualcenter;
-	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_CM * cos(theta*180/M_PI);
-	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_CM * sin(theta*180/M_PI);
-	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_CM || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_CM)
+	actualcenter.x = robotcenter.x + CENTER_OF_ROBOT_OFFSET_IN_M * cos(theta*180/M_PI);
+	actualcenter.y = robotcenter.y + CENTER_OF_ROBOT_OFFSET_IN_M * sin(theta*180/M_PI);
+	if(abs(actualcenter.x - robotcenter.x) > CENTER_OF_ROBOT_OFFSET_IN_M || abs(actualcenter.y - robotcenter.y) > CENTER_OF_ROBOT_OFFSET_IN_M)
 	{
 		cout << "bad calculation" << endl;
 		cout << actualcenter.x << "," << actualcenter.y << endl;
@@ -220,12 +230,12 @@ void ImageProcessor::erodeDilate(Mat img)
 {
 	//averages pixels in ovals to get rid of background noise
 //	morphological opening (remove small objects from the foreground)
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
 
 	//morphological closing (fill small holes in the foreground)
-	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	dilate( img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
+	erode(img, img, getStructuringElement(MORPH_ELLIPSE, Size(ERODE_DILATE_SIZE, ERODE_DILATE_SIZE)) );
 }
 
 //finds the circle in the center of the field and returns it
@@ -301,7 +311,28 @@ void ImageProcessor::initializeCenter(Mat centercircle)
 	center = Point2d(centercirc[0], centercirc[1]);
 
 	// //with the center find the scaling factor
-	scalingfactor = CIRCLE_DIAMETER_IN_CM/(centercirc[2]*2);
+	scalingfactor = CIRCLE_DIAMETER_IN_M/(centercirc[2]*2);
 }
 
+void ImageProcessor::invertObjForAway(VisionObject* obj)
+{
+	Point2d p = obj->getLocation();
+	p.x = -p.x;
+	p.y = -p.y;
+	obj->setLocation(p);
 
+}
+
+void ImageProcessor::invertRobotForAway(Robot* robot)
+{
+	double theta = robot->getOrientation();
+
+	if (theta < 180)
+		theta += 180;
+	else
+		theta -= 180;
+
+	robot->setOrientation(theta);
+
+	invertObjForAway(robot);
+}

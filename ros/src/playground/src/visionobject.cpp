@@ -5,15 +5,11 @@ VisionObject::VisionObject()
 {
 	location.x = 0;
 	location.y = 0;
-	speed = 0;
-	direction = 0;
 }
 
-VisionObject::VisionObject(Point2d location, double speed, double direction)
+VisionObject::VisionObject(Point2d loc)
 {
-	this->location = location;
-	this->speed = speed;
-	this->direction = direction;
+	location = loc;
 }
 
 
@@ -25,26 +21,6 @@ Point2d VisionObject::getLocation() const
 void VisionObject::setLocation(const Point2d &value)
 {
 	location = value;
-}
-
-double VisionObject::getSpeed() const
-{
-	return speed;
-}
-
-void VisionObject::setSpeed(double value)
-{
-	speed = value;
-}
-
-double VisionObject::getDirection() const
-{
-	return direction;
-}
-
-void VisionObject::setDirection(double value)
-{
-	direction = value;
 }
 
 void VisionObject::toString()
@@ -69,3 +45,34 @@ void VisionObject::setHighHSV(Scalar hsv)
 {
 	highHSV = hsv;
 }
+
+void VisionObject::setMask(unsigned MASK)
+{
+	mask = MASK;
+}
+unsigned VisionObject::getMask()
+{
+	return mask;
+}
+
+void VisionObject::setThreadStart(bool start)
+{
+	threadstart = start;
+}
+
+bool VisionObject::getThreadStart()
+{
+	return threadstart;
+}
+
+void VisionObject::setNodeIdent(string identity)
+{
+	nodeIdent = identity;
+}
+string VisionObject::getNodeIdent()
+{
+	return nodeIdent;
+}
+
+
+

@@ -52,6 +52,11 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to main (see VARARGIN)
 
+% Clear globals
+global ball
+ball = [];
+
+
 % Choose default command line output for main
 handles.output = hObject;
 
@@ -60,7 +65,7 @@ handles.plot_position = plot(handles.fig_position,0,0);
 hold(handles.fig_position,'on');
 handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
 handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
-set(handles.fig_position,'XLim',[-1.8 1.8],'YLim',[-1 1]);
+set(handles.fig_position,'XLim',[-2 2],'YLim',[-1.6 1.6]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
 ylabel(handles.fig_position, 'height (meters)');
@@ -89,7 +94,7 @@ handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
 handles.sub.error = rossubscriber('/error', 'geometry_msgs/Pose2D', {@errorCallback,handles});
 handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
-handles.sub.estimated_ball_position = rossubscriber('/estimated_ball_position', 'geometry_msgs/Pose2D', {@estimatedBallPositionCallback,handles});
+handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
 
 % And Publishers
@@ -181,14 +186,18 @@ function visionBallPositionCallback(src, msg, handles)
     set(handles.table_ball_vision,'Data', {msg.X msg.Y});
     
     
-function estimatedBallPositionCallback(src, msg, handles)
+function ballStateCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_estimate)
         return
     end
-
-    set(handles.plot_ball_estimate,'XData', msg.X, 'YData', msg.Y);
     
-    set(handles.table_ball_estimate,'Data', {msg.X msg.Y});
+    % For grabbing ball data ot analyze later
+    global ball
+    ball = [ball msg];
+
+    set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
+    
+    set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
     
 
 
@@ -232,22 +241,72 @@ function fig_position_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
     handles = guidata(hObject);
-    global pos;
     
     if get(handles.chk_point_move,'Value') == 1
+        % Get the x,y point of the click
         point = eventdata.IntersectionPoint(1:2);
         
+        % Create the first point of the line
+        h1 = line('XData',point(1),'YData',point(2));
+        set(h1,'Color','r');
+        
+        hObject.Parent.Parent.WindowButtonMotionFcn = {@winBtnMotionCB,h1,point};
+        hObject.Parent.Parent.WindowButtonUpFcn = {@winBtnUpCB,h1};
+    end
+
+function winBtnMotionCB(hObject, eventdata, h1, p_init)
+
+    % Get the x,y point that the mouse is hovering over.
+    point = hObject.CurrentAxes.CurrentPoint(1,1:2);
+    
+    % Create a new line
+    xdat = [p_init(1) point(1)];
+    ydat = [p_init(2) point(2)];
+    
+    set(h1,'XData',xdat,'YData',ydat);
+    
+function winBtnUpCB(hObject, eventdata, h1)
+    global pos;
+    
+    handles = guidata(hObject);
+
+    % Clear the callbacks
+    hObject.WindowButtonMotionFcn = '';
+    hObject.WindowButtonUpFcn = '';
+
+    % Get the line so we can calc angle
+    xdat = get(h1,'XData');
+    ydat = get(h1,'YData');
+
+    if length(xdat) == 2
+
+        theta = atan2(diff(ydat),diff(xdat));
+
+        % Take care of the fact that atan2 returns [-pi, pi]
+        if theta < 0
+            theta = theta + 2*pi;
+        end
+
+        % Convert to degrees
+        theta = theta*180/pi;
+        
+    else
         theta = pos(2);
 
-
-        set(handles.table_desired_position,'Data', {0 0 0});
-
-        msg = rosmessage(handles.pub.desired_position);
-        msg.X = point(1);
-        msg.Y = point(2);
-        msg.Theta = theta;
-        send(handles.pub.desired_position, msg);
     end
+
+    delete(h1);
+    
+    % The set point is always the first place there was a click
+    point = [xdat(1) ydat(1)];
+        
+    set(handles.table_desired_position,'Data', {0 0 0});
+
+    msg = rosmessage(handles.pub.desired_position);
+    msg.X = point(1);
+    msg.Y = point(2);
+    msg.Theta = theta;
+    send(handles.pub.desired_position, msg);
 
 
 % --- Executes on button press in chk_node_controller.
