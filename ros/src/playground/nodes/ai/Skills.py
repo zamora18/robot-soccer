@@ -20,7 +20,7 @@ _kicker_count = 0
 def kick():
     global _kicker_count
     _kicker_count = _kicker_count + 1
-    print"Actuate: {}".format(_kicker_count))
+    print("Actuate: {}".format(_kicker_count))
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 
