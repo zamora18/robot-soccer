@@ -102,18 +102,18 @@ def _aggressive_offense(robot, opponent, ball):
     a,b,opptoball,theta = Skills.find_triangle(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
 
     if   section == 1:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
+        #if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
             #kick the ball towards the goal
-            Skills.kick()
-        elif (allytoball < opptoball):
+            #Skills.kick()
+        if (allytoball < opptoball):
             return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return _strong_defense(robot, ball)
     elif section == 2:
-        if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
+        #if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
             #kick the ball towards the goal
-            Skills.kick()
-        elif (allytoball < opptoball):
+            #Skills.kick()
+        if (allytoball < opptoball):
             return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return Skills.stay_between_points_at_distance(_goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'], 0.70)
