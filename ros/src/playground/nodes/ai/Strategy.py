@@ -23,8 +23,25 @@ _half_field          = 0
 _ball_defend_position = None
 
 _done = False
+
+_going_home = False
+_wait_timer = 0
   
-def choose_strategy(robot, opponent, ball):
+def choose_strategy(robot, opponent, ball, goal):
+    global _going_home, _wait_timer
+    if goal:
+        print "***** GOAL!! ****** (maybe this is sad...)"
+        _going_home = True
+        _wait_timer = 0
+
+    if _going_home:
+        if _wait_timer < 500: # 7 seconds
+            _wait_timer = _wait_timer + 1
+            return _goal_position_home
+        else:
+            print "ready to start"
+            _going_home = False
+
     # if ball['xhat_future'] < _goal_position_home[0] + _field_length/4:
     #	return _strong_defense(robot, ball)
     # else:
@@ -81,16 +98,23 @@ def _aggressive_offense(robot, opponent, ball):
     section = _get_field_section(ball['xhat'])
     future_section = _get_field_section(ball['xhat_future'])
 
+    a,b,allytoball,theta = Skills.find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+    a,b,opptoball,theta = Skills.find_triangle(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
+
     if   section == 1:
         if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.35):
             #kick the ball towards the goal
             Skills.kick()
+        elif (allytoball < opptoball):
+            return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return _strong_defense(robot, ball)
     elif section == 2:
         if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.15):# and not _close([robot['xhat'], robot['yhat']], [opponent['xhat'], opponent['yhat']], 0.25):
             #kick the ball towards the goal
             Skills.kick()
+        elif (allytoball < opptoball):
+            return Skills.approach_to_kick_facing_goal(robot, ball)
         else:
             return Skills.stay_between_points_at_distance(_goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'], 0.70)
     elif section == 3:

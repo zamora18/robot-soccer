@@ -5,6 +5,7 @@ import time
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
+from std_msgs.msg import Bool
 from playground.msg import BallState
 
 import numpy as np
@@ -20,6 +21,8 @@ _measured = (None, None)
 
 _last_time = time.time()
 
+_goal_pub = None
+
 _estimator_on = True
 _predictor_on = True
 
@@ -33,12 +36,20 @@ def _handle_vision_ball_position(msg):
     # how much time elapsed since last measurement
     _last_time = time.time()
 
+    # Was there a goal?
+    if abs(msg.x) > 1.79 and (abs(msg.y) < .305):
+        msg = Bool()
+        msg.data = True
+        _goal_pub.publish(msg)
+
 def main():
     rospy.init_node('ball_estimator', anonymous=False)
 
     # Sub/Pub
     rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
     pub = rospy.Publisher('ball_state', BallState, queue_size=10)
+    global _goal_pub
+    _goal_pub = rospy.Publisher('goal', Bool, queue_size=10)
 
     global _measured
 
