@@ -4,7 +4,7 @@
 #include <gazebo/common/common.hh>
 #include <stdio.h>
 #include "ros/ros.h"
-#include "geometry_msgs/Vector3.h"
+#include "geometry_msgs/Twist.h"
 
 namespace gazebo
 {
@@ -70,18 +70,21 @@ namespace gazebo
 				math::Vector3 linearVel = link->GetWorldLinearVel();
 				math::Vector3 angularVel = link->GetWorldAngularVel();
 
-				double fx = SoccerDrive::saturate((command_msg.x - linearVel.x)*kP_xy, maxF_xy);
-				double fy = SoccerDrive::saturate((command_msg.y - linearVel.y)*kP_xy, maxF_xy);
-				double fw = SoccerDrive::saturate((command_msg.z - angularVel.z)*kP_w, maxF_w);
+				double fx = SoccerDrive::saturate((command_msg.linear.x - linearVel.x)*kP_xy, maxF_xy);
+				double fy = SoccerDrive::saturate((command_msg.linear.y - linearVel.y)*kP_xy, maxF_xy);
+				double fw = SoccerDrive::saturate((command_msg.angular.z - angularVel.z)*kP_w, maxF_w);
 
 				link->AddForce(math::Vector3(fx, fy, 0));
 				link->AddTorque(math::Vector3(0, 0, fw));
 			}
 		}
 
-		void CommandCallback(const geometry_msgs::Vector3 msg)
+		void CommandCallback(const geometry_msgs::Twist msg)
 		{
 			command_msg = msg;
+
+			// convert from degrees to radians
+			command_msg.angular.z = command_msg.angular.z*M_PI/180.0;
 		}
 
 	private:
@@ -93,7 +96,7 @@ namespace gazebo
 		event::ConnectionPtr updateConnection;
 		ros::NodeHandle node_handle;
 		ros::Subscriber command_sub;
-		geometry_msgs::Vector3 command_msg;\
+		geometry_msgs::Twist command_msg;
 		double kP_xy;
 		double kP_w;
 		double maxF_xy;

@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 # Declare ROS messages and services
-add_message_files(DIRECTORY msg FILES SoccerPoses.msg)
+add_message_files(DIRECTORY msg FILES)
 
 # Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs geometry_msgs)
@@ -39,9 +39,10 @@ add_dependencies(vision_sim ${PROJECT_NAME}_generate_messages_cpp)
 find_package( OpenCV REQUIRED )
 target_link_libraries(vision_sim ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
-add_executable(controller src/controller.cpp)
-add_dependencies(controller ${PROJECT_NAME}_generate_messages_cpp)
-target_link_libraries(controller ${catkin_LIBRARIES})
+# Maybe still use this for the opponent when testing against another player?
+# add_executable(controller src/controller.cpp)
+# add_dependencies(controller ${PROJECT_NAME}_generate_messages_cpp)
+# target_link_libraries(controller ${catkin_LIBRARIES})
 
 # Add plugins
 add_library(soccer_drive plugins/soccer_drive.cpp)
