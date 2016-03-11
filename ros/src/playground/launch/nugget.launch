@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
 	<node name="motion" pkg="playground" type="motion_node.py" />
 	<!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->

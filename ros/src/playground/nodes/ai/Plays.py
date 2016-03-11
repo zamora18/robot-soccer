@@ -48,7 +48,7 @@ def shoot(robot, ball, distance_from_center):
         return desired_c
 
     elif  _shoot_state == ShootState.approach:
-        return Skills.approach_to_kick_facing_goal(robot, ball)
+        return desired_c #Skills.approach_to_kick_facing_goal(robot, ball)
 
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
