@@ -65,6 +65,10 @@ namespace gazebo
 			{
 				model->SetWorldPose(math::Pose(command_msg.x, command_msg.y, command_msg.z, 0, 0, 0));
 				newMessage = false;
+
+				// Clear the velocity when the user places the ball
+				link->SetLinearVel(math::Vector3(0, 0, 0));
+				link->SetForce(math::Vector3(0, 0, 0));
 			}
 			else if (model->GetWorldPose().pos.x < -FIELD_WIDTH/2)
 			{

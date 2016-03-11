@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
+#include "std_msgs/Bool.h"
 
 namespace gazebo
 {
@@ -17,6 +18,7 @@ namespace gazebo
 			model = _parent;
 			sdf_pointer = _sdf;
 			link = model->GetLink("base_link");
+			kicker_joint = model->GetJoint("kicker_joint");
 
 			// Connect to ROS
 			if (sdf_pointer->HasElement("namespace"))
@@ -31,6 +33,7 @@ namespace gazebo
 			node_handle = ros::NodeHandle(robot_name);
 			gzmsg << "[model_push] Subscribing to " << ("/" + robot_name + "/command") << "\n";
 			command_sub = node_handle.subscribe("/" + robot_name + "/command", 1, &SoccerDrive::CommandCallback, this);
+			kick_sub = node_handle.subscribe("/" + robot_name + "/kick", 1, &SoccerDrive::KickCallback, this);
 
 			// Listen to the update event. This event is broadcast every
 			// simulation iteration.
@@ -77,6 +80,13 @@ namespace gazebo
 				link->AddForce(math::Vector3(fx, fy, 0));
 				link->AddTorque(math::Vector3(0, 0, fw));
 			}
+
+			// Kick the ball!
+			if (kick_msg.data) {
+				kicker_joint->SetForce(0, 15);
+			} else {
+				kicker_joint->SetForce(0, -15);
+			}
 		}
 
 		void CommandCallback(const geometry_msgs::Twist msg)
@@ -87,16 +97,24 @@ namespace gazebo
 			command_msg.angular.z = command_msg.angular.z*M_PI/180.0;
 		}
 
+		void KickCallback(const std_msgs::Bool msg)
+		{
+			kick_msg = msg;
+		}
+
 	private:
 		// Pointer to the model
 		sdf::ElementPtr sdf_pointer;
 		std::string robot_name;
 		physics::ModelPtr model;
 		physics::LinkPtr link;
+		physics::JointPtr kicker_joint;
 		event::ConnectionPtr updateConnection;
 		ros::NodeHandle node_handle;
 		ros::Subscriber command_sub;
+		ros::Subscriber kick_sub;
 		geometry_msgs::Twist command_msg;
+		std_msgs::Bool kick_msg;
 		double kP_xy;
 		double kP_w;
 		double maxF_xy;

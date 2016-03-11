@@ -12,6 +12,12 @@
   <xacro:property name="wheel_dist" value=".095"/>
   <xacro:property name="radius" value=".095"/>
   <xacro:property name="jersey_color" value="$(arg jersey_color)"/>
+  <xacro:property name="kicker_height" value="0.0254"/>
+  <xacro:property name="kicker_thickness" value="0.003175"/>
+  <xacro:property name="kicker_width" value="0.0762"/>
+  <xacro:property name="kicker_upper_limit" value="0.0254"/>
+  <xacro:property name="kicker_dist" value="0.09"/>
+
 
   <!-- Dummy base link -->
   <link name="base_link">
@@ -32,7 +38,7 @@
       </geometry>
     </visual>
     <inertial>
-      <origin xyz="0 0 ${height/2+wheel_radius/4}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${height/2-wheel_radius}" rpy="0 0 0"/>
       <mass value="${mass}"/>
       <inertia
         ixx="${mass/12 * (3*radius*radius + height*height)}" ixy="0.0" ixz="0.0"
@@ -47,6 +53,40 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="chassis"/>
+  </joint>
+
+  <!-- Kicker -->
+  <link name="kicker">
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${kicker_thickness} ${kicker_width} ${kicker_height}" />
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${kicker_thickness} ${kicker_width} ${kicker_height}" />
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="17E-3"/>
+      <inertia
+        ixx="1E-6" ixy="0.0" ixz="0.0"
+        iyy="1E-6" iyz="0.0"
+        izz="1E-6"/>
+    </inertial>
+  </link>
+  <gazebo reference="kicker">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <joint type="prismatic" name="kicker_joint">
+    <origin xyz="${kicker_dist} 0 ${kicker_height/2+0.01}" rpy="0 0 0"/>
+    <axis xyz="1 0 0" />
+    <limit upper="${kicker_upper_limit}" lower="0" effort="17" velocity="1" />
+    <parent link="base_link"/>
+    <child link="kicker"/>
   </joint>
 
   <!-- Jersey -->
