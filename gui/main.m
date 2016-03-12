@@ -173,16 +173,17 @@ function velCmdsCallback(src, msg, handles)
     set(handles.table_velocity,'Data', {vx vy w});
     
 function pidInfoCB(src, msg, handles)
-    if ~ishandle(handles.table_error)
-        return
-    end
-
-    set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
-    
     global view_resp
     global view_resp_start
     
     persistent step_resp_plot
+    
+    if ~view_resp || ~ishandle(handles.table_error) ||...
+            isempty(step_resp_plot) || ~ishandle(step_resp_plot(1,1))
+        return
+    end
+
+    set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
     
     % Select the plots to subplot (if you want theta, add it)
 %     labelYs = {'x-position (m)', 'y-position (m)', 'theta (deg)'};
@@ -221,7 +222,7 @@ function pidInfoCB(src, msg, handles)
             end
             
             % Make the zoom linked in the x-direction
-            linkaxes(ax(:), 'x');
+%             linkaxes(ax(:), 'x');
         else
             for i = 1:N
                 % Update the YData vector for actual
