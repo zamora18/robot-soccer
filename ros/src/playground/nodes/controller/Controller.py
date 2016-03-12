@@ -13,7 +13,7 @@ _arrived = False
 
 # These let us update theta at smaller rates than x and y
 _loop_count = 0
-_theta_loops = 2 # so every 2 loops do theta controller
+_theta_loops = 1 # so every 2 loops do theta controller
 
 velocities = (0, 0, 0)
 
@@ -89,7 +89,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
             else:
                 theta_c = theta_c - 360
 
-        w  = PID_theta.update(theta_c, thetahat, Ts, max_error_window=90)
+        w  = PID_theta.update(theta_c, thetahat, Ts, max_error_window=0)
 
     # Are we there yet?
     _arrived = (vx == 0 and vy == 0 and w == 0 and update_theta)
