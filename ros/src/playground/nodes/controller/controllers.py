@@ -32,7 +32,7 @@ class PID(object):
         self.x_d1 = 0
         
 
-    def update(self, x_c, x, Ts, max_window_error=0.5):
+    def update(self, x_c, x, Ts, max_error_window=0.5):
         """Update
 
         Computes the output 'force' to send to the plant so that x_c == x
