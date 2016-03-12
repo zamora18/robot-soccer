@@ -178,16 +178,15 @@ function pidInfoCB(src, msg, handles)
     
     persistent step_resp_plot
     
-    if ~view_resp || ~ishandle(handles.table_error) ||...
-            isempty(step_resp_plot) || ~ishandle(step_resp_plot(1,1))
+    if ~ishandle(handles.table_error) %|| isempty(step_resp_plot) || ~ishandle(step_resp_plot(1,1))
         return
     end
 
     set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
     
     % Select the plots to subplot (if you want theta, add it)
-%     labelYs = {'x-position (m)', 'y-position (m)', 'theta (deg)'};
-    labelYs = {'x-position (m)', 'y-position (m)'};
+    labelYs = {'x-position (m)', 'y-position (m)', 'theta (deg)'};
+%     labelYs = {'x-position (m)', 'y-position (m)'};
 
     % How many subplots should there be?
     N = length(labelYs);
