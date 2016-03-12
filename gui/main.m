@@ -176,49 +176,68 @@ function pidInfoCB(src, msg, handles)
     if ~ishandle(handles.table_error)
         return
     end
-    
-%     handles = guidata(hObject);
-    
+
     set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
     
     global view_resp
     global view_resp_start
-    global step_resp_fig
-    global step_resp_plot
-    global step_resp_plot_desired
+    
+    persistent step_resp_plot
+    
+    % Select the plots to subplot (if you want theta, add it)
+%     labelYs = {'x-position (m)', 'y-position (m)', 'theta (deg)'};
+    labelYs = {'x-position (m)', 'y-position (m)'};
+
+    % How many subplots should there be?
+    N = length(labelYs);
+    
     if view_resp
         
-        desired = msg.Desired.X;
-        actual = msg.Actual.X;
-        
+        desired = [msg.Desired.X msg.Desired.Y msg.Desired.Theta];
+        actual = [msg.Actual.X msg.Actual.Y msg.Actual.Theta];
         
         if view_resp_start
             view_resp_start = false;
-            disp('start!');
-            step_resp_fig = figure(2);
             
-            step_resp_plot = plot(0,actual);
-            hold on;
-            step_resp_plot_desired = plot(0,desired);
+            % clear the figure
+            figure(2);
+            clf;
+            
+            % Initialize handles
+            step_resp_plot = zeros(2,N);
+            ax = zeros(1,N);
+            
+            % Setup the subplots
+            for i = 1:N
+                ax(i) = subplot(N,1,i);
+                step_resp_plot(1,i) = plot(0,desired(i));
+                hold on;
+                step_resp_plot(2,i) = plot(0,actual(i));
+                ylabel(labelYs(i));
+                xlabel('samples (n)');
+                if i == 1
+                    title('Step Response');
+                end
+            end
+            
+            % Make the zoom linked in the x-direction
+            linkaxes(ax(:), 'x');
         else
-%             disp('hi');
-            ydat = get(step_resp_plot,'YData');
-            ydat = [ydat actual];
-            t = 0:length(ydat)-1;
-            set(step_resp_plot,'XData',t,'YData',ydat);
-           
-            ydat = get(step_resp_plot_desired,'YData');
-            ydat = [ydat desired];
-            t = 0:length(ydat)-1;
-            set(step_resp_plot_desired,'XData',t,'YData',ydat);
+            for i = 1:N
+                % Update the YData vector for actual
+                ydat = [get(step_resp_plot(2,i),'YData') actual(i)];
+                t = (0:(length(ydat)-1));
+                set(step_resp_plot(2,i),'XData',t,'YData',ydat);
+
+                % Update the YData vector for desired
+                ydat = [get(step_resp_plot(1,i),'YData') desired(i)];
+                t = (0:(length(ydat)-1));
+                set(step_resp_plot(1,i),'XData',t,'YData',ydat);
+            end
         end
         
         
     end
-    
-    % Update handles structure
-%     guidata(handles.table_error, handles);
-    
     
 function visionBallPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_vision)
