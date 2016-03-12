@@ -100,6 +100,8 @@ void getRobotPose(Mat& imgHsv, Scalar color[], geometry_msgs::Pose2D& robotPose)
     Point2d diff = centerSmall - centerLarge;
     double angle = atan2(diff.y, diff.x);
 
+    //convert angle to degrees
+    angle = angle *180/M_PI;
     robotPose.x = robotCenter.x;
     robotPose.y = robotCenter.y;
     robotPose.theta = angle;
