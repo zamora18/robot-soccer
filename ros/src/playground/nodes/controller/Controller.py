@@ -4,7 +4,7 @@ from controllers import PID
 
 PID_x = PID(2.5, 0, 0, 2, 0.05, integrator_limit=0.05)
 PID_y = PID(2.5, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_theta = PID(3, 0, 0, 180, 0.05, integrator_limit=0.05)
+PID_theta = PID(2, 0, 0, 180, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
