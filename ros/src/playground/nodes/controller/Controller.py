@@ -11,6 +11,10 @@ _set_point = (0, 0, 0)
 # A flag to determine whether or not we are at our set point
 _arrived = False
 
+# These let us update theta at smaller rates than x and y
+_loop_count = 0
+_theta_loops = 2 # so every 2 loops do theta controller
+
 velocities = (0, 0, 0)
 
 def init():
@@ -41,11 +45,21 @@ def get_commanded_position():
     return _set_point
 
 def update(time_since_last_update, xhat, yhat, thetahat):
-    global velocities, _arrived
+    global velocities, _arrived, _loop_count
 
     if _arrived:
         # Don't even try
         return (0, 0, 0)
+
+    # We've had another motion loop!
+    _loop_count = _loop_count + 1
+
+    # Only update theta every _theta_loops times
+    if _loop_count == _theta_loops:
+        update_theta = True
+        _loop_count = 0
+    else:
+        update_theta = False
 
     # Break out variables for easy access
     x_c = _set_point[0]
@@ -64,7 +78,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
     if not _close(y_c, yhat):
         vy = PID_y.update(y_c, yhat, Ts)
 
-    if not _close(theta_c, thetahat, tolerance=5): # degrees
+    if update_theta and not _close(theta_c, thetahat, tolerance=5): # degrees
         # Since the max distance you should ever go is 180 degrees,
         # test to see so that the commanded value is proportional to
         # the error between commanded and actual.
@@ -75,10 +89,10 @@ def update(time_since_last_update, xhat, yhat, thetahat):
             else:
                 theta_c = theta_c - 360
 
-        w  = PID_theta.update(theta_c, thetahat, Ts, max_error_window=10)
+        w  = PID_theta.update(theta_c, thetahat, Ts, max_error_window=90)
 
     # Are we there yet?
-    _arrived = (vx == 0 and vy == 0 and w == 0)
+    _arrived = (vx == 0 and vy == 0 and w == 0 and update_theta)
 
     velocities = (vx, vy, w)
 
