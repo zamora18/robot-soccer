@@ -32,15 +32,15 @@ class PID(object):
         self.x_d1 = 0
         
 
-    def update(self, x_c, x, Ts, window_error=True):
+    def update(self, x_c, x, Ts, max_window_error=0.5):
         """Update
 
         Computes the output 'force' to send to the plant so that x_c == x
         """
 
         # compute the error
-        max_error_window = 0.5
-        if window_error and abs(x_c - x) > max_error_window:
+        use_window_error = (max_error_window is not 0)
+        if use_window_error and abs(x_c - x) > max_error_window:
             error = max_error_window*np.sign(x_c - x)
         else:
             error = x_c - x

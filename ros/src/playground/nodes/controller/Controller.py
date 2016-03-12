@@ -75,7 +75,7 @@ def update(time_since_last_update, xhat, yhat, thetahat):
             else:
                 theta_c = theta_c - 360
 
-        w  = PID_theta.update(theta_c, thetahat, Ts, window_error=False)
+        w  = PID_theta.update(theta_c, thetahat, Ts, max_window_error=10)
 
     # Are we there yet?
     _arrived = (vx == 0 and vy == 0 and w == 0)
