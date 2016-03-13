@@ -19,7 +19,8 @@ def kick():
     print("Actuate: {}".format(_kicker_count))
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
-
+def dribble(robot, ball):
+	
 
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
 	"""

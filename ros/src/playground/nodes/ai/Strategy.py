@@ -7,11 +7,14 @@ import Plays
 import Utilities
 import Constants
 
-_fourth_field_length = _field_length/4
+# Variables for tracking opponent strategy
+_avg_dist_between_robots    = 0
+_averaging_factor           = 0
+_time_in_our_half           = 0
+
+
 
 _ball_defend_position = None
-
-_done = False
 
 _going_home = False
 _wait_timer = 0
@@ -180,4 +183,14 @@ def _keep_inside_field(x_c, y_c):
     elif y_c < -Constants.field_width/2:
         y_c = -Constants.field_width/2 + Constants.robot_width
 
-    return (x_c, y_cConstants
+    return (x_c, y_c)
+
+def _update_opponent_tracking_variables():
+    global _avg_dist_between_robots
+    global _averaging_factor
+    global _time_in_our_half
+
+    _averaging_factor = _averaging_factor + 1
+    #_avg_dist_between_robots = (_avg_dist_between_robots + Utilities.get_distance_between_points(opponent['xhat'],opponent['yhat'], opponent2['xhat'], opponent2['yhat'])) / _averaging_factor
+
+

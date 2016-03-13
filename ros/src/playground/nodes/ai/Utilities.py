@@ -4,12 +4,32 @@ import Constants
 
 
 
+def our_robot_closer_to_ball(robot, opponent, ball):
+    closest = _get_closest_robot_to_point(robot['xhat'], robot['yhat'], opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
+    if (closest == 1):
+        return True 
+    else:
+        return False
+
+def _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, point_x, point_y):
+    rob_1_dist = get_distance_between_points(rob1_x, rob1_y, point_x, point_y)
+    rob_2_dist = get_distance_between_points(rob2_x, rob2_y, point_x, point_y)
+    if (rob_1_dist < rob_2_dist):
+        return 1
+    else:
+        return 2
+
+def ball_is_behind_robot(robot, ball):
+    if (robot['xhat']-Constants.robot_half_width > ball['xhat']):
+        return True 
+    else: 
+        return False
 
 
 
-# make function that detects the closest "robot" to the ball. Call it our_rob_closer and return T/F
-# or call it closest robot and return 1 or 2
-
+def get_sides_of_triangle(x1,x2,y1,y2):
+    (a,b,c,theta) = find_triangle(x1,x2,y1,y2)
+    return (a,b)
 
 def get_distance_between_points(x1,y1,x2,y2):
     (a,b,c,theta) = find_triangle(x1,y1,x2,y2)
@@ -35,16 +55,17 @@ def find_triangle(x1,y1,x2,y2):
     return (a,b,c,theta)
 
 def get_front_of_robot(robot):
-    if (robot['xhat'] < 0):
-        x_pos = robot['xhat']-Constants.robot_half_width*cos(robot['thetahat'])
-        if (robot['yhat'])
-        y_pos = robot['xhat']-Constants.robot_half_width*cos(robot['thetahat'])
-    else:
-        x_pos = robot['xhat']-Constants.robot_half_width*cos(robot['thetahat'])
+    x_pos = robot['xhat']+Constants.robot_half_width*cos(robot['thetahat']) ### thetahat is in degrees, so we should change from degree to radians?? ----------
+    y_pos = robot['yhat']+Constants.robot_half_width*sin(robot['thetahat'])
+
+    return (x_pos, y_pos)
 
 
 def rad_to_deg(rad):
     return rad*180/np.pi
+
+def deg_to_rad(deg):
+    return deg*np.pi/180
 
 def close(a, b, tolerance=0.010):
     """
@@ -71,17 +92,17 @@ def _demand_list(a):
 
 def get_field_section(x_pos):
         #Field is divided into 4 sections. 2 back half, 2 front half.
-        home_back_fourth     = -_fourth_field_length 
-        home_front_fourth    = _half_field
-        away_back_fourth     = _fourth_field_length
-        away_front_fourth    = _field_length/2
+        home_back_fourth     = -Constants.fourth_field_length 
+        home_front_fourth    = Constants.half_field
+        away_back_fourth     = Constants.fourth_field_length
+        away_front_fourth    = 2*Constants.fourth_field_length
 
         if x_pos < _half_field:
             if x_pos < home_back_fourth:
                 return 1
-            else: # home_front_fourth
+            else:
                 return 2
-        else: # ball is in away half
+        else: 
             if x_pos < away_back_fourth:
                 return 3
             else:
