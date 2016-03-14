@@ -5,7 +5,7 @@ import Utilities
 import Constants
 
 
-_distance_behind_ball_for_kick 		= _robot_width + .03 # this is for the jersey being off center
+_distance_behind_ball_for_kick      = _robot_width + .03 # this is for the jersey being off center
 _distance_behind_ball_for_dribbling = _robot_width/2 + .05
 _distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
 _distance_behind_ball_approach = .3
@@ -20,26 +20,28 @@ def kick():
     os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 def dribble_forward(robot, ball):
-	x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])
-	y_c = robot['yhat']+Constants.dribble_distance*sin(robot['thetahat'])
-	theta_c = robot['thetahat']
-	return (x_c, y_c, theta_c)
+    x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])
+    y_c = robot['yhat']+Constants.dribble_distance*sin(robot['thetahat'])
+    theta_c = robot['thetahat']
+    return (x_c, y_c, theta_c)
 
 
 def dribble_to_point(robot, ball):
+    pass
 
 
 def dribble_along_line(robot, ball):
+    pass
 
 
 
 
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
-	"""
-	Distance should be between 0 and 1, scaled from the first point
- 	example follow ball 2/3 distance between goal and ball
-	"""
-	theta = Utilities.get_angle_between_points(x1,y1,x2,y2)
+    """
+    Distance should be between 0 and 1, scaled from the first point
+    example follow ball 2/3 distance between goal and ball
+    """
+    theta = Utilities.get_angle_between_points(x1,y1,x2,y2)
     cprime = c*(1-distance)
 
     # aprime is the length of the simalar triangle with hypotenuse cprime
@@ -88,31 +90,31 @@ def attack_ball(robot, ball):
 
 
 def defend_goal_in_arc(ball):
-	c = Utilities.get_distance_between_points(Constants._goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
+    c = Utilities.get_distance_between_points(Constants._goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
     distance = _distance_from_goal_for_arc_defense/c
 
     return stay_between_points_at_distance(Constants._goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'], distance)
 
 # def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
-	# if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
+    # if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
 
 
 def go_behind_ball_facing_target(robot, opponent, ball, des_dist, target_x, target_y):
-	theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], target_x, target_y)
-	
-	hypotenuse = Constnts.robot_half_width + des_dist
-	x_c = ball['xhat'] - hypotenuse*np.cos(theta)
-	y_c = ball['yhat'] - hypotenuse*np.sin(theta)
-	theta = Utilities.rad_to_deg(theta)
-	return (x_c, y_c, theta)
+    theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], target_x, target_y)
+    
+    hypotenuse = Constnts.robot_half_width + des_dist
+    x_c = ball['xhat'] - hypotenuse*np.cos(theta)
+    y_c = ball['yhat'] - hypotenuse*np.sin(theta)
+    theta = Utilities.rad_to_deg(theta)
+    return (x_c, y_c, theta)
 
 def push_ball_des_distance (robot, ball, distance):
-	hypotenuse = distance
-	theta_c = robot['thetahat']
-	x_c = ball['xhat'] + hypotenuse*np.cos(theta_c)
-	y_c = ball['yhat'] + hypotenuse*np.sin(theta_c)
+    hypotenuse = distance
+    theta_c = robot['thetahat']
+    x_c = ball['xhat'] + hypotenuse*np.cos(theta_c)
+    y_c = ball['yhat'] + hypotenuse*np.sin(theta_c)
 
-	return (x_c, y_c, theta_c)
+    return (x_c, y_c, theta_c)
 
 
 
