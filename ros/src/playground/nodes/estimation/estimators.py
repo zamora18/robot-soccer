@@ -297,8 +297,8 @@ class RobotEstimator(object):
         # The naming is unfortunate, but self.xhat is the state estimation
         # while the local xhat is the x-position estimate
         xhat = self.xhat.getA()[0][0]
-        yhat = self.xhat.getA()[0][1]
-        thetahat = self.xhat.getA()[0][2]
+        yhat = self.xhat.getA()[1][0]
+        thetahat = self.xhat.getA()[2][0]
         
         return (xhat, yhat, thetahat)
 
@@ -336,7 +336,6 @@ class RobotEstimator(object):
         y_pred = self.xhat_d1
 
         # Kalman gain
-        import ipdb; ipdb.set_trace()
         L = _mdiv(self.S_d1, (self.R+self.S_d1))
 
         # Update estimation error covariance
@@ -348,11 +347,12 @@ class RobotEstimator(object):
 
         # Propagate up to current point
         N = 10
+        import ipdb; ipdb.set_trace()
         for i in xrange(N*self.discrete_delays):
             # Basically, this allows us to use the given old vel_cmd N times
             idx = int(np.ceil(np.true_divide(i,N)))
-            self.xhat_d1 = self.xhat_d1 + (T_ctrl/N)*self.delayed_vel_cmds[idx]
-            self.S_d1 = self.S_d1 + (T_ctrl/N)*self.Q
+            self.xhat_d1 = self.xhat_d1 + (self.T_ctrl/N)*self.delayed_vel_cmds[idx]
+            self.S_d1 = self.S_d1 + (self.T_ctrl/N)*self.Q
 
         # Update current estimate
         self.xhat = self.xhat_d1
