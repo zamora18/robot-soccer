@@ -1,3 +1,4 @@
+from collections import Iterable
 import numpy as np 
 
 import Constants
@@ -19,13 +20,25 @@ def _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, point_x, point_y
     else:
         return 2
 
-def ball_is_behind_robot(robot, ball):
+def is_ball_behind_robot(robot, ball):
     if (robot['xhat']-Constants.robot_half_width > ball['xhat']):
         return True 
     else: 
         return False
 
+def is_ball_between_home_and_robot(robot, ball):
+    epsilon = Constants.robot_width/4
 
+    crossproduct = (ball['yhat'] - robot['yhat'] ball['yhat'] - robot['yhat']) * (Constants.goal_position_home[0] - robot['xhat']) - (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[1] - robot['yhat'])
+    if abs(crossproduct) > epsilon : return False   # (or != 0 if using integers)
+
+    dotproduct = (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[0] - robot['xhat']) + (ball['yhat'] - robot['yhat'])*(Constants.goal_position_home[1] - robot['yhat'])
+    if dotproduct < 0 : return False
+
+    squaredlengthba = (Constants.goal_position_home[0] - robot['xhat'])*(Constants.goal_position_home[0] - robot['xhat']) + (Constants.goal_position_home[1] - robot['yhat'])*(Constants.goal_position_home[1] - robot['yhat'])
+    if dotproduct > squaredlengthba: return False
+
+    return True
 
 def get_sides_of_triangle(x1,x2,y1,y2):
     (a,b,c,theta) = find_triangle(x1,x2,y1,y2)
@@ -43,8 +56,10 @@ def find_triangle(x1,y1,x2,y2):
     """Find Triangle
 
     returns the triangle's sides (a, b, c) and theta (in radians) between p1 and p2
+    input coordinates should be "FROM (x1,y1) TO (x2,y2)
     """
     # a, b and c are lengths of the side of a right triangle betweem p1 and p2
+    #import ipdb; ipdb.set_trace() #FOR DEBUGGING!
     a = x2 - x1
     b = y2 - y1
     c = np.sqrt(a**2 + b**2)
@@ -97,7 +112,7 @@ def get_field_section(x_pos):
         away_back_fourth     = Constants.fourth_field_length
         away_front_fourth    = 2*Constants.fourth_field_length
 
-        if x_pos < _half_field:
+        if x_pos < Constants.half_field:
             if x_pos < home_back_fourth:
                 return 1
             else:

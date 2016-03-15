@@ -1,4 +1,3 @@
-from collections import Iterable
 import numpy as np
 
 import Skills
@@ -53,6 +52,22 @@ def shoot(robot, ball, distance_from_center):
         return desired_c
     else:
         return robot['xhat'], robot['yhat'], robot['thetahat']
+
+def avoid_own_goal(robot, ball):
+    dist_to_avoid_collision = Constants.robot_width
+    if (ball['xhat'] < robot['xhat']):
+        x_c = ball['xhat']
+        if (ball['yhat'] > 0):
+            y_c = ball['yhat']+dist_to_avoid_collision
+        else:
+            y_c = ball['yhat']-dist_to_avoid_collision
+        theta_c = Utilities.get_angle_between_points
+        theta_c = Utilities.rad_to_deg(theta_c)
+        return (x_c, y_c, theta_c)
+    else:
+        dist_to_maintain = 0.75 # In my mind I'm trying to be 75% closer to the ball
+        return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
+
 
 
 # def advance_ball(robot, opponent, ball):

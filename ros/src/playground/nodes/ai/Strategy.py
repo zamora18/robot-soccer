@@ -1,5 +1,3 @@
-from collections import Iterable
-
 import numpy as np
 
 import Skills
@@ -89,60 +87,63 @@ def _strong_offense(robot, opponent, ball):
 def _aggressive_offense(robot, opponent, ball):
     
     section = Utilities.get_field_section(ball['xhat'])
-    future_section = Utilities.get_field_section(ball['xhat_future'])
+    #future_section = Utilities.get_field_section(ball['xhat_future'])
 
     allytoball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     opptoball  = Utilities.get_distance_between_points(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
 
-    if   section == 1:
-        if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
-            return Skills.attack_ball(robot, ball)
-        else:
-            return _strong_defense(robot, ball)
-    elif section == 2:
-        if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
-            return Skills.attack_ball(robot, ball)
-        else:
-            dist_to_maintain = 0.70
-            return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
-    elif section == 3:
-        if ball['yhat'] < 0:
-            return Plays.shoot(robot, ball, -0.75)
-        else:
-            return Plays.shoot(robot, ball, 0.75)
-    else: #section is 4
-        if ball['yhat'] < 0:
-            return Plays.shoot(robot, ball, -0.75)
-        else:
-            return Plays.shoot(robot, ball, 0.75)
-    return (robot['xhat'], robot['yhat'], robot['thetahat'])
+    if (Utilities.is_ball_behind_robot(robot, ball) and Utilities.is_ball_between_home_and_robot(robot,ball)):
+        return Plays.avoid_own_goal(robot, ball)
+    else:
+
+        if   section == 1:
+            if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
+                return Skills.attack_ball(robot, ball)
+            else:
+                return _strong_defense(robot, ball)
+        elif section == 2:
+            if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
+                return Skills.attack_ball(robot, ball)
+            else:
+                dist_to_maintain = 0.70
+                return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
+        elif section == 3:
+            if ball['yhat'] < 0:
+                return Plays.shoot(robot, ball, -0.75)
+            else:
+                return Plays.shoot(robot, ball, 0.75)
+        else: #section is 4
+            if ball['yhat'] < 0:
+                return Plays.shoot(robot, ball, -0.75)
+            else:
+                return Plays.shoot(robot, ball, 0.75)
+        return (robot['xhat'], robot['yhat'], robot['thetahat']) #default, returns 
 
 
 
 def _strong_defense(robot, ball):
     global _ball_defend_position
 
-    #if _goal_scored:
-     #   return  (-(_field_length/4), 0, 0)
-
-    #for now we want to make one robot defend the goal
+    
     theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
     theta_c_deg = Utilities.rad_to_deg(theta_c)
-    x_c =  Constants.goalie_x_pos
+    #x_c =  Constants.goalie_x_pos
+    x_c = Constants.goalie_radius*cos(theta_c)
 
     # defends at yhat future
-    y_c = ball['yhat_future']
+    y_c = Constants.goalie_radius*sin(theta_c)
 
-    if abs(ball['xhat_future']) > abs(x_c):
-        if _ball_defend_position is None:
-            _ball_defend_position = ball
-    else:
-        _ball_defend_position = None
+    #Updating global variable? I don't understand what this is doing
+    #if abs(ball['xhat_future']) > abs(x_c):
+    #    if _ball_defend_position is None:
+    #        _ball_defend_position = ball
+    #else:
+    #    _ball_defend_position = None
 
-    if _ball_defend_position is not None:
-        y_c = _ball_defend_position['yhat_future']
+    #if _ball_defend_position is not None:
+    #    y_c = _ball_defend_position['yhat_future']
 
-    y_c = _limit_goalie_y(y_c, ball)
+    #y_c = _limit_goalie_y(y_c, ball)
 
     #Constants.goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
     theta_c_deg = 0
@@ -163,10 +164,10 @@ def _goal_scored(robot, ball):
 
 def _limit_goalie_y(y_c, ball):
     # keeps robot in goal
-    if (ball['yhat_future'] > _goal_box_width/2):
-        y_c = _goal_box_width/2
-    elif (ball['yhat_future'] < -_goal_box_width/2):
-        y_c = -_goal_box_width/2
+    if (ball['yhat'] > Constants.goal_box_width/2):
+        y_c = Constants.goal_box_width/2
+    elif (ball['yhat'] < -Constants.goal_box_width/2):
+        y_c = -Constants.goal_box_width/2
 
     return y_c
 
@@ -174,9 +175,9 @@ def _limit_goalie_y(y_c, ball):
 def _keep_inside_field(x_c, y_c):
     
     if x_c > Constants.goal_position_opp[0]:
-        x_c = -_goalie_x_pos
+        x_c = -Constants.goalie_x_pos
     elif x_c < Constants.goal_position_home[0]:
-        x_c = Constants.goal_position_home
+        x_c = Constants.goal_position_home[0]
 
     if y_c > Constants.field_width/2:
         y_c = Constants.field_width/2 - Constants.robot_width

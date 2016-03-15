@@ -5,10 +5,10 @@ import Utilities
 import Constants
 
 
-_distance_behind_ball_for_kick      = _robot_width + .03 # this is for the jersey being off center
-_distance_behind_ball_for_dribbling = _robot_width/2 + .05
-_distance_from_goal_for_arc_defense = _goal_box_width + _robot_width *2
-_distance_behind_ball_approach = .3
+_distance_behind_ball_for_kick      = Constants.robot_width + .03 # this is for the jersey being off center
+_distance_behind_ball_for_dribbling = Constants.robot_width/2 + .05
+_distance_from_goal_for_arc_defense = Constants.goal_box_width + Constants.robot_width *2
+_distance_behind_ball_approach      = .3
 
 _kicker_count = 0
 
@@ -42,6 +42,7 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     example follow ball 2/3 distance between goal and ball
     """
     theta = Utilities.get_angle_between_points(x1,y1,x2,y2)
+    c = Utilities.get_distance_between_points(x1,y1,x2,y2)
     cprime = c*(1-distance)
 
     # aprime is the length of the simalar triangle with hypotenuse cprime
@@ -63,8 +64,8 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     distance from center is for shooting in corners, 1 will put it in the "top" corner
     while -1 will put it in the bottom of the goal and 0 is exact center"""
 
-    y2 = distance_from_center_of_goal * _goal_box_width/2
-    x2 = _goal_position_opp
+    y2 = distance_from_center_of_goal * Constants.goal_box_width/2
+    x2 = Constants.goal_position_opp[0]
 
     theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], x2,y2)
     cprime = _distance_behind_ball_for_kick
@@ -81,7 +82,7 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     return (x_c, y_c, theta_c)
 
 def attack_ball(robot, ball):
-    a,b,c,theta = find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+    a,b,c,theta = Utilities.find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     x_c = _distance_behind_ball_approach * np.cos(theta*np.pi/180) + a + ball['xhat']
     y_c = _distance_behind_ball_approach * np.sin(theta*np.pi/180) + b + ball['yhat']
     theta = Utilities.rad_to_deg(theta)
@@ -90,10 +91,10 @@ def attack_ball(robot, ball):
 
 
 def defend_goal_in_arc(ball):
-    c = Utilities.get_distance_between_points(Constants._goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
+    c = Utilities.get_distance_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
     distance = _distance_from_goal_for_arc_defense/c
 
-    return stay_between_points_at_distance(Constants._goal_position_home[0], _goal_position_home[1], ball['xhat_future'], ball['yhat_future'], distance)
+    return stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], distance)
 
 # def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
     # if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
@@ -102,7 +103,7 @@ def defend_goal_in_arc(ball):
 def go_behind_ball_facing_target(robot, opponent, ball, des_dist, target_x, target_y):
     theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], target_x, target_y)
     
-    hypotenuse = Constnts.robot_half_width + des_dist
+    hypotenuse = Constants.robot_half_width + des_dist
     x_c = ball['xhat'] - hypotenuse*np.cos(theta)
     y_c = ball['yhat'] - hypotenuse*np.sin(theta)
     theta = Utilities.rad_to_deg(theta)
