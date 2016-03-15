@@ -5,8 +5,8 @@ Tcamera=1/30;Tcontrol=1/100;
 cam_latency = 130E-3; % s
 update_type = 'SIMPLE';
 Q = diag([(5E-2)^2 (5E-2)^2 (10*pi/180)^2]);
-R = diag([ 0.01^2 0.01^2 (2*pi/180)^2 ]);
-save('bot_msg_data5.mat');
+R = diag([ 0.001^2 0.001^2 (1*pi/180)^2 ]);
+save('bot_msg_data7.mat');
 
 % How many samples are there?
 N = length(bot);
