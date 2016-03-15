@@ -37,7 +37,6 @@ class BallEstimator(LowPassFilter):
             v[1] =- v[1]
 
 
-
 class RobotEstimator(KalmanFilter):
     """RobotEstimator
     Uses a Kalman Filter to estimate the robot's state. This implementation
@@ -81,7 +80,7 @@ class RobotEstimator(KalmanFilter):
         Q = np.matrix(np.diag([(.5E-2)**2, (.5E-2)**2, (5*np.pi/180)**2]))
         R = np.matrix(np.diag([0.01**2, 0.01**2, (2*np.pi/180)**2]))
 
-        super(RobotEstimator, self).__init__(T_ctrl, T_cam, cam_latency, A, B, C, Q, R)
+        super(RobotEstimator, self).__init__(update_type, T_ctrl, T_cam, cam_latency, A, B, C, Q, R)
 
 
 class OpponentEstimator(KalmanFilter):

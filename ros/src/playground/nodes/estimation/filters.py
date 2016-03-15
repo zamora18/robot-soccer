@@ -249,10 +249,10 @@ class KalmanFilter(object):
     UPDATE_SIMPLE = 0
     UPDATE_FIXED_DELAY = 1
 
-    def __init__(self, T_ctrl, T_cam, cam_latency, A, B, C, Q, R):
+    def __init__(self, update_type, T_ctrl, T_cam, cam_latency, A, B, C, Q, R):
         super(KalmanFilter, self).__init__()
 
-        self.update_type = 'SIMPLE' #'FIXED_CAMERA_DELAY'
+        self.update_type = update_type
 
         # Sample period
         self.T_ctrl = T_ctrl
