@@ -46,17 +46,6 @@ def dribble_along_line(robot, ball):
 
 
 
-     7 def add_two_ints_client(x, y):
-     8     rospy.wait_for_service('add_two_ints')
-     9     try:
-    10         add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
-    11         resp1 = add_two_ints(x, y)
-    12         return resp1.sum
-    13     except rospy.ServiceException, e:
-    14         print "Service call failed: %s"%e
-
-
-
 
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     """
