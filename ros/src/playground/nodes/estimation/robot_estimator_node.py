@@ -56,9 +56,11 @@ def main():
 
         xhat = yhat = thetahat = xhat_future = yhat_future = thetahat_future = 0
 
-        if _estimator_on:
+        if rospy.get_param('robot_estimator_on', 'true'):
             # Ts = (time.time() - _last_time)
             (xhat, yhat, thetahat) = _robot.update(_measured, _velocities)
+        else:
+            (xhat, yhat, thetahat) = _measured
 
         # if _predictor_on:
         #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)
@@ -87,7 +89,8 @@ def main():
 
         # Set measured to None so the robot updater 
         # knows to predict instead of correcting
-        _measured = (None, None, None)
+        if rospy.get_param('robot_estimator_on', 'true'):
+            _measured = (None, None, None)
 
 
         rate.sleep()
