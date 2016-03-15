@@ -3,7 +3,7 @@
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
-from playground.msg import EncoderEstimates
+from playground.msg import EncoderEstimates, RobotState
 from playground.srv import RoboClawRPC, RoboClawRPCResponse
 
 import numpy as np
@@ -22,7 +22,7 @@ def _handle_velocity_command(msg):
 
 def _handle_theta(msg):
     global _theta
-    _theta = msg.theta
+    _theta = msg.thetahat
 
 # -----------------------------------------------------------------------------
 
@@ -41,8 +41,8 @@ def main():
     # Services
     rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
 
-    # Hack
-    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_theta)
+    # So that we know the robot's theta
+    rospy.Subscriber('robot_state', RobotState, _handle_theta)
 
     # init wheelbase
     wheelbase.init()

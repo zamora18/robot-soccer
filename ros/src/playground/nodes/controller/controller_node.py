@@ -5,7 +5,7 @@ import rospy
 from geometry_msgs.msg import Twist, Pose2D
 from std_srvs.srv import Trigger, TriggerResponse
 
-from playground.msg import PIDInfo
+from playground.msg import PIDInfo, RobotState
 
 import numpy as np
 
@@ -20,15 +20,15 @@ _thetahat = 0
 _ctrl_on = True
 _initializing = True
 
-def _handle_estimated_position(msg):
+def _handle_robot_state(msg):
     global _xhat, _yhat, _thetahat, _initializing
-    _xhat = msg.x
-    _yhat = msg.y
-    _thetahat = msg.theta
+    _xhat = msg.xhat
+    _yhat = msg.yhat
+    _thetahat = msg.thetahat
 
     if _initializing:
         _initializing = False
-        Controller.set_commanded_position(msg.x, msg.y, msg.theta)
+        Controller.set_commanded_position(_xhat, _yhat, _thetahat)
 
 def _handle_desired_position(msg):
     global _ctrl_on
@@ -48,7 +48,7 @@ def main():
     rospy.init_node('controller', anonymous=False)
 
     # Sub/Pub
-    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_position)
+    rospy.Subscriber('robot_state', RobotState, _handle_robot_state)
     rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
     pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
     pub_PIDInfo = rospy.Publisher('pidinfo', PIDInfo, queue_size=10)

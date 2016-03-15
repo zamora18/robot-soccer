@@ -93,11 +93,10 @@ set(handles.table_ball_vision,'Data', {0 0 0});
 set(handles.table_ball_estimate,'Data', {0 0 0});
 
 % Setup ROS Subscribers
-handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
+handles.sub.vision_robot_position = rossubscriber('/robot_state', 'playground/RobotState', {@robotStateCallback,handles});
 handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
 handles.sub.error = rossubscriber('/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
-handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
 handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
 
@@ -133,24 +132,28 @@ clear handles.pub
 % The GUI is no longer waiting, just close it
 delete(hObject);
 
-function visionRobotPositionCallback(src, msg, handles)
+function robotStateCallback(src, msg, handles)
 
     if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
         return
     end
     
+    % Save for when we are clicking to drive
     global pos
-    pos = [msg.X msg.Y msg.Theta];
+    pos = [msg.Xhat msg.Yhat msg.Thetahat];
+    
+    global bot
+    bot = [bot msg];
 
     x = get(handles.plot_position,'XData');
     y = get(handles.plot_position,'YData');
-    x = [x msg.X];
-    y = [y msg.Y];
+    x = [x msg.Xhat];
+    y = [y msg.Yhat];
     set(handles.plot_position,'XData',x,'YData',y);
     
     set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
-    set(handles.table_position,'Data', {msg.X msg.Y msg.Theta});
+    set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
     
 function desiredPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_desired_position)
@@ -239,28 +242,29 @@ function pidInfoCB(src, msg, handles)
         
     end
     
-function visionBallPositionCallback(src, msg, handles)
-    if ~ishandle(handles.table_ball_vision)
-        return
-    end
-    
-    set(handles.plot_ball_vision,'XData', msg.X, 'YData', msg.Y);
-
-    set(handles.table_ball_vision,'Data', {msg.X msg.Y});
-    
-    
 function ballStateCallback(src, msg, handles)
-    if ~ishandle(handles.table_ball_estimate)
+    if ~ishandle(handles.table_ball_estimate) ...
+            ||  ~ishandle(handles.table_ball_vision)
         return
     end
     
-    % For grabbing ball data ot analyze later
+    % For grabbing ball data to analyze later
     global ball
     ball = [ball msg];
 
+    % Predicted (red X)
     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
-    
     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
+    
+    % Estimated (green circle)
+    set(handles.plot_ball_vision,'XData', msg.Xhat, 'YData', msg.Yhat);
+    set(handles.table_ball_vision,'Data', {msg.Xhat msg.Yhat});
+    
+    % Plot vision measured?
+    % You'd have to use the bool 'Correction' to know if you should plot it
+    % or not, as these come in faster than the camera. basically, if you
+    % just straight plot these measurements it will jump between its
+    % position and 0
     
 
 
