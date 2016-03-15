@@ -227,7 +227,7 @@ class RobotEstimator(object):
     if vision threshold is done well and there is very low latency.
 
     State Definition:
-        x = (x y theta)
+        x = (x y theta)'
     """
     def __init__(self):
         super(RobotEstimator, self).__init__()
@@ -239,7 +239,7 @@ class RobotEstimator(object):
         self.T_cam = 1/30.0
 
         # Initialize filter's persistent variables
-        self.xhat = np.matrix([0, 0, 0])
+        self.xhat = np.matrix([0, 0, 0]).T
         self.xhat_d1 = self.xhat
         self.S = np.matrix(np.diag([0, 0, 0]))  # should probably use arrays, 
                                                 # but I just learned that and
@@ -273,8 +273,8 @@ class RobotEstimator(object):
         """Update
         """
         
-        # Convert incoming vel_cmds to a matrix
-        vel_cmd = np.matrix(vel_cmd)
+        # Convert incoming vel_cmds to a column vector
+        vel_cmd = np.matrix(vel_cmd).T
 
         # Prediction step between measurements
         #   This could probably be optomized out for
@@ -311,7 +311,7 @@ class RobotEstimator(object):
     def _update_simple(self, measurement):
         """Update Simple
         """
-        y = measurement
+        y = np.matrix(measurement).T
         y_pred = self.xhat
 
         # Kalman gain
@@ -332,7 +332,7 @@ class RobotEstimator(object):
         # Shift old velocity commands
         self._shift_delayed_vel_cmds(vel_cmd)
 
-        y = measurement
+        y = np.matrix(measurement).T
         y_pred = self.xhat_d1
 
         # Kalman gain
