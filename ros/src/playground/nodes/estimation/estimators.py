@@ -315,7 +315,7 @@ class RobotEstimator(object):
         y_pred = self.xhat
 
         # Kalman gain
-        L = self.S/(self.R+self.S)
+        L = _mdiv(self.S, (self.R+self.S))
 
         # Update estimation error covariance
         I = np.matrix(np.eye(3))
@@ -337,7 +337,7 @@ class RobotEstimator(object):
 
         # Kalman gain
         import ipdb; ipdb.set_trace()
-        L = self.S_d1/(self.R+self.S_d1)
+        L = _mdiv(self.S_d1, (self.R+self.S_d1))
 
         # Update estimation error covariance
         I = np.matrix(np.eye( 3 ))
@@ -350,7 +350,7 @@ class RobotEstimator(object):
         N = 10
         for i in xrange(N*self.discrete_delays):
             # Basically, this allows us to use the given old vel_cmd N times
-            idx = int(np.ceil(i/N))
+            idx = int(np.ceil(np.true_divide(i,N)))
             self.xhat_d1 = self.xhat_d1 + (T_ctrl/N)*self.delayed_vel_cmds[idx]
             self.S_d1 = self.S_d1 + (T_ctrl/N)*self.Q
 
@@ -524,3 +524,16 @@ class OpponentEstimator(object):
         # Update current estimate
         self.xhat = self.xhat_d1
         self.S = self.S_d1
+
+def _mdiv(a, b):
+    """Matrix Divide
+    ignore division by 0
+
+    Example: _mdiv( [-1, 0, 1], 0 ) -> [0, 0, 0]
+    """
+    with np.errstate(divide='ignore', invalid='ignore'):
+        c = np.true_divide(a,b)
+        c[c == np.inf] = 0
+        c = np.nan_to_num(c)
+
+    return c
