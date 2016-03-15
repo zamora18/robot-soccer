@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     rospy
     gazebo_ros
     std_msgs
+    std_srvs
     geometry_msgs
     message_generation
     cv_bridge
@@ -25,7 +26,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 #add_message_files(DIRECTORY msg FILES)
 
 # Generate added messages and services
-generate_messages(DEPENDENCIES std_msgs geometry_msgs)
+generate_messages(DEPENDENCIES std_msgs std_srvs geometry_msgs)
 
 # Declare a catkin package
 catkin_package(CATKIN_DEPENDS roscpp rospy std_msgs std_srvs geometry_msgs message_runtime gazebo_ros)

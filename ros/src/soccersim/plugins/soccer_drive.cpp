@@ -7,6 +7,8 @@
 #include "geometry_msgs/Twist.h"
 #include "std_srvs/Trigger.h"
 
+using namespace std;
+
 namespace gazebo
 {
 	class SoccerDrive : public ModelPlugin
@@ -33,7 +35,7 @@ namespace gazebo
 			node_handle = ros::NodeHandle(robot_name);
 			gzmsg << "[model_push] Subscribing to " << ("/" + robot_name + "/command") << "\n";
 			command_sub = node_handle.subscribe("/" + robot_name + "/command", 1, &SoccerDrive::CommandCallback, this);
-			kick_srv = node_handle.advertiseService("/" + robot_name + "/kick", SoccerDrive::KickSrv);
+			kick_srv = node_handle.advertiseService("/" + robot_name + "/kick", &SoccerDrive::KickSrv, this);
 
 			// Listen to the update event. This event is broadcast every
 			// simulation iteration.
@@ -118,7 +120,7 @@ namespace gazebo
 		ros::Subscriber command_sub;
 		ros::Subscriber kick_sub;
 		geometry_msgs::Twist command_msg;
-		std::bool kick;
+		bool kick;
 		ros::ServiceServer kick_srv;
 		double kP_xy;
 		double kP_w;
