@@ -347,10 +347,9 @@ class RobotEstimator(object):
 
         # Propagate up to current point
         N = 10
-        import ipdb; ipdb.set_trace()
         for i in xrange(N*self.discrete_delays):
             # Basically, this allows us to use the given old vel_cmd N times
-            idx = int(np.ceil(np.true_divide(i,N)))
+            idx = int(np.floor(np.true_divide(i,N)))
             self.xhat_d1 = self.xhat_d1 + (self.T_ctrl/N)*self.delayed_vel_cmds[idx]
             self.S_d1 = self.S_d1 + (self.T_ctrl/N)*self.Q
 
