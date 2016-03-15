@@ -55,6 +55,8 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 % Clear globals
 global ball
 ball = [];
+global bot
+bot = [];
 
 global view_resp
 view_resp = false;
