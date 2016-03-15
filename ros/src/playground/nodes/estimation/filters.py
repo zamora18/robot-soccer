@@ -13,9 +13,9 @@ class LowPassFilter(object):
     The scheme is chosen via the self.update_type variable.
     """
 
-    self.UPDATE_SIMPLE = 0
-    self.UPDATE_DELAY = 1
-    self.UPDATE_BOUNCE = 2
+    UPDATE_SIMPLE = 0
+    UPDATE_DELAY = 1
+    UPDATE_BOUNCE = 2
 
     def __init__(self, T_ctrl, alpha, tau, update_type, N):
         super(LowPassFilter, self).__init__()
@@ -217,10 +217,9 @@ class LowPassFilter(object):
         Expects a row vector (np.matrix) of length self.N
         and returns a list of elements
         """
-
         xhat = []
         for i in xrange(self.N):
-            xhat[i] = mat.getA()[0][i]
+            xhat.append(mat.getA()[0][i])
 
         return xhat
 
