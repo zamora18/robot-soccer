@@ -40,7 +40,6 @@ def choose_strategy(robot, opponent, ball, goal):
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
-    # return Skills.defend_goal_in_arc(ball)
     return _aggressive_offense(robot, opponent, ball)
     #return Plays.shoot(robot, ball,0)
 
@@ -92,7 +91,7 @@ def _aggressive_offense(robot, opponent, ball):
     allytoball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     opptoball  = Utilities.get_distance_between_points(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
 
-    if (Utilities.is_ball_behind_robot(robot, ball)) #and Utilities.is_ball_between_home_and_robot(robot,ball)):
+    if (Utilities.is_ball_behind_robot(robot, ball)): #and Utilities.is_ball_between_home_and_robot(robot,ball)):
         return Plays.avoid_own_goal(robot, ball)
     else:
 
@@ -128,10 +127,10 @@ def _strong_defense(robot, ball):
     theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
     theta_c_deg = Utilities.rad_to_deg(theta_c)
     #x_c =  Constants.goalie_x_pos
-    x_c = Constants.goalie_radius*cos(theta_c)
+    x_c = Constants.goalie_radius*np.cos(theta_c)
 
     # defends at yhat future
-    y_c = Constants.goalie_radius*sin(theta_c)
+    y_c = Constants.goalie_radius*np.sin(theta_c)
 
     #Updating global variable? I don't understand what this is doing
     #if abs(ball['xhat_future']) > abs(x_c):

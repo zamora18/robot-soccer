@@ -7,29 +7,34 @@ import Constants
 
 class ShootState:
     setup = 0
-    approach = 1
+    attack = 1
     shoot = 2
 
 
 _shoot_state = ShootState.setup
 
 def _robot_close(robot, x, y, theta):
-    return Utilities.close(x, robot['xhat'], tolerance=.23) and Utilities.close(y, robot['yhat'], tolerance=.23) \
+    return Utilities.close(x, robot['xhat'], tolerance=.15) and Utilities.close(y, robot['yhat'], tolerance=.15) \
                 and Utilities.close(theta, robot['thetahat'], tolerance = 15)
 
 def shoot(robot, ball, distance_from_center):
     global _shoot_state
 
-    desired_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
+    desired_setup_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
 
     # transition
     if(_shoot_state == ShootState.setup):
         x, y, theta = Skills.set_up_kick_facing_goal(ball, 0)
-        if _robot_close(robot, *desired_c):
-            _shoot_state = ShootState.approach
+        if _robot_close(robot, *desired_setup_c):
+            _shoot_state = ShootState.attack
 
-    elif _shoot_state == ShootState.approach:
+    elif _shoot_state == ShootState.attack:
         c = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+
+        # if the ball is behind the robot, go back to set up
+        if (Utilities.is_ball_behind_robot(robot, ball)):
+            print("LOOK OUT BEHIND YOU")
+            _shoot_state = ShootState.setup
         if(c < Constants.robot_width * (3.0/4.0)):
             _shoot_state = ShootState.shoot
 
@@ -39,18 +44,19 @@ def shoot(robot, ball, distance_from_center):
     else:
         _shoot_state = ShootState.setup
 
-    #action
+    # action
     if(_shoot_state == ShootState.setup):
-        return desired_c
+        return desired_setup_c
 
-    elif  _shoot_state == ShootState.approach:
-        return desired_c #Skills.approach_to_kick_facing_goal(robot, ball)
+    elif  _shoot_state == ShootState.attack:
+        return Skills.attack_ball(robot,ball) #Skills.approach_to_kick_facing_goal(robot, ball)
 
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
         Skills.kick()
-        return desired_c
+        return desired_setup_c
     else:
+        print ('default')
         return robot['xhat'], robot['yhat'], robot['thetahat']
 
 def avoid_own_goal(robot, ball):

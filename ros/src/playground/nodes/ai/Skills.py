@@ -93,9 +93,9 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     return (x_c, y_c, theta_c)
 
 def attack_ball(robot, ball):
-	"""
-	Simply pushes the ball along the "vector" from robot to ball
-	"""
+    """
+    Simply pushes the ball along the "vector" from robot to ball
+    """
     theta = Utilities.get_angle_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     x_c = ball['xhat'] + Constants.kick_dist*np.cos(theta)  		#*np.pi/180 <-- took this out of theta
     y_c = ball['yhat'] + Constants.kick_dist*np.sin(theta) 		#*np.pi/180 <-- took this out of theta

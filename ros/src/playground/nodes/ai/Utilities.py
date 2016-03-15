@@ -29,7 +29,7 @@ def is_ball_behind_robot(robot, ball):
 def is_ball_between_home_and_robot(robot, ball):
     epsilon = Constants.robot_width/4
 
-    crossproduct = (ball['yhat'] - robot['yhat'] ball['yhat'] - robot['yhat']) * (Constants.goal_position_home[0] - robot['xhat']) - (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[1] - robot['yhat'])
+    crossproduct = (ball['yhat'] - robot['yhat']) * (Constants.goal_position_home[0] - robot['xhat']) - (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[1] - robot['yhat'])
     if abs(crossproduct) > epsilon : return False   # (or != 0 if using integers)
 
     dotproduct = (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[0] - robot['xhat']) + (ball['yhat'] - robot['yhat'])*(Constants.goal_position_home[1] - robot['yhat'])
