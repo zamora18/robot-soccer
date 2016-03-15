@@ -92,7 +92,7 @@ def _aggressive_offense(robot, opponent, ball):
     allytoball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
     opptoball  = Utilities.get_distance_between_points(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
 
-    if (Utilities.is_ball_behind_robot(robot, ball) and Utilities.is_ball_between_home_and_robot(robot,ball)):
+    if (Utilities.is_ball_behind_robot(robot, ball)) #and Utilities.is_ball_between_home_and_robot(robot,ball)):
         return Plays.avoid_own_goal(robot, ball)
     else:
 

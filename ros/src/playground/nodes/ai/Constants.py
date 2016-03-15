@@ -15,6 +15,7 @@ goal_position_opp  	= [-goal_position_home[0], 0]
 
 des_dist_from_ball 	= 0.0762 #(3.0in)
 kick_dist          	= 0.1524 #(6.0in)
+push_ball_dist		= 0.2032 #(8.0in)
 goalie_x_pos       	= goal_position_home[0] + goal_box_length + robot_half_width
 goalie_radius		= goal_box_width/2
 
