@@ -232,7 +232,7 @@ class RobotEstimator(object):
     def __init__(self):
         super(RobotEstimator, self).__init__()
 
-        self.update_type = 'FIXED_CAMERA_DELAY'
+        self.update_type = 'SIMPLE' #'FIXED_CAMERA_DELAY'
 
         # Sample rate
         self.T_ctrl = 1/100.0
@@ -265,7 +265,7 @@ class RobotEstimator(object):
             self.delayed_vel_cmds.append(np.matrix([0, 0, 0]))
 
         # Noise statistics
-        self.Q = np.matrix(np.diag([1**2, 1**2, (2*np.pi/180)**2]))
+        self.Q = np.matrix(np.diag([.1**2, .1**2, (5*np.pi/180)**2]))
         self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*np.pi/180)**2]))
 
 
