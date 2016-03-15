@@ -1,9 +1,9 @@
-from collections import Iterable
 import numpy as np
 
 import Skills
+import Utilities
+import Constants
 
-_robot_width        = 0.1841 # (7.25 in)
 
 class ShootState:
     setup = 0
@@ -13,12 +13,9 @@ class ShootState:
 
 _shoot_state = ShootState.setup
 
-def _close(a, b, tolerance=20.0):
-    return abs(a - b) <= tolerance
-
 def _robot_close(robot, x, y, theta):
-    return _close(x, robot['xhat'], tolerance=.15) and _close(y, robot['yhat'], .15) \
-                and _close(theta, robot['thetahat'], tolerance = 20)
+    return Utilities.close(x, robot['xhat'], tolerance=.23) and Utilities.close(y, robot['yhat'], tolerance=.23) \
+                and Utilities.close(theta, robot['thetahat'], tolerance = 15)
 
 def shoot(robot, ball, distance_from_center):
     global _shoot_state
@@ -32,9 +29,8 @@ def shoot(robot, ball, distance_from_center):
             _shoot_state = ShootState.approach
 
     elif _shoot_state == ShootState.approach:
-        a,b,c,theta = Skills.find_triangle(robot['xhat'], robot['yhat'], \
-                                ball['xhat'], ball['yhat'])
-        if(c < _robot_width * (3.0/4.0)):
+        c = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+        if(c < Constants.robot_width * (3.0/4.0)):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
@@ -48,7 +44,7 @@ def shoot(robot, ball, distance_from_center):
         return desired_c
 
     elif  _shoot_state == ShootState.approach:
-        return Skills.approach_to_kick_facing_goal(robot, ball)
+        return desired_c #Skills.approach_to_kick_facing_goal(robot, ball)
 
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
@@ -57,33 +53,23 @@ def shoot(robot, ball, distance_from_center):
     else:
         return robot['xhat'], robot['yhat'], robot['thetahat']
 
+def avoid_own_goal(robot, ball):
+    dist_to_avoid_collision = Constants.robot_width
+    if (ball['xhat'] < robot['xhat']):
+        x_c = ball['xhat']
+        if (ball['yhat'] > 0):
+            y_c = ball['yhat']+dist_to_avoid_collision
+        else:
+            y_c = ball['yhat']-dist_to_avoid_collision
+        theta_c = Utilities.get_angle_between_points
+        theta_c = Utilities.rad_to_deg(theta_c)
+        return (x_c, y_c, theta_c)
+    else:
+        dist_to_maintain = 0.75 # In my mind I'm trying to be 75% closer to the ball
+        return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
+
+
 
 # def advance_ball(robot, opponent, ball):
-
-
-
-def _close(a, b, tolerance=0.010):
-    """
-
-    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
-    """
-
-    # Demand vals to be lists
-    a = _demand_list(a)
-    b = _demand_list(b)
-
-    return all(abs(np.subtract(a, b)) <= tolerance)
-
-def _demand_list(a):
-    """
-    Make a non-iterable or a tuple into a list
-    """
-    if not isinstance(a, Iterable):
-        a = [a]
-
-    elif type(a) is tuple:
-        a = list(a)
-
-    return a
 
 

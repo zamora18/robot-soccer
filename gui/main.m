@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 24-Feb-2016 01:19:09
+% Last Modified by GUIDE v2.5 08-Mar-2016 19:37:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,9 +56,13 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 global ball
 ball = [];
 
+global view_resp
+view_resp = false;
 
 % Choose default command line output for main
 handles.output = hObject;
+
+set(gcf,'toolbar','figure');
 
 % Setup Position Plot
 handles.plot_position = plot(handles.fig_position,0,0);
@@ -76,8 +80,8 @@ set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 handles.plot_velocity = quiver(handles.fig_velocity,0,0,0,0,0);
 set(handles.fig_velocity,'XLim',[-1.5 1.5],'YLim',[-1.5 1.5]);
 daspect(handles.fig_velocity, [1 1 1]);
-xlabel(handles.fig_velocity,'width (m/s)');
-ylabel(handles.fig_velocity,'height (m/s)');
+xlabel(handles.fig_velocity,'x (m/s)');
+ylabel(handles.fig_velocity,'y (m/s)');
 set(handles.fig_velocity, 'XGrid', 'on', 'YGrid', 'on');
 
 % Setup Tables
@@ -92,7 +96,7 @@ set(handles.table_ball_estimate,'Data', {0 0 0});
 handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
 handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
-handles.sub.error = rossubscriber('/error', 'geometry_msgs/Pose2D', {@errorCallback,handles});
+handles.sub.error = rossubscriber('/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
 handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
 handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
@@ -168,13 +172,72 @@ function velCmdsCallback(src, msg, handles)
 
     set(handles.table_velocity,'Data', {vx vy w});
     
-function errorCallback(src, msg, handles)
-    if ~ishandle(handles.table_error)
+function pidInfoCB(src, msg, handles)
+    global view_resp
+    global view_resp_start
+    
+    persistent step_resp_plot
+    
+    if ~ishandle(handles.table_error) %|| isempty(step_resp_plot) || ~ishandle(step_resp_plot(1,1))
         return
     end
 
-    set(handles.table_error,'Data', {msg.X msg.Y msg.Theta});
+    set(handles.table_error,'Data', {msg.Error.X msg.Error.Y msg.Error.Theta});
     
+    % Select the plots to subplot (if you want theta, add it)
+    labelYs = {'x-position (m)', 'y-position (m)', 'theta (deg)'};
+%     labelYs = {'x-position (m)', 'y-position (m)'};
+
+    % How many subplots should there be?
+    N = length(labelYs);
+    
+    if view_resp
+        
+        desired = [msg.Desired.X msg.Desired.Y msg.Desired.Theta];
+        actual = [msg.Actual.X msg.Actual.Y msg.Actual.Theta];
+        
+        if view_resp_start
+            view_resp_start = false;
+            
+            % clear the figure
+            figure(2);
+            clf;
+            
+            % Initialize handles
+            step_resp_plot = zeros(2,N);
+            ax = zeros(1,N);
+            
+            % Setup the subplots
+            for i = 1:N
+                ax(i) = subplot(N,1,i);
+                step_resp_plot(1,i) = plot(0,desired(i));
+                hold on;
+                step_resp_plot(2,i) = plot(0,actual(i));
+                ylabel(labelYs(i));
+                xlabel('samples (n)');
+                if i == 1
+                    title('Step Response');
+                end
+            end
+            
+            % Make the zoom linked in the x-direction
+%             linkaxes(ax(:), 'x');
+        else
+            for i = 1:N
+                % Update the YData vector for actual
+                ydat = [get(step_resp_plot(2,i),'YData') actual(i)];
+                t = (0:(length(ydat)-1));
+                set(step_resp_plot(2,i),'XData',t,'YData',ydat);
+
+                % Update the YData vector for desired
+                ydat = [get(step_resp_plot(1,i),'YData') desired(i)];
+                t = (0:(length(ydat)-1));
+                set(step_resp_plot(1,i),'XData',t,'YData',ydat);
+            end
+        end
+        
+        
+    end
     
 function visionBallPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_ball_vision)
@@ -333,3 +396,32 @@ function btn_update_status_Callback(hObject, eventdata, handles)
     
     set(handles.lbl_battery,'String',[num2str(resp) 'v']);
     
+
+
+% --- Executes on button press in btn_stop_moving.
+function btn_stop_moving_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_stop_moving (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    c = get(handles.table_position,'Data');
+    desired = cell2mat(c);
+
+    msg = rosmessage(handles.pub.desired_position);
+    msg.X = desired(1);
+    msg.Y = desired(2);
+    msg.Theta = desired(3);
+    send(handles.pub.desired_position, msg);
+
+
+% --- Executes on button press in btn_step_resp.
+function btn_step_resp_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_step_resp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global view_resp
+global view_resp_start
+
+view_resp_start = true;
+view_resp = ~view_resp;
+
+disp(view_resp);
