@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-#include "std_msgs/Bool.h"
+#include "std_srvs/Trigger.h"
 
 namespace gazebo
 {
@@ -33,7 +33,7 @@ namespace gazebo
 			node_handle = ros::NodeHandle(robot_name);
 			gzmsg << "[model_push] Subscribing to " << ("/" + robot_name + "/command") << "\n";
 			command_sub = node_handle.subscribe("/" + robot_name + "/command", 1, &SoccerDrive::CommandCallback, this);
-			kick_sub = node_handle.subscribe("/" + robot_name + "/kick", 1, &SoccerDrive::KickCallback, this);
+			kick_srv = node_handle.advertiseService("/" + robot_name + "/kick", SoccerDrive::KickSrv);
 
 			// Listen to the update event. This event is broadcast every
 			// simulation iteration.
@@ -82,8 +82,9 @@ namespace gazebo
 			}
 
 			// Kick the ball!
-			if (kick_msg.data) {
+			if (kick) {
 				kicker_joint->SetForce(0, 15);
+				kick = false;
 			} else {
 				kicker_joint->SetForce(0, -15);
 			}
@@ -97,9 +98,12 @@ namespace gazebo
 			command_msg.angular.z = command_msg.angular.z*M_PI/180.0;
 		}
 
-		void KickCallback(const std_msgs::Bool msg)
+		bool KickSrv(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)
 		{
-			kick_msg = msg;
+			kick = true;
+			res.success = true;
+
+			return true;
 		}
 
 	private:
@@ -114,7 +118,8 @@ namespace gazebo
 		ros::Subscriber command_sub;
 		ros::Subscriber kick_sub;
 		geometry_msgs::Twist command_msg;
-		std_msgs::Bool kick_msg;
+		std::bool kick;
+		ros::ServiceServer kick_srv;
 		double kP_xy;
 		double kP_w;
 		double maxF_xy;

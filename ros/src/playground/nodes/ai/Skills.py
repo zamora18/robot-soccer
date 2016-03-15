@@ -1,6 +1,9 @@
 import os
 import numpy as np
 
+import rospy
+from std_srvs.srv import Trigger
+
 import Utilities
 import Constants
 
@@ -17,7 +20,15 @@ def kick():
     global _kicker_count
     _kicker_count = _kicker_count + 1
     print("Actuate: {}".format(_kicker_count))
-    os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
+
+    if rosparam.get_param('simulation_mode', 'false'):
+        try:
+            kick_srv = rospy.ServiceProxy('/home1/kick', Trigger)
+            kick_srv()
+        except rospy.ServiceException, e:
+            print "Kick service call failed: %s"%e
+    else:
+        os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
 
 def dribble_forward(robot, ball):
     x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])
@@ -32,6 +43,17 @@ def dribble_to_point(robot, ball):
 
 def dribble_along_line(robot, ball):
     pass
+
+
+
+     7 def add_two_ints_client(x, y):
+     8     rospy.wait_for_service('add_two_ints')
+     9     try:
+    10         add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
+    11         resp1 = add_two_ints(x, y)
+    12         return resp1.sum
+    13     except rospy.ServiceException, e:
+    14         print "Service call failed: %s"%e
 
 
 
