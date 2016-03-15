@@ -86,7 +86,6 @@ namespace gazebo
 			// Kick the ball!
 			if (kick) {
 				kicker_joint->SetForce(0, 15);
-				kick = false;
 			} else {
 				kicker_joint->SetForce(0, -15);
 			}
@@ -102,8 +101,8 @@ namespace gazebo
 
 		bool KickSrv(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)
 		{
-			kick = true;
-			res.success = true;
+			kick = !kick;
+			res.success = kick;
 
 			return true;
 		}

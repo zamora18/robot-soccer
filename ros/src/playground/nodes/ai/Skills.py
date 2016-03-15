@@ -1,4 +1,4 @@
-import os
+import os, time
 import numpy as np
 
 import rospy
@@ -21,9 +21,11 @@ def kick():
     _kicker_count = _kicker_count + 1
     print("Actuate: {}".format(_kicker_count))
 
-    if rosparam.get_param('simulation_mode', 'false'):
+    if rospy.get_param('simulation_mode', 'false'):
         try:
             kick_srv = rospy.ServiceProxy('/home1/kick', Trigger)
+            kick_srv()
+            time.sleep(0.100)
             kick_srv()
         except rospy.ServiceException, e:
             print "Kick service call failed: %s"%e
