@@ -229,7 +229,7 @@ class RobotEstimator(object):
     State Definition:
         x = (x y theta)
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(RobotEstimator, self).__init__()
 
         self.update_type = 'FIXED_CAMERA_DELAY'
@@ -265,14 +265,17 @@ class RobotEstimator(object):
             self.delayed_vel_cmds.append(np.matrix([0, 0, 0]))
 
         # Noise statistics
-        self.Q = np.matrix(np.diag([1**2, 1**2, (2*pi/180)**2]))
-        self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*pi/180)**2]))
+        self.Q = np.matrix(np.diag([1**2, 1**2, (2*np.pi/180)**2]))
+        self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*np.pi/180)**2]))
 
 
     def update(self, vel_cmd, measurement=None):
         """Update
         """
-       
+        
+        # Convert incoming vel_cmds to a matrix
+        vel_cmd = np.matrix(vel_cmd)
+
         # Prediction step between measurements
         #   This could probably be optomized out for
         #   FIXED_CAMERA_DELAY on non-measurements
@@ -282,7 +285,7 @@ class RobotEstimator(object):
             self.S = self.S + (self.T_ctrl/N)*self.Q
 
         # correction step at measurement
-        if measurement is not None:
+        if measurement.count(None) == 0:
             # Only update when a camera measurement came in
 
             if self.update_type == 'SIMPLE':
@@ -333,6 +336,7 @@ class RobotEstimator(object):
         y_pred = self.xhat_d1
 
         # Kalman gain
+        import ipdb; ipdb.set_trace()
         L = self.S_d1/(self.R+self.S_d1)
 
         # Update estimation error covariance
@@ -425,8 +429,8 @@ class OpponentEstimator(object):
         self.C = np.matrix(mat)
 
         # Noise statistics
-        self.Q = np.matrix(np.diag([1**2, 1**2, (2*pi/180)**2]))
-        self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*pi/180)**2]))
+        self.Q = np.matrix(np.diag([1**2, 1**2, (2*np.pi/180)**2]))
+        self.R = np.matrix(np.diag([0.01**2, 0.01**2, (2*np.pi/180)**2]))
 
 
     def update(self, measurement=None):

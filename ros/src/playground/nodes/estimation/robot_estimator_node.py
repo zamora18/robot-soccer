@@ -49,6 +49,8 @@ def main():
     # Use remap in roslaunch file to create separate channels per robot
     pub = rospy.Publisher('robot_state', RobotState, queue_size=10)
 
+    global _measured
+
     rate = rospy.Rate(_estimator_rate)
     while not rospy.is_shutdown():
 
