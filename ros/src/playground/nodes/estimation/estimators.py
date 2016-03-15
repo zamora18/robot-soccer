@@ -529,6 +529,9 @@ def _mdiv(a, b):
     ignore division by 0
 
     Example: _mdiv( [-1, 0, 1], 0 ) -> [0, 0, 0]
+
+    Is this element-wise or not? Should it be? or not?
+
     """
     with np.errstate(divide='ignore', invalid='ignore'):
         c = np.true_divide(a,b)
