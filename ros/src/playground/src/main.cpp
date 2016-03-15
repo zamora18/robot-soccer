@@ -9,15 +9,19 @@
 #include <pthread.h>
 
 #include <ros/ros.h>
+#include "playground/coords.h"
 
 #define ESC 1048603
 #define a_KEY 1048673
 #define h_KEY 1048680
 
-#define ALL_THREADS_DONE_MASK 0x3
-#define BALL_THREAD_MASK 0x4
+#define ALL_THREADS_DONE_MASK 0xF
+#define BALL_THREAD_MASK 0x10
 #define ALLY1_THREAD_MASK 0x1
-#define OPPONENT_THREAD_MASK 0x2
+#define ALLY2_THREAD_MASK 0x2
+#define OPPONENT1_THREAD_MASK 0x4
+#define OPPONENT2_THREAD_MASK 0x8
+
 
 #define THRESHHOLD_BOX_WIDTH 250
 
@@ -53,19 +57,19 @@ int ballLowV;
 int ballHighV;
 
 
-int robot1LowH;
-int robot1HighH;
-int robot1LowS;
-int robot1HighS;
-int robot1LowV;
-int robot1HighV;
+int ally1LowH;
+int ally1HighH;
+int ally1LowS;
+int ally1HighS;
+int ally1LowV;
+int ally1HighV;
 
-int robot2LowH;
-int robot2HighH;
-int robot2LowS;
-int robot2HighS;
-int robot2LowV;
-int robot2HighV;
+int opp1LowH;
+int opp1HighH;
+int opp1LowS;
+int opp1HighS;
+int opp1LowV;
+int opp1HighV;
 
 void* trackRobot(void* robotobject);
 
@@ -101,8 +105,8 @@ int main(int argc, char *argv[])
 	}//*/
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	namedWindow("RobotControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	namedWindow("Robot2Control", CV_WINDOW_AUTOSIZE);
+	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("Opp1Control", CV_WINDOW_AUTOSIZE);
 
 
 
@@ -125,13 +129,13 @@ int main(int argc, char *argv[])
 	//covert original immage to HSV to find robots
 	//cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
-	Robot robot = Robot();
-	robot.setNodeIdent("ally");
-	robot.setMask(ALLY1_THREAD_MASK);
+	Robot ally1 = Robot();
+	ally1.setNodeIdent("ally");
+	ally1.setMask(ALLY1_THREAD_MASK);
 
-	Robot robot2 = Robot();
-	robot2.setNodeIdent("opponent");
-	robot2.setMask(OPPONENT_THREAD_MASK);
+	Robot opp1 = Robot();
+	opp1.setNodeIdent("opponent");
+	opp1.setMask(OPPONENT1_THREAD_MASK);
 
 
 	VisionObject ball = VisionObject();
@@ -142,6 +146,7 @@ int main(int argc, char *argv[])
 
 	//get rid of noise
 	//video.erodeDilate(imgTemp);
+
 	// //find position and angle of robot
 	//video.initializeRobot(&robot, imgTemp);
 
@@ -166,30 +171,30 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("HighV", "BallControl", &ballHighV, 255);
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("LowH", "RobotControl", &robot1LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "RobotControl", &robot1HighH, 179);
+	cvCreateTrackbar("LowH", "Ally1Control", &ally1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Ally1Control", &ally1HighH, 179);
 
-	cvCreateTrackbar("LowS", "RobotControl", &robot1LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "RobotControl", &robot1HighS, 255);
+	cvCreateTrackbar("LowS", "Ally1Control", &ally1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Ally1Control", &ally1HighS, 255);
 
-	cvCreateTrackbar("LowV", "RobotControl", &robot1LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "RobotControl", &robot1HighV, 255);
+	cvCreateTrackbar("LowV", "Ally1Control", &ally1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Ally1Control", &ally1HighV, 255);
 
-	cvCreateTrackbar("LowH", "Robot2Control", &robot2LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Robot2Control", &robot2HighH, 179);
+	cvCreateTrackbar("LowH", "Opp1Control", &opp1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Opp1Control", &opp1HighH, 179);
 
-	cvCreateTrackbar("LowS", "Robot2Control", &robot2LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Robot2Control", &robot2HighS, 255);
+	cvCreateTrackbar("LowS", "Opp1Control", &opp1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Opp1Control", &opp1HighS, 255);
 
-	cvCreateTrackbar("LowV", "Robot2Control", &robot2LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Robot2Control", &robot2HighV, 255);
+	cvCreateTrackbar("LowV", "Opp1Control", &opp1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Opp1Control", &opp1HighV, 255);
 
 	//initialize threads
 
 	threadstatus = ALL_THREADS_DONE_MASK;
 
 
-	pthread_t robot1thread;
+	pthread_t ally1thread;
 	pthread_t robotoppthread;
 
 	pthread_cond_init(&robot1cond, NULL);
@@ -198,8 +203,8 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mrobot1cond, NULL);
 	pthread_mutex_init(&mrobot1done, NULL);
 
-	pthread_create(&robot1thread, NULL, trackRobot, &robot);
-	pthread_create(&robotoppthread, NULL, trackRobot, &robot2);
+	pthread_create(&ally1thread, NULL, trackRobot, &ally1);
+	pthread_create(&robotoppthread, NULL, trackRobot, &opp1);
 
 
 
@@ -226,10 +231,10 @@ int main(int argc, char *argv[])
 		}
 
 
-		robot.setLowHSV(Scalar(robot1LowH, robot1LowS, robot1LowV));
-		robot.setHighHSV(Scalar(robot1HighH, robot1HighS, robot1HighV));
-		robot2.setLowHSV(Scalar(robot2LowH, robot2LowS, robot2LowV));
-		robot2.setHighHSV(Scalar(robot2HighH, robot2HighS, robot2HighV));
+		ally1.setLowHSV(Scalar(ally1LowH, ally1LowS, ally1LowV));
+		ally1.setHighHSV(Scalar(ally1HighH, ally1HighS, ally1HighV));
+		opp1.setLowHSV(Scalar(opp1LowH, opp1LowS, opp1LowV));
+		opp1.setHighHSV(Scalar(opp1HighH, opp1HighS, opp1HighV));
 
 		//cout << "cloning" << endl;
 
@@ -256,7 +261,7 @@ int main(int argc, char *argv[])
 		
 
 
-		Mat imgRobotThresh, imgBW, imgBallThresh, imgRobot2Thresh;
+		Mat imgAlly1Thresh, imgBW, imgBallThresh, imgOpp1Thresh;
 
 		//centercircle = imgOriginal.clone();
 
@@ -281,7 +286,7 @@ int main(int argc, char *argv[])
 
 		 video.erodeDilate(imgBallThresh);
 
-		// video.initializeRobot(&robot, imgRobotThresh);		
+		// video.initializeRobot(&robot, imgAlly1Thresh);		
 		
 		// video.initializeRobot(&robot2, imgRobot2Thresh);
 
@@ -293,8 +298,8 @@ int main(int argc, char *argv[])
 		////cout << "thread finished! finishing and displaying" << endl;
 
 
-		drawRobotLine(imgOriginal, robot);
-		drawRobotLine(imgOriginal, robot2);
+		drawRobotLine(imgOriginal, ally1);
+		drawRobotLine(imgOriginal, opp1);
 		
 		if(!video.initializeBall(&ball, imgBallThresh) && away)
 			video.invertObjForAway(&ball);
@@ -321,9 +326,9 @@ int main(int argc, char *argv[])
 		//show the new image
 		if(showAlly1Thresh)
 		{
-			inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
-			video.erodeDilate(imgRobotThresh);
-			imshow("robotthresh", imgRobotThresh);
+			inRange(imgHSV, Scalar(ally1LowH, ally1LowS, ally1LowV), Scalar(ally1HighH, ally1HighS, ally1HighV), imgAlly1Thresh);
+			video.erodeDilate(imgAlly1Thresh);
+			imshow("robotthresh", imgAlly1Thresh);
 		}
 		if (showBallThresh)
 		{
@@ -331,9 +336,9 @@ int main(int argc, char *argv[])
 		}
 		if(showOpp1Thresh)
 		{
-			inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
-			video.erodeDilate(imgRobot2Thresh);
-			imshow("robot2thresh", imgRobot2Thresh);//*/
+			inRange(imgHSV, Scalar(opp1LowH, opp1LowS, opp1LowV), Scalar(opp1HighH, opp1HighS, opp1HighV), imgOpp1Thresh);
+			video.erodeDilate(imgOpp1Thresh);
+			imshow("opp1thresh", imgOpp1Thresh);//*/
 		}
 
 
@@ -399,7 +404,7 @@ int main(int argc, char *argv[])
 	}
 	//pthread_exit(NULL);
 	int exitstatus = 1;
-	exitstatus = pthread_cancel(robot1thread);
+	exitstatus = pthread_cancel(ally1thread);
 	exitstatus |= pthread_cancel(robotoppthread);
 	pthread_mutex_destroy(&mrobot1cond);
 	pthread_mutex_destroy(&mrobot1done);
@@ -558,69 +563,69 @@ bool initColors()
 
 	if (allycolor == "r")
 	{
-		robot1LowH = 0;
-		robot1HighH = 179;
+		ally1LowH = 0;
+		ally1HighH = 179;
 
-		robot1LowS = 81;
-		robot1HighS = 105;
+		ally1LowS = 81;
+		ally1HighS = 105;
 
-		robot1LowV = 226;
-		robot1HighV = 255;
+		ally1LowV = 226;
+		ally1HighV = 255;
 	}
 	else if (allycolor == "o")
 	{
-		robot1LowH = 10;
-		robot1HighH = 24;
+		ally1LowH = 10;
+		ally1HighH = 24;
 
-		robot1LowS = 58;
-		robot1HighS = 255;
+		ally1LowS = 58;
+		ally1HighS = 255;
 
-		robot1LowV = 207;
-		robot1HighV = 255;
+		ally1LowV = 207;
+		ally1HighV = 255;
 	}
 	else if (allycolor == "p")
 	{
-		robot1LowH = 125;
-		robot1HighH = 164;
+		ally1LowH = 125;
+		ally1HighH = 164;
 
-		robot1LowS = 0;
-		robot1HighS = 78;
+		ally1LowS = 0;
+		ally1HighS = 78;
 
-		robot1LowV = 207;
-		robot1HighV = 255;
+		ally1LowV = 200;
+		ally1HighV = 255;
 	}
 	else if (allycolor == "bc")
 	{
-		robot1LowH = 82;
-		robot1HighH = 116;
+		ally1LowH = 77;
+		ally1HighH = 111;
 
-		robot1LowS = 0;
-		robot1HighS = 41;
+		ally1LowS = 0;
+		ally1HighS = 87;
 
-		robot1LowV = 217;
-		robot1HighV = 255;
+		ally1LowV = 230;
+		ally1HighV = 255;
 	}
 	else if (allycolor == "b")
 	{
-		robot1LowH = 81;
-		robot1HighH = 110;
+		ally1LowH = 81;
+		ally1HighH = 110;
 
-		robot1LowS = 174;
-		robot1HighS = 255;
+		ally1LowS = 174;
+		ally1HighS = 255;
 
-		robot1LowV = 189;
-		robot1HighV = 255;
+		ally1LowV = 189;
+		ally1HighV = 255;
 	}
 	else if (allycolor == "g")
 	{
-		robot1LowH = 55;
-		robot1HighH = 94;
+		ally1LowH = 46;
+		ally1HighH = 94;
 
-		robot1LowS = 40;
-		robot1HighS = 179;
+		ally1LowS = 0;
+		ally1HighS = 179;
 
-		robot1LowV = 186;
-		robot1HighV = 255;
+		ally1LowV = 186;
+		ally1HighV = 255;
 	}
 	else
 		return false;
@@ -628,69 +633,69 @@ bool initColors()
 	// opponent colors
 	if (opponentcolor == "r")
 	{
-		robot2LowH = 0;
-		robot2HighH = 179;
+		opp1LowH = 0;
+		opp1HighH = 179;
 
-		robot2LowS = 81;
-		robot2HighS = 105;
+		opp1LowS = 81;
+		opp1HighS = 105;
 
-		robot2LowV = 226;
-		robot2HighV = 255;
+		opp1LowV = 226;
+		opp1HighV = 255;
 	}
 	else if (opponentcolor == "o")
 	{
-		robot2LowH = 10;
-		robot2HighH = 24;
+		opp1LowH = 10;
+		opp1HighH = 24;
 
-		robot2LowS = 58;
-		robot2HighS = 255;
+		opp1LowS = 58;
+		opp1HighS = 255;
 
-		robot2LowV = 207;
-		robot2HighV = 255;
+		opp1LowV = 207;
+		opp1HighV = 255;
 	}
 	else if (opponentcolor == "p")
 	{
-		robot2LowH = 121;
-		robot2HighH = 164;
+		opp1LowH = 125;
+		opp1HighH = 164;
 
-		robot2LowS = 0;
-		robot2HighS = 78;
+		opp1LowS = 0;
+		opp1HighS = 78;
 
-		robot2LowV = 207;
-		robot2HighV = 255;
+		opp1LowV = 200;
+		opp1HighV = 255;
 	}
 	else if (opponentcolor == "bc")
 	{
-		robot2LowH = 77;
-		robot2HighH = 111;
+		opp1LowH = 77;
+		opp1HighH = 111;
 
-		robot2LowS = 0;
-		robot2HighS = 87;
+		opp1LowS = 0;
+		opp1HighS = 87;
 
-		robot2LowV = 230;
-		robot2HighV = 255;
+		opp1LowV = 230;
+		opp1HighV = 255;
 	}
-	else if (opponentcolor == "b")
+	else if (allycolor == "b")
 	{
-		robot2LowH = 81;
-		robot2HighH = 110;
+		opp1LowH = 81;
+		opp1HighH = 110;
 
-		robot2LowS = 174;
-		robot2HighS = 255;
+		opp1LowS = 174;
+		opp1HighS = 255;
 
-		robot2LowV = 189;
-		robot2HighV = 255;
+		opp1LowV = 189;
+		opp1HighV = 255;
 	}
 	else if (opponentcolor == "g")
 	{
-		robot2LowH = 55;
-		robot2HighH = 94;
+		opp1LowH = 46;
+		opp1HighH = 94;
 
-		robot2LowS = 40;
-		robot2HighS = 179;
+		opp1LowS = 0;
+		opp1HighS = 179;
 
-		robot2LowV = 186;
-		robot2HighV = 255;
+		opp1LowV = 186;
+		opp1HighV = 255;
 	}
 	else
 		return false;
