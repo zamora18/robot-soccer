@@ -247,14 +247,14 @@ class KalmanFilter(object):
     self.UPDATE_SIMPLE = 0
     self.UPDATE_FIXED_DELAY = 1
 
-    def __init__(self):
+    def __init__(self, T_ctrl, T_cam, cam_latency, A, B, C, Q, R):
         super(KalmanFilter, self).__init__()
 
         self.update_type = 'SIMPLE' #'FIXED_CAMERA_DELAY'
 
-        # Sample rate
-        self.T_ctrl = 1/100.0
-        self.T_cam = 1/30.0
+        # Sample period
+        self.T_ctrl = T_ctrl
+        self.T_cam = T_cam
 
         # Initialize filter's persistent variables
         self.xhat = np.matrix(np.zeros(N)).T
@@ -269,7 +269,7 @@ class KalmanFilter(object):
         # It was reported that our camera was having 100-150ms of latency
         # through the network (cam --> usb --> camserver --> network --> camserver)
         # But I'm not sure that it is true (try sending timestamped ROS messages)
-        camera_frame_delay = int(np.ceil(130E-3/self.T_cam))
+        camera_frame_delay = int(np.ceil(cam_latency/self.T_cam))
 
         # The ratio of when there is a new camera measurement vs when
         # this estimator's update() function will be called
@@ -288,6 +288,9 @@ class KalmanFilter(object):
         # Noise statistics
         self.Q = Q
         self.R = R
+
+        # Number of states
+        self.N = len(self.A)
 
 
     def update(self, measurement=None, vel_cmd=None):
