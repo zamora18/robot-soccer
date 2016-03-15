@@ -100,7 +100,7 @@ class LowPassFilter(object):
         return self._unpack_states(pos)
 
 
-    def _update_simple(self, Ts, measurement):
+    def _update_simple(self, Ts, measurement=None):
         """Update Simple
         Estimates states, with no regard for camera latencies
 
@@ -131,7 +131,7 @@ class LowPassFilter(object):
             self._update_velocity(measurement, Ts)
 
 
-    def _update_delayed(self, Ts, ball_x=None, ball_y=None):
+    def _update_delayed(self, Ts, measurement=None):
         """Update Delayed
         Estimates states while compensating for variable camera delay.
 
