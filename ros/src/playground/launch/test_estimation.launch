@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py" output="screen" />
+    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py" output="screen">
+        <remap from="vision_position" to="vision_ally_position" />
+    </node>
+</launch>

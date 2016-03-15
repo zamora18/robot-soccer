@@ -18,6 +18,19 @@ class LowPassFilter(object):
     UPDATE_BOUNCE = 2
 
     def __init__(self, T_ctrl, alpha, tau, update_type, N):
+        """LowPassFilter init method
+
+        Args:
+            T_ctrl          - 
+            alpha           - 
+            tau             - dirty-derivative bandwidth. Small numbers
+                                allow derivatives to be more loose; i.e.,
+                                0.001 creates lots of noise in velocity.
+            update_type     - 
+            N               - 
+
+
+        """
         super(LowPassFilter, self).__init__()
 
         # Get the LPF update type

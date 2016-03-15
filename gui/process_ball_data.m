@@ -1,7 +1,11 @@
 % clear; close all; clc;
-% load('ball_msg_data2.mat');
+% load('ball_msg_data4.mat');
 
-%Tcamera=1/30;Tcontrol=1/100;tau=0.02;alpha=0.3;
+% Tcamera=1/30;
+% Tcontrol=1/100;
+% tau=0.075;
+% alpha=0.75;
+% save('ball_msg_data9.mat');
 
 % How many samples are there?
 N = length(ball);
