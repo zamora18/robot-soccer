@@ -19,9 +19,9 @@ class BallEstimator(LowPassFilter):
     def __init__(self):
 
         T_ctrl = 1/100.0
-        alpha = 0.5
-        tau = 0.2
-        update_type = LowPassFilter.UPDATE_DELAY
+        alpha = 0.75
+        tau = 0.075
+        update_type = LowPassFilter.UPDATE_SIMPLE
         N = 2
 
         super(BallEstimator, self).__init__(T_ctrl, alpha, tau, update_type, N)
