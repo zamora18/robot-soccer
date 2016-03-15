@@ -69,18 +69,13 @@ class RobotEstimator(KalmanFilter):
         I = np.eye(N,N)
 
         # A matrix (NxN)
-        row1 = np.concatenate(( O, I, O ), axis=1)
-        row2 = np.concatenate(( O, O, I ), axis=1)
-        row3 = np.concatenate(( O, O, O ), axis=1)
-        mat = np.concatenate(( row1, row2, row3 ))
-        A = np.matrix(mat)
+        A = np.matrix( O )
 
         # B matrix
-        B = np.matrix( O )
+        B = np.matrix( I )
 
         # C matrix
-        mat = np.concatenate(( I, O, O ), axis=1)
-        C = np.matrix(mat)
+        C = np.matrix( I )
 
         # Noise statistics (Q is process noise; R is sensor covariance)
         Q = np.matrix(np.diag([(.5E-2)**2, (.5E-2)**2, (5*np.pi/180)**2]))

@@ -1,5 +1,7 @@
 import numpy as np
 
+from collections import deque
+
 class LowPassFilter(object):
     """LowPassFilter
     Uses a weighted average low-pass filter with parameter alpha to
@@ -244,8 +246,8 @@ class KalmanFilter(object):
 
     """
 
-    self.UPDATE_SIMPLE = 0
-    self.UPDATE_FIXED_DELAY = 1
+    UPDATE_SIMPLE = 0
+    UPDATE_FIXED_DELAY = 1
 
     def __init__(self, T_ctrl, T_cam, cam_latency, A, B, C, Q, R):
         super(KalmanFilter, self).__init__()
@@ -256,10 +258,13 @@ class KalmanFilter(object):
         self.T_ctrl = T_ctrl
         self.T_cam = T_cam
 
+        # Number of states
+        self.N = len(A)
+
         # Initialize filter's persistent variables
-        self.xhat = np.matrix(np.zeros(N)).T
+        self.xhat = np.matrix(np.zeros( self.N )).T
         self.xhat_d1 = self.xhat
-        self.S = np.matrix(np.diag(np.zeros(N)))
+        self.S = np.matrix(np.diag(np.zeros( self.N )))
         self.S_d1 = self.S
 
         # In one camera frame, how many control cycles happen?
@@ -289,16 +294,13 @@ class KalmanFilter(object):
         self.Q = Q
         self.R = R
 
-        # Number of states
-        self.N = len(self.A)
-
 
     def update(self, measurement=None, vel_cmd=None):
         """Update
         """
         
         # Convert incoming vel_cmds to a column vector
-        vel_cmd = np.matrix(vel_cmd).T if vel_cmd is not None else None
+        vel_cmd = np.matrix(vel_cmd).T if vel_cmd.count(None) == 0 else None
 
         # Prediction step between measurements
         #   This could probably be optomized out for
@@ -320,13 +322,7 @@ class KalmanFilter(object):
             elif self.update_type == self.UPDATE_FIXED_DELAY:
                 self._update_delayed(vel_cmd, measurement)
 
-        # The naming is unfortunate, but self.xhat is the state estimation
-        # while the local xhat is the x-position estimate
-        xhat = self.xhat.getA()[0][0]
-        yhat = self.xhat.getA()[1][0]
-        thetahat = self.xhat.getA()[2][0]
-        
-        return (xhat, yhat, thetahat)
+        return self._unpack_states(self.xhat)
 
     def predict(self):
         """Predict
@@ -418,7 +414,7 @@ class KalmanFilter(object):
         """
         xhat = []
         for i in xrange(self.N):
-            xhat.append(mat.getA()[0][i])
+            xhat.append(mat.getA()[i][0])
 
         return xhat
 
