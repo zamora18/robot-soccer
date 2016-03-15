@@ -5,6 +5,8 @@ import rospy
 from geometry_msgs.msg import Twist, Pose2D
 from std_srvs.srv import Trigger, TriggerResponse
 
+from playground.msg import PIDInfo
+
 import numpy as np
 
 import Controller
@@ -30,7 +32,6 @@ def _handle_estimated_position(msg):
 
 def _handle_desired_position(msg):
     global _ctrl_on
-    # print("Set Point: ({}, {}, {})".format(msg.x, msg.y, msg.theta))
     Controller.set_commanded_position(msg.x, msg.y, msg.theta)
     _ctrl_on = True
 
@@ -50,7 +51,7 @@ def main():
     rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_position)
     rospy.Subscriber('desired_position', Pose2D, _handle_desired_position)
     pub = rospy.Publisher('vel_cmds', Twist, queue_size=10)
-    pub_err = rospy.Publisher('error', Pose2D, queue_size=10)
+    pub_PIDInfo = rospy.Publisher('pidinfo', PIDInfo, queue_size=10)
 
     # Services
     rospy.Service('/controller/toggle', Trigger, _toggle)
@@ -63,22 +64,27 @@ def main():
         if _ctrl_on:
             (vx, vy, w) = Controller.update(_ctrl_period, _xhat, _yhat, _thetahat)
 
-            #if vx == 0 and vy == 0 and w == 0:
-                #_ctrl_on = False
-                #continue
-
+            # Publish Velocity Commands
             msg = Twist()
             msg.linear.x = vx
             msg.linear.y = vy
             msg.angular.z = w
-
             pub.publish(msg)
 
-            msg = Pose2D()
-            msg.x = Controller.PID_x.error_d1
-            msg.y = Controller.PID_y.error_d1
-            msg.theta = Controller.PID_theta.error_d1
-            pub_err.publish(msg)
+            # Publish PID Info
+            msg = PIDInfo()
+            msg.error.x = Controller.PID_x.error_d1
+            msg.error.y = Controller.PID_y.error_d1
+            msg.error.theta = Controller.PID_theta.error_d1
+            set_point = Controller.get_commanded_position()
+            msg.desired.x = set_point[0]
+            msg.desired.y = set_point[1]
+            msg.desired.theta = set_point[2]
+            msg.actual.x = _xhat
+            msg.actual.y = _yhat
+            msg.actual.theta = _thetahat
+            pub_PIDInfo.publish(msg)
+
 
         rate.sleep()
 
