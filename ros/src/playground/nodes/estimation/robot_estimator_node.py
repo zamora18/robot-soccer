@@ -58,7 +58,7 @@ def main():
 
         if _estimator_on:
             # Ts = (time.time() - _last_time)
-            (xhat, yhat, thetahat) = _robot.update(_velocities, _measured)
+            (xhat, yhat, thetahat) = _robot.update(_measured, _velocities)
 
         # if _predictor_on:
         #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)

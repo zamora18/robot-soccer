@@ -337,7 +337,7 @@ class KalmanFilter(object):
         y_pred = self.C*self.xhat
 
         # Kalman gain
-        L = (self.S*self.C.T) / (self.R + self.C*self.S*self.C.T)
+        L = _mdiv((self.S*self.C.T), (self.R + self.C*self.S*self.C.T))
 
         # Update estimation error covariance
         I = np.matrix(np.eye( self.N ))
