@@ -132,20 +132,26 @@ def trick_play(robot, ball):
     else:
         _trick_state = ShootState.setup
 
+    set_up_distance = 0.4
+    theta_c = Utilities.get_angle_between_points(0, 0, Constants.field_length/2, Constants.field_width)
+    x_c_before = -set_up_distance*cos(theta_c)
+    x_c_after = set_up_distance*cos(theta_c)
+    y_c_before = -set_up_distance*sin(theta_c)
+    y_c_after = set_up_distance*sin(theta_c)
 
     # Moore output
     if _trick_state == ShootState.setup:
-        return (-.115, -.225, 62.93)
+        return (x_c_before, y_c_before, theta_c)
 
     elif _trick_state == ShootState.attack:
-        return (.115, .225, 62.93)
+        return (x_c_after, y_c_after, theta_c)
 
     elif _trick_state == ShootState.shoot:
         Skills.kick()
-        return (.115, .225, 62.93)
+        return (x_c_before, y_c_before, theta_c)
 
     else:
-        return (-.115, -.225, 62.93)        
+        return (x_c_before, y_c_before, theta_c)        
 
 
 

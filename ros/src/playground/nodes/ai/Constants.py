@@ -13,6 +13,8 @@ goal_box_length    	= 0.1143 # (4.5 in)
 goal_position_home 	= [-field_length/2, 0] #this could change depending on camera
 goal_position_opp  	= [-goal_position_home[0], 0]
 
+center_circle_radius= 0.25
+
 des_dist_from_ball 	= 0.0762 #(3.0in)
 kick_dist          	= 0.1524 #(6.0in)
 push_ball_dist		= 0.2032 #(8.0in)
