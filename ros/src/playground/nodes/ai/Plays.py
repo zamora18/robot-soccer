@@ -10,6 +10,8 @@ class ShootState:
     attack = 1
     shoot = 2
 
+_beginning_trick_shot = False
+
 
 _shoot_state = ShootState.setup
 _trick_state = ShootState.setup
@@ -122,6 +124,7 @@ def play_goalie (robot, ball):
 def trick_play(robot, ball):
 
     global _trick_state
+    global _beginning_trick_shot
 
     distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
 
@@ -160,12 +163,15 @@ def trick_play(robot, ball):
 
     elif _trick_state == ShootState.shoot:
         Skills.kick()
+        _beginning_trick_shot = True
         return (x_c_before, y_c_before, theta_c)
 
     else:
         return (x_c_before, y_c_before, theta_c)        
 
-
+def is_trick_play_complete():
+    global _beginning_trick_shot
+    return _beginning_trick_shot
 
 
 # def advance_ball(robot, opponent, ball):

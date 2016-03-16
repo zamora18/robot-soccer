@@ -10,7 +10,6 @@ _avg_dist_between_robots    = 0
 _averaging_factor           = 0
 _time_in_our_half           = 0
 
-_beginning_trick_shot = False
 
 _ball_defend_position = None
 
@@ -40,8 +39,10 @@ def choose_strategy(robot, opponent, ball, goal):
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
-    return Plays.trick_play(robot, ball)
-    #return _aggressive_offense(robot, opponent, ball)
+    if not Plays.is_trick_play_complete():
+        return Plays.trick_play(robot, ball)
+    else:
+        return _aggressive_offense(robot, opponent, ball)
     #return Plays.shoot(robot, ball,0)
 
 
@@ -192,5 +193,4 @@ def _update_opponent_tracking_variables():
 
     _averaging_factor = _averaging_factor + 1
     #_avg_dist_between_robots = (_avg_dist_between_robots + Utilities.get_distance_between_points(opponent['xhat'],opponent['yhat'], opponent2['xhat'], opponent2['yhat'])) / _averaging_factor
-
 
