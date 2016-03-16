@@ -88,35 +88,34 @@ def _aggressive_offense(robot, opponent, ball):
     section = Utilities.get_field_section(ball['xhat'])
     #future_section = Utilities.get_field_section(ball['xhat_future'])
 
-    allytoball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-    opptoball  = Utilities.get_distance_between_points(opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
+    # ************************this has been making us run away from the ball into the corners, needs debugged***********************
+    
+    # if (Utilities.is_ball_behind_robot(robot, ball)): #and Utilities.is_ball_between_home_and_robot(robot,ball)):
+    #     return Plays.avoid_own_goal(robot, ball)
+    # else:
 
-    if (Utilities.is_ball_behind_robot(robot, ball)): #and Utilities.is_ball_between_home_and_robot(robot,ball)):
-        return Plays.avoid_own_goal(robot, ball)
-    else:
-
-        if   section == 1:
-            if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
-                return Skills.attack_ball(robot, ball)
-            else:
-                return _strong_defense(robot, ball)
-        elif section == 2:
-            if (allytoball < opptoball and robot['xhat'] < ball['xhat']):
-                return Skills.attack_ball(robot, ball)
-            else:
-                dist_to_maintain = 0.70
-                return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
-        elif section == 3:
-            if ball['yhat'] < 0:
-                return Plays.shoot(robot, ball, -0.75)
-            else:
-                return Plays.shoot(robot, ball, 0.75)
-        else: #section is 4
-            if ball['yhat'] < 0:
-                return Plays.shoot(robot, ball, -0.75)
-            else:
-                return Plays.shoot(robot, ball, 0.75)
-        return (robot['xhat'], robot['yhat'], robot['thetahat']) #default, returns 
+    if   section == 1:
+        if (Utilities.our_robot_closer_to_ball(robot, opponent, ball) and not Utilities.is_ball_behind_robot(robot, ball)):
+            return Skills.attack_ball(robot, ball)
+        else:
+            return _strong_defense(robot, ball)
+    elif section == 2:
+        if (Utilities.our_robot_closer_to_ball(robot, opponent, ball) and not Utilities.is_ball_behind_robot(robot, ball)):
+            return Skills.attack_ball(robot, ball)
+        else:
+            dist_to_maintain = 0.70
+            return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
+    elif section == 3:
+        if ball['yhat'] < 0:
+            return Plays.shoot(robot, ball, -0.75)
+        else:
+            return Plays.shoot(robot, ball, 0.75)
+    else: #section is 4
+        if ball['yhat'] < 0:
+            return Plays.shoot(robot, ball, -0.75)
+        else:
+            return Plays.shoot(robot, ball, 0.75)
+    return (robot['xhat'], robot['yhat'], robot['thetahat']) #default, returns 
 
 
 

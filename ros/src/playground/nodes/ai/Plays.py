@@ -18,91 +18,65 @@ def _robot_close_to_point(robot, x, y, theta):
                 and Utilities.close(theta, robot['thetahat'], tolerance = 15)
 
 def shoot(robot, ball, distance_from_center):
+    """ this sets up for a shot at a distance from the center. Distance from center should be between -1 and 1 (really like .75 and -.75).
+        0 signifies straight on, 1 is top corner and -1 is bottom corner
+        it also attacks the ball then actuates the kicker"""
+
+
     global _shoot_state
 
-
-
-    #transitions
-    # new state machine
+    # this is the desired setup point, the whole state machine needs it so it is
+    # calculated here
     desired_setup_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
 
-    # if the robot is lined up with goal for shot, attack the ball
-    if(_shoot_state == ShootState.setup):
-        if _robot_close_to_point(robot, *desired_setup_c) and not Utilities.is_ball_behind_robot(robot,ball):
-            _shoot_state = ShootState.attack
-        elif Utilities.is_ball_behind_robot(robot,ball):
-            _shoot_state = ShootState.setup
+    # transition states
 
-    # if the ball is right next to the front of the robot go into the shoot state
-    elif(_shoot_state == ShootState.attack):
+    # set up state
+    if(_shoot_state == ShootState.setup):
+        # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
+        if _robot_close_to_point(robot, *desired_setup_c) and not Utilities.is_ball_behind_robot(robot, ball):
+            _shoot_state = ShootState.attack
+
+
+    elif _shoot_state == ShootState.attack:
+        # get the distance to the ball
 
         distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-        if Utilities.is_ball_behind_robot(robot, ball):
+
+        # if the ball is behind the robot, go back to set up
+        if (Utilities.is_ball_behind_robot(robot, ball)):
             _shoot_state = ShootState.setup
+        # if the ball is close enough, go to the shoot state
         elif(distance_to_ball < Constants.robot_width * (3.0/4.0)):
             _shoot_state = ShootState.shoot
 
-    # if we just actuated, go to setup phase
-    elif(_shoot_state == ShootState.setup):
+    # if we just shot, go back to setup
+    elif _shoot_state == ShootState.shoot:
+        _shoot_state = ShootState.setup
+
+    # default state, go to setup
+    else:
         _shoot_state = ShootState.setup
 
     # action
+    # go to the desired setup location
     if(_shoot_state == ShootState.setup):
         return desired_setup_c
 
+    # attack the ball
     elif  _shoot_state == ShootState.attack:
-        return Skills.attack_ball(robot, ball)
+        return Skills.attack_ball(robot,ball)
 
+    # GGGGGOOOOOOOOOOOAAAAAAAAAALLLLLLLLLLLL!!!!!!!!!!!!!!!!!!
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
         Skills.kick()
         return Skills.attack_ball(robot,ball) # keep attacking the ball as you kick
+
+    # wait for state machine to start
     else:
         print ('default')
         return robot['xhat'], robot['yhat'], robot['thetahat']
-
-    # desired_setup_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
-
-    # # transition
-
-    # #set up state
-    # if(_shoot_state == ShootState.setup):
-    #     x, y, theta = Skills.set_up_kick_facing_goal(ball, 0)
-
-    #     # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-    #     if _robot_close(robot, *desired_setup_c) and not Utilities.is_ball_behind_robot(robot, ball):
-    #         _shoot_state = ShootState.attack
-
-
-    # elif _shoot_state == ShootState.attack:
-    #     c = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-
-    #     # if the ball is behind the robot, go back to set up
-    #     if (Utilities.is_ball_behind_robot(robot, ball)):
-    #         _shoot_state = ShootState.setup
-    #     elif(c < Constants.robot_width * (3.0/4.0)):
-    #         _shoot_state = ShootState.shoot
-
-    # elif _shoot_state == ShootState.shoot:
-    #     _shoot_state = ShootState.setup
-
-    # else:
-    #     _shoot_state = ShootState.setup
-
-    # # action
-    # if(_shoot_state == ShootState.setup):
-    #     return desired_setup_c
-
-    # elif  _shoot_state == ShootState.attack:
-    #     return Skills.attack_ball(robot,ball)
-
-    # elif _shoot_state == ShootState.shoot:
-    #     print "KICKING"
-    #     Skills.kick()
-    #     return Skills.attack_ball(robot,ball) # keep attacking the ball as you kick
-    # else:
-    #     print ('default')
-    #     return robot['xhat'], robot['yhat'], robot['thetahat']
 
 
 
