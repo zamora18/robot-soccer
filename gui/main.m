@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 08-Mar-2016 19:37:52
+% Last Modified by GUIDE v2.5 15-Mar-2016 22:18:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -441,3 +441,15 @@ view_resp_start = true;
 view_resp = ~view_resp;
 
 disp(view_resp);
+
+
+% --- Executes on button press in btn_kick.
+function btn_kick_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_kick (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    
+    kick = rossvcclient('/kick');
+    req = rosmessage(kick);
+    resp = call(kick,req,'Timeout',3);
