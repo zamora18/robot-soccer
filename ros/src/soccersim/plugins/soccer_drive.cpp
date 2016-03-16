@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define KICK_COUNT_MAX	100
+#define KICK_COUNT_MAX	125
 
 namespace gazebo
 {
@@ -135,7 +135,7 @@ namespace gazebo
 		ros::Subscriber kick_sub;
 		geometry_msgs::Twist command_msg;
 		bool kick;
-		unsigned int kick_count
+		unsigned int kick_count;
 		ros::ServiceServer kick_srv;
 		double kP_xy;
 		double kP_w;
