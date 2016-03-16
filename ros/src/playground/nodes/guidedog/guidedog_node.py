@@ -22,6 +22,8 @@ _opponent = None
 _ally = None
 _robot_desired = None
 
+_go_rogue = False
+
 _pub = None
 
 def _handle_raw_desired_position(msg):
@@ -57,16 +59,6 @@ def _handle_ally_position(msg):
     else:
         desired = (msg.x, msg.y, msg.theta)
 
-    # Create desired message
-    desired_msg = Pose2D()
-    desired_msg.x = desired[0]
-    desired_msg.y = desired[1]
-    desired_msg.theta = desired[2]
-
-    _pub.publish(desired_msg)
-
-    return
-
     _edge_padding = 0.25
 
     # Define field edges
@@ -81,6 +73,10 @@ def _handle_ally_position(msg):
     desired_msg.y = desired[1]
     desired_msg.theta = desired[2]
 
+    if _go_rogue:
+        # Publish through un-guidedog'ed and bail
+        _pub.publish(desired_msg)
+        return
 
     # Are we within 50% of the perimeter of the opponent?
     if _close(robot, opponent, tolerance=1.50*_robot_width):
@@ -172,12 +168,14 @@ def main():
 
     print("Woof! Woof!")
 
-    global _pub
+    global _pub, _go_rogue
     _pub = rospy.Publisher('desired_position_safe', Pose2D, queue_size=10)
 
     rospy.Subscriber('desired_position', Pose2D, _handle_raw_desired_position)
     rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
     rospy.Subscriber('vision_ally_position', Pose2D, _handle_ally_position)
+
+    _go_rogue = rospy.get_param('go_rogue', 'false')
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
