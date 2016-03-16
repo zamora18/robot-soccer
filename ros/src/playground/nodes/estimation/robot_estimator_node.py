@@ -22,6 +22,7 @@ _measured = (None, None, None)
 _velocities = (0, 0, 0)
 
 _robot_estimator_on = True
+_predictor_on = True
 _state_pub = None
 
 _last_time = time.time()
@@ -39,6 +40,7 @@ def _handle_vision_position(msg):
         msg.xhat = msg.vision_x = msg.xhat_future = _measured[0]
         msg.yhat = msg.vision_y = msg.yhat_future = _measured[1]
         msg.thetahat = msg.vision_theta = msg.thetahat_future = _measured[2]
+        msg.correction = True
         _state_pub.publish(msg)
 
     # Timestamp this msg so the ball updater knows
@@ -72,11 +74,11 @@ def main():
 
         # LPF
         Ts = (time.time() - _last_time)
-        (xhat, yhat, thetahat) = _robot.update(Ts, measured=_measured)
+        (xhat, yhat, thetahat) = _robot.update(Ts, measurement=_measured)
 
         # # KF
         # Ts = (time.time() - _last_time)
-        # (xhat, yhat, thetahat) = _robot.update(measured=_measured, velocities=_velocities)
+        # (xhat, yhat, thetahat) = _robot.update(measurement=_measured, vel_cmd=_velocities)
 
         # if _predictor_on:
         #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)
@@ -101,7 +103,7 @@ def main():
         msg.thetahat_future = thetahat_future
         msg.predict_forward_seconds = _predict_forward_seconds if _predictor_on else 0
         msg.correction = _measured[0] is not None and _measured[1] is not None and _measured[2] is not None
-        pub.publish(msg)
+        _state_pub.publish(msg)
 
         # Set measured to None so the robot updater 
         # knows to predict instead of correcting
