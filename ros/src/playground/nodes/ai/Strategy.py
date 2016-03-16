@@ -108,14 +108,14 @@ def _aggressive_offense(robot, opponent, ball):
             return Skills.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], dist_to_maintain)
     elif section == 3:
         if ball['yhat'] < 0:
-            return Plays.shoot(robot, ball, 0.75)
+            return Plays.shoot(robot, ball, 0.25)
         else:
-            return Plays.shoot(robot, ball, -0.75)
+            return Plays.shoot(robot, ball, -0.25)
     else: #section is 4
         if ball['yhat'] < 0:
-            return Plays.shoot(robot, ball, 0.75)
+            return Plays.shoot(robot, ball, 0.25)
         else:
-            return Plays.shoot(robot, ball, -0.75)
+            return Plays.shoot(robot, ball, -0.25)
     return (robot['xhat'], robot['yhat'], robot['thetahat']) #default, returns 
 
 

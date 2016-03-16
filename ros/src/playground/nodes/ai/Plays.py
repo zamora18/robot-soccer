@@ -134,10 +134,12 @@ def trick_play(robot, ball):
 
     set_up_distance = 0.4
     theta_c = Utilities.get_angle_between_points(0, 0, Constants.field_length/2, Constants.field_width)
-    x_c_before = -set_up_distance*cos(theta_c)
-    x_c_after = set_up_distance*cos(theta_c)
-    y_c_before = -set_up_distance*sin(theta_c)
-    y_c_after = set_up_distance*sin(theta_c)
+    x_c_before = -set_up_distance*np.cos(theta_c)
+    x_c_after = set_up_distance*np.cos(theta_c)
+    y_c_before = -set_up_distance*np.sin(theta_c)
+    y_c_after = set_up_distance*np.sin(theta_c)
+
+    theta_c = Utilities.rad_to_deg(theta_c)
 
     # Moore output
     if _trick_state == ShootState.setup:
