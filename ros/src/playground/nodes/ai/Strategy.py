@@ -28,7 +28,7 @@ def choose_strategy(robot, opponent, ball, goal):
     if _going_home:
         if _wait_timer < 500: # 7 seconds
             _wait_timer = _wait_timer + 1
-            return (Constants.goal_position_home, 0)
+            return (Constants.goal_position_home[0], Constants.goal_position_home[1], 0)
         else:
             print "ready to start"
             _going_home = False
@@ -39,10 +39,10 @@ def choose_strategy(robot, opponent, ball, goal):
     	# return _strong_offense(robot, ball)
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
-    if not Plays.is_trick_play_complete():
-        return Plays.trick_play(robot, ball)
-    else:
-        return _aggressive_offense(robot, opponent, ball)
+    #if not Plays.is_trick_play_complete():
+    #    return Plays.trick_play(robot, ball)
+    #else:
+    return _aggressive_offense(robot, opponent, ball)
     #return Plays.shoot(robot, ball,0)
 
 
