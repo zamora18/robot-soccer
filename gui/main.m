@@ -104,7 +104,7 @@ handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@
 
 
 % And Publishers
-handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D');
+handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
 
 % Update handles structure
 guidata(hObject, handles);
