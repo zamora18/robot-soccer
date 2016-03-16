@@ -59,13 +59,13 @@ def _handle_ally_position(msg):
     else:
         desired = (msg.x, msg.y, msg.theta)
 
-    _edge_padding = 0.25
+    _edge_padding = (0.20, 0.15)
 
     # Define field edges
-    min_x = -((_field_length/2) - _edge_padding)
-    max_x = ((_field_length/2) - _edge_padding)
-    min_y = -((_field_width/2) - _edge_padding)
-    max_y = ((_field_width/2) - _edge_padding)
+    min_x = -((_field_length/2) - _edge_padding[0])
+    max_x = ((_field_length/2) - _edge_padding[0])
+    min_y = -((_field_width/2) - _edge_padding[1])
+    max_y = ((_field_width/2) - _edge_padding[1])
 
     # Create desired message
     desired_msg = Pose2D()
@@ -91,19 +91,19 @@ def _handle_ally_position(msg):
     #     desired = _choose_offset_point(robot, opponent, desired)
 
     # Are we about to hit the edge of the field?
-    if _close(robot[0], min_x, tolerance=_edge_padding) and desired[0] < min_x:
+    if _close(robot[0], min_x, tolerance=_edge_padding[0]) and desired[0] < min_x:
         # print("{} is close to {}".format(robot[0],min_x))
         desired_msg.x = min_x
 
-    if _close(robot[0], max_x, tolerance=_edge_padding) and desired[0] > max_x:
+    if _close(robot[0], max_x, tolerance=_edge_padding[0]) and desired[0] > max_x:
         # print("{} is close to {}".format(robot[0],max_x))
         desired_msg.x = max_x
 
-    if _close(robot[1], min_y, tolerance=_edge_padding) and desired[1] < min_y:
+    if _close(robot[1], min_y, tolerance=_edge_padding[1]) and desired[1] < min_y:
         # print("{} is close to {}".format(robot[1],min_y))
         desired_msg.y = min_y
 
-    if _close(robot[1], max_y, tolerance=_edge_padding) and desired[1] > max_y:
+    if _close(robot[1], max_y, tolerance=_edge_padding[1]) and desired[1] > max_y:
         # print("{} is close to {}".format(robot[1],max_y))
         desired_msg.y = max_y
 
