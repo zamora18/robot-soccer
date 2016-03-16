@@ -37,7 +37,7 @@ def _get_battery_voltage(req):
 # -----------------------------------------------------------------------------
 
 def _kick(req):
-    os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
+    os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .07; echo 0 > /sys/class/gpio/gpio200/value")
     return TriggerResponse(True, "GPIO actuated!")
 
 # -----------------------------------------------------------------------------
