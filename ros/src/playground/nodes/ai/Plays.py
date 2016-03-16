@@ -17,13 +17,9 @@ _shoot_state = ShootState.setup
 _trick_state = ShootState.setup
 
 def _robot_close_to_point(robot, x, y, theta):
-<<<<<<< HEAD
     return Utilities.close(x, robot['xhat'], tolerance = .10) and Utilities.close(y, robot['yhat'], tolerance=.10) \
                 and Utilities.close(theta, robot['thetahat'], tolerance = 10)
-=======
-    return Utilities.close(x, robot['xhat'], tolerance = .20) and Utilities.close(y, robot['yhat'], tolerance=.20) \
-                and Utilities.close(theta, robot['thetahat'], tolerance = 20)
->>>>>>> cc816811edf64a41e5da863c78c42bf297803e22
+
 
 def shoot(robot, ball, distance_from_center):
     """ this sets up for a shot at a distance from the center. Distance from center should be between -1 and 1 (really like .75 and -.75).
