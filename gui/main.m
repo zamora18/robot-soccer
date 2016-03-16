@@ -71,6 +71,7 @@ handles.plot_position = plot(handles.fig_position,0,0);
 hold(handles.fig_position,'on');
 handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
 handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
+handles.plot_bot_vision = plot(handles.fig_position,0,0,'k*');
 set(handles.fig_position,'XLim',[-2 2],'YLim',[-1.6 1.6]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
@@ -156,6 +157,15 @@ function robotStateCallback(src, msg, handles)
     set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
     set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
+    
+%     % Predicted (red X)
+%     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
+%     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
+    
+    % Estimated (black asterisk)
+    if msg.Correction
+        set(handles.plot_bot_vision,'XData', msg.VisionX, 'YData', msg.VisionY);
+    end
     
 function desiredPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_desired_position)

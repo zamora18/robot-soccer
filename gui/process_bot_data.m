@@ -2,10 +2,10 @@
 % load('bot_msg_data2.mat');
 
 Tcamera=1/30;Tcontrol=1/100;
-cam_latency = 130E-3; % s
-update_type = 'SIMPLE';
-Q = diag([(5E-2)^2 (5E-2)^2 (10*pi/180)^2]);
-R = diag([ 0.001^2 0.001^2 (1*pi/180)^2 ]);
+% cam_latency = 130E-3; % s
+% update_type = 'SIMPLE';
+% Q = diag([(5E-2)^2 (5E-2)^2 (10*pi/180)^2]);
+% R = diag([ 0.001^2 0.001^2 (1*pi/180)^2 ]);
 % save('bot_msg_data7.mat');
 
 % How many samples are there?
@@ -82,5 +82,16 @@ set(s,'sizedata', .6);
 % ylabel('Velocity (m/s)');
 
 linkaxes(ax(:), 'x');
+
+figure(2), clf
+plot(t,thetahat,t,thetahat_future,theta_t,theta);
+legend('estimated','predicted','camera');
+xlim([0 t(end)]);
+title('theta');
+xlabel('time (s)');
+ylabel('Angle (deg)');
+hold on;
+s = scatter(corrections_t,corrections_theta, 'k');
+set(s,'sizedata', .6);
 
 % Plot the initial position

@@ -3,59 +3,33 @@
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
-from playground.msg import coords
+from playground.msg import RobotState
 
 import numpy as np
 
-_hack_period = 1.0/100
-
 robopub = None
-visionpub = None
-ballpub = None
 
 def _handle_vision_robot_position(msg):
-    # Split up into robot position
-    robo_msg = Pose2D()
-    robo_msg.x = msg.x
-    robo_msg.y = msg.y
-    robo_msg.theta = msg.theta
+    robo_msg = RobotState()
+
+    robo_msg.vision_x = msg.x
+    robo_msg.vision_y = msg.y
+    robo_msg.vision_theta = msg.theta
+    robo_msg.correction = True
+
+    robo_msg.xhat = msg.x
+    robo_msg.yhat = msg.y
+    robo_msg.thetahat = msg.theta
+
     robopub.publish(robo_msg)
-
-    visionpub.publish(robo_msg)
-
-def _handle_vision_ball_position(msg):
-    # ... and ball position
-    ball_msg = Pose2D()
-    ball_msg.x = msg.x
-    ball_msg.y = msg.y
-    ball_msg.theta = 0
-
-    ballpub.publish(ball_msg)
 
 def main():
     rospy.init_node('hack', anonymous=False)
 
-    # Don't use odom node with this
-    global robopub, ballpub, visionpub
-    robopub = rospy.Publisher('estimated_robot_position', Pose2D, queue_size=10)
-    visionpub = rospy.Publisher('vision_robot_position', Pose2D, queue_size=10)
-    # ballpub = rospy.Publisher('estimated_ball_position', Pose2D, queue_size=10)
+    global robopub
+    robopub = rospy.Publisher('robot_state', RobotState, queue_size=10)
 
-    # rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
     rospy.Subscriber('vision_ally_position', Pose2D, _handle_vision_robot_position)
-    # pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
-
-    # rate = rospy.Rate(int(1/_hack_period))
-    # while not rospy.is_shutdown():
-
-    #     msg = Pose2D()
-    #     msg.x = _ball_x
-    #     msg.y = _ball_y
-    #     msg.theta = 0
-
-    #     pub.publish(msg)
-
-    #     rate.sleep()
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
