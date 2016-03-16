@@ -10,7 +10,7 @@ _avg_dist_between_robots    = 0
 _averaging_factor           = 0
 _time_in_our_half           = 0
 
-
+_beginning_trick_shot = False
 
 _ball_defend_position = None
 
