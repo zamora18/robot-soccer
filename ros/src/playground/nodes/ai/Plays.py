@@ -106,7 +106,14 @@ def avoid_own_goal(robot, ball):
 
 
 def play_goalie (robot, ball):
-    pass
+    theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
+    theta_c_deg = Utilities.rad_to_deg(theta_c)
+    #x_c =  Constants.goalie_x_pos
+    x_c = Constants.goal_position_home[0] + Constants.goalie_radius*np.cos(theta_c)
+
+    # defends at yhat future
+    y_c = Constants.goal_position_home[1] + Constants.goalie_radius*np.sin(theta_c)
+    return (x_c, y_c, theta_c_deg)
 
 
 
@@ -119,11 +126,12 @@ def trick_play(robot, ball):
     distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
 
     set_up_distance = 0.4
-    theta_c = Utilities.get_angle_between_points(0, 0, Constants.field_length/2, Constants.field_width*3/4)
-    x_c_before = -set_up_distance*np.cos(theta_c)
-    x_c_after = set_up_distance*np.cos(theta_c)
-    y_c_before = -set_up_distance*np.sin(theta_c)
-    y_c_after = set_up_distance*np.sin(theta_c)
+    theta_c = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], Constants.field_length/2, Constants.field_width*3/4-ball['yhat'])
+    x_c_before = ball['xhat']-set_up_distance*np.cos(theta_c)
+    y_c_before = ball['yhat']-set_up_distance*np.sin(theta_c)
+
+    x_c_after = ball['xhat']+set_up_distance*np.cos(theta_c)
+    y_c_after = ball['yhat']+set_up_distance*np.sin(theta_c)
 
     theta_c = Utilities.rad_to_deg(theta_c)
 

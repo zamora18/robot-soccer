@@ -145,7 +145,7 @@ def _strong_defense(robot, ball):
     #y_c = _limit_goalie_y(y_c, ball)
 
     #Constants.goal_position_home[1] + (_goal_box_length+_robot_half_width)*np.sin(theta_c)
-    theta_c_deg = 0
+    #theta_c_deg = 0
     return (x_c, y_c, theta_c_deg)
     
 def _aggressive_defense(robot, ball):
