@@ -9,7 +9,7 @@ from playground.msg import RobotState
 
 import numpy as np
 
-from estimators import RobotEstimator
+from estimators import RobotEstimatorLPF
 
 _robot = RobotEstimatorLPF()
 
@@ -24,10 +24,12 @@ _velocities = (0, 0, 0)
 _robot_estimator_on = True
 _state_pub = None
 
+_last_time = time.time()
+
 _predict_forward_seconds = (5/30.0)
 
 def _handle_vision_position(msg):
-    global _measured
+    global _measured, _last_time
     _measured = (msg.x, msg.y, msg.theta)
 
     # If the estimator isn't on, just pass
@@ -38,6 +40,10 @@ def _handle_vision_position(msg):
         msg.yhat = msg.vision_y = msg.yhat_future = _measured[1]
         msg.thetahat = msg.vision_theta = msg.thetahat_future = _measured[2]
         _state_pub.publish(msg)
+
+    # Timestamp this msg so the ball updater knows
+    # how much time elapsed since last measurement
+    _last_time = time.time()
 
 def _handle_vel_cmds(msg):
     global _velocities
@@ -64,7 +70,13 @@ def main():
 
         xhat = yhat = thetahat = xhat_future = yhat_future = thetahat_future = 0
 
-        (xhat, yhat, thetahat) = _robot.update(_measured, _velocities)
+        # LPF
+        Ts = (time.time() - _last_time)
+        (xhat, yhat, thetahat) = _robot.update(Ts, measured=_measured)
+
+        # # KF
+        # Ts = (time.time() - _last_time)
+        # (xhat, yhat, thetahat) = _robot.update(measured=_measured, velocities=_velocities)
 
         # if _predictor_on:
         #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)
