@@ -15,7 +15,7 @@ _shoot_state = ShootState.setup
 
 def _robot_close_to_point(robot, x, y, theta):
     return Utilities.close(x, robot['xhat'], tolerance=.15) and Utilities.close(y, robot['yhat'], tolerance=.15) \
-                and Utilities.close(theta, robot['thetahat'], tolerance = 15)
+                and Utilities.close(theta, robot['thetahat'], tolerance = 10)
 
 def shoot(robot, ball, distance_from_center):
     """ this sets up for a shot at a distance from the center. Distance from center should be between -1 and 1 (really like .75 and -.75).
