@@ -21,17 +21,22 @@ _measured = (None, None, None)
 # (vx, vy, w) from motion node
 _velocities = (0, 0, 0)
 
-# _last_time = time.time()
+_robot_estimator_on = True
 
 _predict_forward_seconds = (5/30.0)
 
 def _handle_vision_position(msg):
-    global _measured#, _last_time
+    global _measured
     _measured = (msg.x, msg.y, msg.theta)
 
-    # Timestamp this msg so the bot updater knows
-    # how much time elapsed since last measurement
-    # _last_time = time.time()
+    # If the estimator isn't on, just pass
+    # vision data through to the rest
+    if not _robot_estimator_on:
+        msg = RobotState()
+        msg.xhat = msg.vision_x = msg.xhat_future = _measured[0]
+        msg.yhat = msg.vision_y = msg.yhat_future = _measured[1]
+        msg.thetahat = msg.vision_theta = msg.thetahat_future = _measured[2]
+        pub.publish(msg)
 
 def _handle_vel_cmds(msg):
     global _velocities
@@ -46,9 +51,9 @@ def main():
     # Use remap in roslaunch file to create separate channels per robot
     pub = rospy.Publisher('robot_state', RobotState, queue_size=10)
 
-    global _measured
+    global _measured, _robot_estimator_on
 
-    robot_estimator_on = rospy.get_param('robot_estimator_on', 'true')
+    _robot_estimator_on = rospy.get_param('robot_estimator_on', 'true')
 
     rate = rospy.Rate(_estimator_rate)
     while not rospy.is_shutdown():
