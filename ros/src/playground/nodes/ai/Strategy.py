@@ -47,44 +47,6 @@ def choose_strategy(robot, opponent, ball, goal):
 
 
 
-
-def _strong_offense(robot, opponent, ball):
-
-    return _hack_offense(robot, ball)
-
-    # for now we want to make one robot kick the ball into the open goal
-    #
-    # arctan2([y], [x])
-    #theta_ball_to_goal      = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], Constants.goal_position_opp[0] ], Constants.goal_position_opp[1])
-    #theta_ball_to_goal_deg  = theta_ball_to_goal*180/np.pi
-    ##theta_bot_to_goal       = Utilities.get_angle_between_points(robot['xhat'], robot['yhat'], Constants.goal_position_opp[0], Constants.goal_position_opp[1])
-    #theta_bot_to_goal_deg   = theta_bot_to_goal*180/np.pi
-    #dist_from_ball          = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-
-    #print("theta_ball_to_goal: {}\t\ttheta_bot_to_goal: {}\r".format(theta_ball_to_goal_deg, theta_bot_to_goal_deg))
-
-    # if ball is past goal (primitive goal scored)
-    #if _goal_scored:
-     #   return  (-(_field_length/4), 0, 0)
-
-
-    #if (ball['xhat'] > Constants.goal_position_opp[0]): #might have to tweak this a little bit
-    #    #ball is in goal, don't move robot anywhere
-    #    return (robot['xhat'], robot['yhat'], robot['thetahat'])
-    #else:
-    #   # if robot is behind the ball and aligned towards goal
-    #    if ( Utilities.close(theta_ball_to_goal_deg, theta_bot_to_goal_deg) and \
-    #        dist_from_ball <= (_des_dist_from_ball+_robot_half_width)): #taking into account 1/2 robot width
-    #        #kick ball towards goal 6 inches
-    #        x_c = ball['xhat'] + (_des_dist_from_ball+_kick_dist)*np.cos(theta_ball_to_goal)
-    #        y_c = ball['yhat'] + (_des_dist_from_ball+_kick_dist)*np.sin(theta_ball_to_goal)
-    #        return (x_c, y_c, theta_ball_to_goal_deg)
-    #    else: 
-    #        #get aligned with ball facing goal
-    #        x_c = ball['xhat'] - (_des_dist_from_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
-    #        y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
-    #        return (x_c, y_c, theta_ball_to_goal_deg) 
-
 def _aggressive_offense(robot, opponent, ball):
     
     section = Utilities.get_field_section(ball['xhat'])
@@ -99,6 +61,8 @@ def _aggressive_offense(robot, opponent, ball):
     if   section == 1:
         if (Utilities.our_robot_closer_to_ball(robot, opponent, ball) and not Utilities.is_ball_behind_robot(robot, ball)):
             return Skills.attack_ball(robot, ball)
+        elif Utilities.is_ball_between_home_and_robot(robot, ball):
+            return Plays.avoid_own_goal(robot, ball)
         else:
             return _strong_defense(robot, ball)
     elif section == 2:
@@ -194,3 +158,49 @@ def _update_opponent_tracking_variables():
     _averaging_factor = _averaging_factor + 1
     #_avg_dist_between_robots = (_avg_dist_between_robots + Utilities.get_distance_between_points(opponent['xhat'],opponent['yhat'], opponent2['xhat'], opponent2['yhat'])) / _averaging_factor
 
+
+
+
+
+
+"""
+Functions we haven't used in a while, but wanted to keep around. Just cuz:
+"""
+
+
+def _strong_offense(robot, opponent, ball):
+
+    return _hack_offense(robot, ball)
+
+    # for now we want to make one robot kick the ball into the open goal
+    #
+    # arctan2([y], [x])
+    #theta_ball_to_goal      = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], Constants.goal_position_opp[0] ], Constants.goal_position_opp[1])
+    #theta_ball_to_goal_deg  = theta_ball_to_goal*180/np.pi
+    ##theta_bot_to_goal       = Utilities.get_angle_between_points(robot['xhat'], robot['yhat'], Constants.goal_position_opp[0], Constants.goal_position_opp[1])
+    #theta_bot_to_goal_deg   = theta_bot_to_goal*180/np.pi
+    #dist_from_ball          = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+
+    #print("theta_ball_to_goal: {}\t\ttheta_bot_to_goal: {}\r".format(theta_ball_to_goal_deg, theta_bot_to_goal_deg))
+
+    # if ball is past goal (primitive goal scored)
+    #if _goal_scored:
+     #   return  (-(_field_length/4), 0, 0)
+
+
+    #if (ball['xhat'] > Constants.goal_position_opp[0]): #might have to tweak this a little bit
+    #    #ball is in goal, don't move robot anywhere
+    #    return (robot['xhat'], robot['yhat'], robot['thetahat'])
+    #else:
+    #   # if robot is behind the ball and aligned towards goal
+    #    if ( Utilities.close(theta_ball_to_goal_deg, theta_bot_to_goal_deg) and \
+    #        dist_from_ball <= (_des_dist_from_ball+_robot_half_width)): #taking into account 1/2 robot width
+    #        #kick ball towards goal 6 inches
+    #        x_c = ball['xhat'] + (_des_dist_from_ball+_kick_dist)*np.cos(theta_ball_to_goal)
+    #        y_c = ball['yhat'] + (_des_dist_from_ball+_kick_dist)*np.sin(theta_ball_to_goal)
+    #        return (x_c, y_c, theta_ball_to_goal_deg)
+    #    else: 
+    #        #get aligned with ball facing goal
+    #        x_c = ball['xhat'] - (_des_dist_from_ball+_robot_half_width)*np.cos(theta_ball_to_goal)
+    #        y_c = ball['yhat'] - (_des_dist_from_ball+_robot_half_width)*np.sin(theta_ball_to_goal)
+    #        return (x_c, y_c, theta_ball_to_goal_deg) 
