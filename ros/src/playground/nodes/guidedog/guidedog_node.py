@@ -82,9 +82,9 @@ def _handle_ally_position(msg):
     if _close(robot, opponent, tolerance=1.50*_robot_width):
         # Go to the closest defensive side.
         print "You're close to a robot!"
-        desired_msg.x = _ally[0]
-        desired_msg.y = _ally[1]
-        desired_msg.theta = _ally[2]
+        #desired_msg.x = _ally[0]
+        #desired_msg.y = _ally[1]
+        #desired_msg.theta = _ally[2]
 
     
     # if _is_opponent_in_path(robot, opponent, desired, buffer=1.60*_robot_width):
