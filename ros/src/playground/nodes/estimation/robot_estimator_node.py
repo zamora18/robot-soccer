@@ -23,9 +23,6 @@ _velocities = (0, 0, 0)
 
 # _last_time = time.time()
 
-_estimator_on = True
-_predictor_on = True
-
 _predict_forward_seconds = (5/30.0)
 
 def _handle_vision_position(msg):
@@ -51,16 +48,17 @@ def main():
 
     global _measured
 
+    robot_estimator_on = rospy.get_param('robot_estimator_on', 'true')
+
     rate = rospy.Rate(_estimator_rate)
     while not rospy.is_shutdown():
 
+        if not robot_estimator_on:
+            break
+
         xhat = yhat = thetahat = xhat_future = yhat_future = thetahat_future = 0
 
-        if rospy.get_param('robot_estimator_on', 'true'):
-            # Ts = (time.time() - _last_time)
-            (xhat, yhat, thetahat) = _robot.update(_measured, _velocities)
-        else:
-            (xhat, yhat, thetahat) = _measured
+        (xhat, yhat, thetahat) = _robot.update(_measured, _velocities)
 
         # if _predictor_on:
         #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)
@@ -89,8 +87,7 @@ def main():
 
         # Set measured to None so the robot updater 
         # knows to predict instead of correcting
-        if rospy.get_param('robot_estimator_on', 'true'):
-            _measured = (None, None, None)
+        _measured = (None, None, None)
 
 
         rate.sleep()
