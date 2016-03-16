@@ -60,7 +60,7 @@ def main():
 
         if _estimator_on:
             Ts = (time.time() - _last_time)
-            (xhat, yhat) = _ball.update(Ts, _measured[0], _measured[1])
+            (xhat, yhat) = _ball.update(Ts, _measured)
 
         if _predictor_on:
             (xhat_future, yhat_future) = _ball.predict(_predict_forward_seconds)
