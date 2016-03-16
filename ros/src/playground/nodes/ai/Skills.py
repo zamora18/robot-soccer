@@ -77,7 +77,7 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     distance from center is for shooting in corners, 1 will put it in the "top" corner
     while -1 will put it in the bottom of the goal and 0 is exact center"""
 
-    y2 = distance_from_center_of_goal * Constants.goal_box_width/2
+    y2 = distance_from_center_of_goal * Constants.goal_box_width/3
     x2 = Constants.goal_position_opp[0]
 
     theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], x2,y2)
