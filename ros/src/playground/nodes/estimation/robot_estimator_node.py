@@ -22,6 +22,7 @@ _measured = (None, None, None)
 _velocities = (0, 0, 0)
 
 _robot_estimator_on = True
+_state_pub = None
 
 _predict_forward_seconds = (5/30.0)
 
@@ -45,13 +46,13 @@ def _handle_vel_cmds(msg):
 def main():
     rospy.init_node('robot_estimator', anonymous=False)
 
+    global _measured, _robot_estimator_on, _state_pub
+
     # Sub/Pub
     rospy.Subscriber('vision_position', Pose2D, _handle_vision_position)
     rospy.Subscriber('vel_cmds', Twist, _handle_vel_cmds)
     # Use remap in roslaunch file to create separate channels per robot
-    pub = rospy.Publisher('robot_state', RobotState, queue_size=10)
-
-    global _measured, _robot_estimator_on
+    _state_pub = rospy.Publisher('robot_state', RobotState, queue_size=10)
 
     _robot_estimator_on = rospy.get_param('robot_estimator_on', 'true')
 
