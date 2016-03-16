@@ -41,7 +41,7 @@ def choose_strategy(robot, opponent, ball, goal):
     # return _aggressive_defense(robot, ball)
     # return Skills.set_up_kick(ball, 0)
     return Plays.trick_play(robot, ball)
-    return _aggressive_offense(robot, opponent, ball)
+    #return _aggressive_offense(robot, opponent, ball)
     #return Plays.shoot(robot, ball,0)
 
 
