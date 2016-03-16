@@ -12,9 +12,10 @@ class ShootState:
 
 
 _shoot_state = ShootState.setup
+_trick_state = ShootState.setup
 
 def _robot_close_to_point(robot, x, y, theta):
-    return Utilities.close(x, robot['xhat'], tolerance=.15) and Utilities.close(y, robot['yhat'], tolerance=.15) \
+    return Utilities.close(x, robot['xhat'], tolerance = .15) and Utilities.close(y, robot['yhat'], tolerance=.15) \
                 and Utilities.close(theta, robot['thetahat'], tolerance = 10)
 
 def shoot(robot, ball, distance_from_center):
@@ -106,6 +107,47 @@ def avoid_own_goal(robot, ball):
 
 def play_goalie (robot, ball):
     pass
+
+
+
+
+
+def trick_play(robot, ball):
+
+    global _trick_state
+
+    distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+
+    # transition
+    if _trick_state == ShootState.setup:
+        if _robot_close_to_point(robot, -.115, -.225, 62.93):
+            _trick_state = ShootState.attack
+
+    elif _trick_state == ShootState.attack:
+        if(distance_to_ball < Constants.robot_width * (3.0/4.0)):
+            _trick_state = ShootState.shoot
+
+    elif _trick_state == ShootState.shoot:
+        _trick_state == ShootState.setup
+    else:
+        _trick_state = ShootState.setup
+
+
+    # Moore output
+    if _trick_state == ShootState.setup:
+        return (-.115, -.225, 62.93)
+
+    elif _trick_state == ShootState.attack:
+        return (.115, .225, 62.93)
+
+    elif _trick_state == ShootState.shoot:
+        Skills.kick()
+        return (.115, .225, 62.93)
+
+    else:
+        return (-.115, -.225, 62.93)        
+
+
 
 
 # def advance_ball(robot, opponent, ball):
