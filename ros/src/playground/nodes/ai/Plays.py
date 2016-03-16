@@ -17,7 +17,7 @@ _shoot_state = ShootState.setup
 _trick_state = ShootState.setup
 
 def _robot_close_to_point(robot, x, y, theta):
-    return Utilities.close(x, robot['xhat'], tolerance = .15) and Utilities.close(y, robot['yhat'], tolerance=.15) \
+    return Utilities.close(x, robot['xhat'], tolerance = .10) and Utilities.close(y, robot['yhat'], tolerance=.10) \
                 and Utilities.close(theta, robot['thetahat'], tolerance = 10)
 
 def shoot(robot, ball, distance_from_center):
@@ -25,46 +25,42 @@ def shoot(robot, ball, distance_from_center):
         0 signifies straight on, 1 is top corner and -1 is bottom corner
         it also attacks the ball then actuates the kicker"""
 
-
     global _shoot_state
 
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
-    desired_setup_c = Skills.set_up_kick_facing_goal(ball, distance_from_center)
+    desired_setup_position = Skills.set_up_kick_facing_goal(ball, distance_from_center)
 
-    # transition states
-
+    ### transition states ###
     # set up state
     if(_shoot_state == ShootState.setup):
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if _robot_close_to_point(robot, *desired_setup_c) and not Utilities.is_ball_behind_robot(robot, ball):
+        if _robot_close_to_point(robot, *desired_setup_position) and not Utilities.is_ball_behind_robot(robot, ball):
             _shoot_state = ShootState.attack
-
 
     elif _shoot_state == ShootState.attack:
         # get the distance to the ball
-
-        distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+        (x_pos, y_pos) = Utilities.get_front_of_robot(robot)
+        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball['xhat'], ball['yhat'])
 
         # if the ball is behind the robot, go back to set up
-        if (Utilities.is_ball_behind_robot(robot, ball)):
+        if (Utilities.is_ball_behind_robot(robot, ball): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
             _shoot_state = ShootState.setup
         # if the ball is close enough, go to the shoot state
-        elif(distance_to_ball < Constants.robot_width * (3.0/4.0)):
+        elif(distance_from_kicker_to_ball <  0.08):
             _shoot_state = ShootState.shoot
 
-    # if we just shot, go back to setup
     elif _shoot_state == ShootState.shoot:
-        _shoot_state = ShootState.setup
-
+        _shoot_state = ShootState.setup # if we just shot, go back to setup
     # default state, go to setup
     else:
         _shoot_state = ShootState.setup
 
-    # action
+
+    ### Moore Outputs in states ###
     # go to the desired setup location
     if(_shoot_state == ShootState.setup):
-        return desired_setup_c
+        return desired_setup_position
 
     # attack the ball
     elif  _shoot_state == ShootState.attack:
