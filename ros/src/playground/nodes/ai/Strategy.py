@@ -126,20 +126,20 @@ def _strong_defense(robot, ball):
     theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
     theta_c_deg = Utilities.rad_to_deg(theta_c)
     #x_c =  Constants.goalie_x_pos
-    x_c = Constants.goalie_radius*np.cos(theta_c)
+    x_c = Constants.goal_position_home[0] + Constants.goalie_radius*np.cos(theta_c)
 
     # defends at yhat future
-    y_c = Constants.goalie_radius*np.sin(theta_c)
+    y_c = Constants.goal_position_home[1] + Constants.goalie_radius*np.sin(theta_c)
 
     #Updating global variable? I don't understand what this is doing
-    #if abs(ball['xhat_future']) > abs(x_c):
-    #    if _ball_defend_position is None:
-    #        _ball_defend_position = ball
-    #else:
-    #    _ball_defend_position = None
+    if abs(ball['xhat_future']) > abs(x_c):
+        if _ball_defend_position is None:
+            _ball_defend_position = ball
+    else:
+        _ball_defend_position = None
 
-    #if _ball_defend_position is not None:
-    #    y_c = _ball_defend_position['yhat_future']
+    if _ball_defend_position is not None:
+        y_c = _ball_defend_position['yhat_future']
 
     #y_c = _limit_goalie_y(y_c, ball)
 
