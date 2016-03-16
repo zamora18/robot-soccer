@@ -129,7 +129,7 @@ def trick_play(robot, ball):
     distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
 
     set_up_distance = 0.4
-    theta_c = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], Constants.field_length/2, Constants.field_width*3/4-ball['yhat'])
+    theta_c = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], Constants.field_length/2, Constants.field_width*5/6-ball['yhat'])
     x_c_before = ball['xhat']-set_up_distance*np.cos(theta_c)
     y_c_before = ball['yhat']-set_up_distance*np.sin(theta_c)
 
@@ -144,7 +144,7 @@ def trick_play(robot, ball):
             _trick_state = ShootState.attack
 
     elif _trick_state == ShootState.attack:
-        if(distance_to_ball < Constants.robot_width * (3.0/4.0)):
+        if(distance_to_ball < Constants.robot_width * (3.8/4.0)):
             _trick_state = ShootState.shoot
 
     elif _trick_state == ShootState.shoot:
