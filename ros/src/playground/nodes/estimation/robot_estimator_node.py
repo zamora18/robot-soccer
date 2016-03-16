@@ -37,7 +37,7 @@ def _handle_vision_position(msg):
         msg.xhat = msg.vision_x = msg.xhat_future = _measured[0]
         msg.yhat = msg.vision_y = msg.yhat_future = _measured[1]
         msg.thetahat = msg.vision_theta = msg.thetahat_future = _measured[2]
-        pub.publish(msg)
+        _state_pub.publish(msg)
 
 def _handle_vel_cmds(msg):
     global _velocities
@@ -59,7 +59,7 @@ def main():
     rate = rospy.Rate(_estimator_rate)
     while not rospy.is_shutdown():
 
-        if not robot_estimator_on:
+        if not _robot_estimator_on:
             break
 
         xhat = yhat = thetahat = xhat_future = yhat_future = thetahat_future = 0
