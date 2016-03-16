@@ -119,7 +119,7 @@ def trick_play(robot, ball):
     distance_to_ball = Utilities.get_distance_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
 
     set_up_distance = 0.4
-    theta_c = Utilities.get_angle_between_points(0, 0, Constants.field_length/2, Constants.field_width)
+    theta_c = Utilities.get_angle_between_points(0, 0, Constants.field_length/2, Constants.field_width*3/4)
     x_c_before = -set_up_distance*np.cos(theta_c)
     x_c_after = set_up_distance*np.cos(theta_c)
     y_c_before = -set_up_distance*np.sin(theta_c)
