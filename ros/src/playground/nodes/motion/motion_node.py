@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import os
 
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Twist, Pose2D
+from std_srvs.srv import Trigger, TriggerResponse
 from playground.msg import EncoderEstimates, RobotState
 from playground.srv import RoboClawRPC, RoboClawRPCResponse
 
@@ -20,6 +22,8 @@ def _handle_velocity_command(msg):
     velocities = (msg.linear.x, msg.linear.y, msg.angular.z)
     motion.drive(*velocities, smooth=_smooth, theta=_theta)
 
+# -----------------------------------------------------------------------------
+
 def _handle_theta(msg):
     global _theta
     _theta = msg.thetahat
@@ -32,6 +36,12 @@ def _get_battery_voltage(req):
 
 # -----------------------------------------------------------------------------
 
+def _kick(req):
+    os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
+    return TriggerResponse(True, "GPIO actuated!")
+
+# -----------------------------------------------------------------------------
+
 def main():
     rospy.init_node('motion', anonymous=False)
 
@@ -40,6 +50,7 @@ def main():
 
     # Services
     rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
+    rospy.Service('/kick', Trigger, _kick)
 
     # So that we know the robot's theta
     rospy.Subscriber('robot_state', RobotState, _handle_theta)

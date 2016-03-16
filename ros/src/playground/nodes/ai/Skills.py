@@ -1,4 +1,4 @@
-import os, time
+import time
 import numpy as np
 
 import rospy
@@ -13,24 +13,17 @@ _distance_behind_ball_for_dribbling = Constants.robot_width/2 + .05
 _distance_from_goal_for_arc_defense = Constants.goal_box_width + Constants.robot_width *2
 _distance_behind_ball_approach      = .3
 
-_kicker_count = 0
 
-# actuates solenoid
 def kick():
-    global _kicker_count
-    _kicker_count = _kicker_count + 1
-    print("Actuate: {}".format(_kicker_count))
+    """Kick
 
-    if rospy.get_param('simulation_mode', 'false'):
-        try:
-            kick_srv = rospy.ServiceProxy('/home1/kick', Trigger)
-            kick_srv()
-            time.sleep(0.100)
-            kick_srv()
-        except rospy.ServiceException, e:
-            print "Kick service call failed: %s"%e
-    else:
-        os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
+    Send a service call to kick the ball.
+    """
+    try:
+        kick_srv = rospy.ServiceProxy('/kick', Trigger)
+        kick_srv()
+    except rospy.ServiceException, e:
+        print "Kick service call failed: %s"%e
 
 def dribble_forward(robot, ball):
     x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])

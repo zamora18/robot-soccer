@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#define KICK_COUNT_MAX	125
+
 namespace gazebo
 {
 	class SoccerDrive : public ModelPlugin
@@ -36,6 +38,9 @@ namespace gazebo
 			gzmsg << "[model_push] Subscribing to " << ("/" + robot_name + "/command") << "\n";
 			command_sub = node_handle.subscribe("/" + robot_name + "/command", 1, &SoccerDrive::CommandCallback, this);
 			kick_srv = node_handle.advertiseService("/" + robot_name + "/kick", &SoccerDrive::KickSrv, this);
+
+			// Init kick counter
+			kick_count = 0;
 
 			// Listen to the update event. This event is broadcast every
 			// simulation iteration.
@@ -86,6 +91,16 @@ namespace gazebo
 			// Kick the ball!
 			if (kick) {
 				kicker_joint->SetForce(0, 15);
+
+				kick_count++;
+
+				// Find out when to release kicker
+				if (kick_count == KICK_COUNT_MAX)
+				{
+					kick_count = 0;
+					kick = false;
+				}
+
 			} else {
 				kicker_joint->SetForce(0, -15);
 			}
@@ -120,6 +135,7 @@ namespace gazebo
 		ros::Subscriber kick_sub;
 		geometry_msgs::Twist command_msg;
 		bool kick;
+		unsigned int kick_count;
 		ros::ServiceServer kick_srv;
 		double kP_xy;
 		double kP_w;
