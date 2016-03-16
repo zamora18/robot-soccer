@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <param name="robot_estimator_on" type="bool" value="false" />
+    <param name="robot_estimator_on" type="bool" value="true" />
     
     <node name="motion" pkg="playground" type="motion_node.py" />
     <!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->

@@ -11,7 +11,7 @@ import numpy as np
 
 from estimators import RobotEstimator
 
-_robot = RobotEstimator()
+_robot = RobotEstimatorLPF()
 
 _estimator_rate = 100
 
