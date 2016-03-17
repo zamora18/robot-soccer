@@ -1,15 +1,15 @@
 % clear; close all; clc;
-load('ball_msg_data9.mat');
+load('data/ball07.mat');
 
 % Tcamera=1/30;
-% Tcontrol=1/100;
+% Tcontrol1/100;
 % tau=0.2;
 % alpha=0.5;
 % update_type = 'UPDATE_DELAY';
 % save('ball_msg_data12.mat');
 
 % How many samples are there?
-N = length(ball);
+N = length(ball.Xhat);
 % M = length(vision_ball);
 
 % Create a time vector
@@ -80,3 +80,8 @@ ylabel('Velocity (m/s)');
 linkaxes([ax1, ax2, ax3, ax4], 'x');
 
 % Plot the initial position
+
+% Convert from ball to struct
+% load('data/ball_msg_data10.mat');
+% ball = unpack_ros_msg(ball);
+% save('data/ball_msg_data10.mat');

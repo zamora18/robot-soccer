@@ -90,12 +90,12 @@ class RobotEstimatorLPF(LowPassFilter):
     State Definition:
         x = (x y theta)'
     """
-    def __init__(self):
+    def __init__(self, _alpha=None, _tau=None, _update_type=None):
 
         T_ctrl = 1/100.0
-        alpha = 0.9
-        tau = 0.075
-        update_type = LowPassFilter.UPDATE_SIMPLE
+        alpha = 0.9 if _alpha is None else _alpha
+        tau = 0.075 if _tau is None else _tau
+        update_type = LowPassFilter.UPDATE_SIMPLE if _update_type is None else _update_type
         N = 3
 
         super(RobotEstimatorLPF, self).__init__(T_ctrl, alpha, tau, update_type, N)
@@ -147,20 +147,3 @@ class OpponentEstimator(KalmanFilter):
         R = np.matrix(np.diag([0.01**2, 0.01**2, (2*np.pi/180)**2]))
 
         super(RobotEstimator, self).__init__(T_ctrl, T_cam, cam_latency, A, B, C, Q, R)
-
-
-def _mdiv(a, b):
-    """Matrix Divide
-    ignore division by 0
-
-    Example: _mdiv( [-1, 0, 1], 0 ) -> [0, 0, 0]
-
-    Is this element-wise or not? Should it be? or not?
-
-    """
-    with np.errstate(divide='ignore', invalid='ignore'):
-        c = np.true_divide(a,b)
-        c[c == np.inf] = 0
-        c = np.nan_to_num(c)
-
-    return c
