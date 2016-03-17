@@ -23,7 +23,9 @@ class LowPassFilter(object):
 
         Args:
             T_ctrl          - 
-            alpha           - 
+            alpha           - The exponential parameter of the filter.
+                              The higher the alpha, the more you trust
+                              your own model, and not the new input.
             tau             - dirty-derivative bandwidth. Small numbers
                               allow derivatives to be more loose; i.e.,
                               0.001 creates lots of noise in velocity.

@@ -1,3 +1,17 @@
+"""Robot LPF
+Use this script to load a .mat file that has a bunch of RobotState messages
+that were captured by the MATLAB GUI. Make sure that the .mat file has an
+unpacked bot struct, and not an array of RobotState messages.
+
+Tune the parameters in main and then run this script. This will create a
+.mat file with the same name as what you loaded, but with '_rerun' appended
+to it.
+
+Load the '*_rerun.mat' into MATLAB and run 'process_bot_data.m' on it to 
+see a graph of the original vs the rerun data with tuned parameters.
+
+Using this script and this process will help to tune filters more quickly.
+"""
 import sys, time, copy
 
 import numpy as np
