@@ -15,6 +15,14 @@ _ball_defend_position = None
 
 _going_home = False
 _wait_timer = 0
+
+
+class Offense_state:
+    update_params = 0
+    trying_to_score = 1
+    
+    defending = 2
+
   
 def choose_strategy(robot, opponent, ball, goal):
     # Ultimate goal is to keep track of the opponent's movement/strategy, and alter ours accordingly
@@ -157,6 +165,17 @@ def _update_opponent_tracking_variables():
 
     _averaging_factor = _averaging_factor + 1
     #_avg_dist_between_robots = (_avg_dist_between_robots + Utilities.get_distance_between_points(opponent['xhat'],opponent['yhat'], opponent2['xhat'], opponent2['yhat'])) / _averaging_factor
+
+
+def _offense_strategy(robot, opponent, ball):
+    global offense_state 
+
+
+
+
+
+
+
 
 
 
