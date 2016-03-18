@@ -142,7 +142,6 @@ int main(int argc, char *argv[])
 
 	//get rid of noise
 	//video.erodeDilate(imgTemp);
-
 	// //find position and angle of robot
 	//video.initializeRobot(&robot, imgTemp);
 
@@ -587,18 +586,18 @@ bool initColors()
 		robot1LowS = 0;
 		robot1HighS = 78;
 
-		robot1LowV = 110;
+		robot1LowV = 207;
 		robot1HighV = 255;
 	}
 	else if (allycolor == "bc")
 	{
-		robot1LowH = 77;
-		robot1HighH = 111;
+		robot1LowH = 82;
+		robot1HighH = 116;
 
 		robot1LowS = 0;
-		robot1HighS = 87;
+		robot1HighS = 41;
 
-		robot1LowV = 230;
+		robot1LowV = 217;
 		robot1HighV = 255;
 	}
 	else if (allycolor == "b")
@@ -614,10 +613,10 @@ bool initColors()
 	}
 	else if (allycolor == "g")
 	{
-		robot1LowH = 46;
+		robot1LowH = 55;
 		robot1HighH = 94;
 
-		robot1LowS = 0;
+		robot1LowS = 40;
 		robot1HighS = 179;
 
 		robot1LowV = 186;
@@ -651,13 +650,13 @@ bool initColors()
 	}
 	else if (opponentcolor == "p")
 	{
-		robot2LowH = 125;
+		robot2LowH = 121;
 		robot2HighH = 164;
 
 		robot2LowS = 0;
 		robot2HighS = 78;
 
-		robot2LowV = 110;
+		robot2LowV = 207;
 		robot2HighV = 255;
 	}
 	else if (opponentcolor == "bc")
@@ -671,7 +670,7 @@ bool initColors()
 		robot2LowV = 230;
 		robot2HighV = 255;
 	}
-	else if (allycolor == "b")
+	else if (opponentcolor == "b")
 	{
 		robot2LowH = 81;
 		robot2HighH = 110;
@@ -684,10 +683,10 @@ bool initColors()
 	}
 	else if (opponentcolor == "g")
 	{
-		robot2LowH = 46;
+		robot2LowH = 55;
 		robot2HighH = 94;
 
-		robot2LowS = 0;
+		robot2LowS = 40;
 		robot2HighS = 179;
 
 		robot2LowV = 186;
