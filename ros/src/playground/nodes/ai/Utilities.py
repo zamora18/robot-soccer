@@ -70,8 +70,8 @@ def find_triangle(x1,y1,x2,y2):
     return (a,b,c,theta)
 
 def get_front_of_robot(robot):
-    x_pos = robot['xhat']+Constants.robot_half_width*cos(robot['thetahat']) ### thetahat is in degrees, so we should change from degree to radians?? ----------
-    y_pos = robot['yhat']+Constants.robot_half_width*sin(robot['thetahat'])
+    x_pos = robot['xhat']+Constants.robot_half_width*np.cos(robot['thetahat']) ### thetahat is in degrees, so we should change from degree to radians?? ----------
+    y_pos = robot['yhat']+Constants.robot_half_width*np.sin(robot['thetahat'])
 
     return (x_pos, y_pos)
 
