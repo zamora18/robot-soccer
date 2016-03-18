@@ -64,12 +64,26 @@ int ally1HighS;
 int ally1LowV;
 int ally1HighV;
 
+int ally2LowH;
+int ally2HighH;
+int ally2LowS;
+int ally2HighS;
+int ally2LowV;
+int ally2HighV;
+
 int opp1LowH;
 int opp1HighH;
 int opp1LowS;
 int opp1HighS;
 int opp1LowV;
 int opp1HighV;
+
+int opp2LowH;
+int opp2HighH;
+int opp2LowS;
+int opp2HighS;
+int opp2LowV;
+int opp2HighV;
 
 void* trackRobot(void* robotobject);
 
@@ -106,7 +120,9 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE);
 	namedWindow("Opp1Control", CV_WINDOW_AUTOSIZE);
+	namedWindow("Opp2Control", CV_WINDOW_AUTOSIZE);
 
 
 
@@ -130,12 +146,20 @@ int main(int argc, char *argv[])
 	//cvtColor(imgTemp, imgTemp, COLOR_BGR2HSV);
 
 	Robot ally1 = Robot();
-	ally1.setNodeIdent("ally");
+	ally1.setNodeIdent("ally1");
 	ally1.setMask(ALLY1_THREAD_MASK);
 
+	Robot ally2 = Robot();
+	ally2.setNodeIdent("ally2");
+	ally2.setMask(ALLY2_THREAD_MASK);
+
 	Robot opp1 = Robot();
-	opp1.setNodeIdent("opponent");
+	opp1.setNodeIdent("opponent1");
 	opp1.setMask(OPPONENT1_THREAD_MASK);
+
+	Robot opp2 = Robot();
+	opp2.setNodeIdent("opponent2");
+	opp2.setMask(OPPONENT2_THREAD_MASK);
 
 
 	VisionObject ball = VisionObject();
@@ -159,6 +183,7 @@ int main(int argc, char *argv[])
 	ballHighS = 200;
 	ballLowV = 132;
 	ballHighV = 255;
+
 
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("LowH", "BallControl", &ballLowH, 179); //Hue (0 - 179)
@@ -189,13 +214,34 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("LowV", "Opp1Control", &opp1LowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "Opp1Control", &opp1HighV, 255);
 
+	cvCreateTrackbar("LowH", "Ally2Control", &ally1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Ally2Control", &ally1HighH, 179);
+
+	cvCreateTrackbar("LowS", "Ally2Control", &ally1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Ally2Control", &ally1HighS, 255);
+
+	cvCreateTrackbar("LowV", "Ally2Control", &ally1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Ally2Control", &ally1HighV, 255);
+
+	cvCreateTrackbar("LowH", "Opp2Control", &opp1LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Opp2Control", &opp1HighH, 179);
+
+	cvCreateTrackbar("LowS", "Opp2Control", &opp1LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Opp2Control", &opp1HighS, 255);
+
+	cvCreateTrackbar("LowV", "Opp2Control", &opp1LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Opp2Control", &opp1HighV, 255);
+
 	//initialize threads
 
 	threadstatus = ALL_THREADS_DONE_MASK;
 
 
 	pthread_t ally1thread;
-	pthread_t robotoppthread;
+	pthread_t ally2thread;
+	pthread_t opp1thread;
+	pthread_t opp2thread;
+
 
 	pthread_cond_init(&robot1cond, NULL);
 	pthread_cond_init(&robot1done, NULL);
@@ -204,7 +250,9 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mrobot1done, NULL);
 
 	pthread_create(&ally1thread, NULL, trackRobot, &ally1);
-	pthread_create(&robotoppthread, NULL, trackRobot, &opp1);
+	pthread_create(&ally2thread, NULL, trackRobot, &ally2);
+	pthread_create(&opp1thread, NULL, trackRobot, &opp1);
+	pthread_create(&opp2thread, NULL, trackRobot, &opp2);
 
 
 
@@ -233,8 +281,15 @@ int main(int argc, char *argv[])
 
 		ally1.setLowHSV(Scalar(ally1LowH, ally1LowS, ally1LowV));
 		ally1.setHighHSV(Scalar(ally1HighH, ally1HighS, ally1HighV));
+
+		ally2.setLowHSV(Scalar(ally2LowH, ally2LowS, ally2LowV));
+		ally2.setHighHSV(Scalar(ally2HighH, ally2HighS, ally2HighV));
+
 		opp1.setLowHSV(Scalar(opp1LowH, opp1LowS, opp1LowV));
 		opp1.setHighHSV(Scalar(opp1HighH, opp1HighS, opp1HighV));
+
+		opp2.setLowHSV(Scalar(opp2LowH, opp2LowS, opp2LowV));
+		opp2.setHighHSV(Scalar(opp2HighH, opp2HighS, opp2HighV));
 
 		//cout << "cloning" << endl;
 
@@ -300,6 +355,8 @@ int main(int argc, char *argv[])
 
 		drawRobotLine(imgOriginal, ally1);
 		drawRobotLine(imgOriginal, opp1);
+		drawRobotLine(imgOriginal, ally2);
+		drawRobotLine(imgOriginal, opp2);
 		
 		if(!video.initializeBall(&ball, imgBallThresh) && away)
 			video.invertObjForAway(&ball);
@@ -324,11 +381,19 @@ int main(int argc, char *argv[])
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
+
+		Mat imgAlly2Thresh, imgOpp2Thresh;
 		if(showAlly1Thresh)
 		{
 			inRange(imgHSV, Scalar(ally1LowH, ally1LowS, ally1LowV), Scalar(ally1HighH, ally1HighS, ally1HighV), imgAlly1Thresh);
 			video.erodeDilate(imgAlly1Thresh);
 			imshow("robotthresh", imgAlly1Thresh);
+		}
+		if(showAlly2Thresh)
+		{
+			inRange(imgHSV, Scalar(ally2LowH, ally2LowS, ally2LowV), Scalar(ally2HighH, ally2HighS, ally2HighV), imgAlly2Thresh);
+			video.erodeDilate(imgAlly2Thresh);
+			imshow("robot2thresh", imgAlly2Thresh);
 		}
 		if (showBallThresh)
 		{
@@ -339,6 +404,12 @@ int main(int argc, char *argv[])
 			inRange(imgHSV, Scalar(opp1LowH, opp1LowS, opp1LowV), Scalar(opp1HighH, opp1HighS, opp1HighV), imgOpp1Thresh);
 			video.erodeDilate(imgOpp1Thresh);
 			imshow("opp1thresh", imgOpp1Thresh);//*/
+		}
+		if(showOpp2Thresh)
+		{
+			inRange(imgHSV, Scalar(opp2LowH, opp2LowS, opp2LowV), Scalar(opp2HighH, opp2HighS, opp2HighV), imgOpp2Thresh);
+			video.erodeDilate(imgOpp2Thresh);
+			imshow("opp2thresh", imgOpp2Thresh);//*/
 		}
 
 
@@ -405,7 +476,9 @@ int main(int argc, char *argv[])
 	//pthread_exit(NULL);
 	int exitstatus = 1;
 	exitstatus = pthread_cancel(ally1thread);
-	exitstatus |= pthread_cancel(robotoppthread);
+	exitstatus |= pthread_cancel(ally2thread);
+	exitstatus |= pthread_cancel(opp1thread);
+	exitstatus |= pthread_cancel(opp2thread);
 	pthread_mutex_destroy(&mrobot1cond);
 	pthread_mutex_destroy(&mrobot1done);
 	pthread_cond_destroy(&robot1cond);
@@ -423,8 +496,9 @@ void* trackRobot(void* robotobject)
 	ImageProcessor video = ImageProcessor(scalingfactor, center);
 	ros::NodeHandle n;
 	stringstream ss;
-	ss << "vision_" << robot->getNodeIdent() << "_position";
-	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>(ss.str(), 5);
+	cout << "there should be something = " << robot->getNodeIdent() << endl;
+	//ss << "vision_" << robot->getNodeIdent() << "_position";
+	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>("vision_" + robot->getNodeIdent() + "_position", 5);
 	int c = 0;
 	while(1)
 	{
@@ -554,14 +628,20 @@ Point2d threshholdBox(VisionObject obj, Mat* img)
 bool initColors()
 {
 		// put in the values of the thing
-	string allycolor, opponentcolor;
+	string ally1color, ally2color, opp1color, opp2color;
 	cout << "Ally1 Color :";
-	cin >> allycolor;
+	cin >> ally1color;
+
+	cout << "Ally2 Color :";
+	cin >> ally2color;
 
 	cout << "OPP1 Color :";
-	cin >> opponentcolor;
+	cin >> opp1color;
 
-	if (allycolor == "r")
+	cout << "OPP2 Color :";
+	cin >> opp2color;
+
+	if (ally1color == "r")
 	{
 		ally1LowH = 0;
 		ally1HighH = 179;
@@ -572,7 +652,7 @@ bool initColors()
 		ally1LowV = 226;
 		ally1HighV = 255;
 	}
-	else if (allycolor == "o")
+	else if (ally1color == "o")
 	{
 		ally1LowH = 10;
 		ally1HighH = 24;
@@ -583,7 +663,7 @@ bool initColors()
 		ally1LowV = 207;
 		ally1HighV = 255;
 	}
-	else if (allycolor == "p")
+	else if (ally1color == "p")
 	{
 		ally1LowH = 125;
 		ally1HighH = 164;
@@ -594,7 +674,7 @@ bool initColors()
 		ally1LowV = 200;
 		ally1HighV = 255;
 	}
-	else if (allycolor == "bc")
+	else if (ally1color == "bc")
 	{
 		ally1LowH = 77;
 		ally1HighH = 111;
@@ -605,7 +685,7 @@ bool initColors()
 		ally1LowV = 230;
 		ally1HighV = 255;
 	}
-	else if (allycolor == "b")
+	else if (ally1color == "b")
 	{
 		ally1LowH = 81;
 		ally1HighH = 110;
@@ -616,7 +696,7 @@ bool initColors()
 		ally1LowV = 189;
 		ally1HighV = 255;
 	}
-	else if (allycolor == "g")
+	else if (ally1color == "g")
 	{
 		ally1LowH = 46;
 		ally1HighH = 94;
@@ -630,8 +710,8 @@ bool initColors()
 	else
 		return false;
 
-	// opponent colors
-	if (opponentcolor == "r")
+	// opp1 colors
+	if (opp1color == "r")
 	{
 		opp1LowH = 0;
 		opp1HighH = 179;
@@ -642,7 +722,7 @@ bool initColors()
 		opp1LowV = 226;
 		opp1HighV = 255;
 	}
-	else if (opponentcolor == "o")
+	else if (opp1color == "o")
 	{
 		opp1LowH = 10;
 		opp1HighH = 24;
@@ -653,7 +733,7 @@ bool initColors()
 		opp1LowV = 207;
 		opp1HighV = 255;
 	}
-	else if (opponentcolor == "p")
+	else if (opp1color == "p")
 	{
 		opp1LowH = 125;
 		opp1HighH = 164;
@@ -664,7 +744,7 @@ bool initColors()
 		opp1LowV = 200;
 		opp1HighV = 255;
 	}
-	else if (opponentcolor == "bc")
+	else if (opp1color == "bc")
 	{
 		opp1LowH = 77;
 		opp1HighH = 111;
@@ -675,7 +755,7 @@ bool initColors()
 		opp1LowV = 230;
 		opp1HighV = 255;
 	}
-	else if (allycolor == "b")
+	else if (opp1color == "b")
 	{
 		opp1LowH = 81;
 		opp1HighH = 110;
@@ -686,7 +766,7 @@ bool initColors()
 		opp1LowV = 189;
 		opp1HighV = 255;
 	}
-	else if (opponentcolor == "g")
+	else if (opp1color == "g")
 	{
 		opp1LowH = 46;
 		opp1HighH = 94;
@@ -700,7 +780,7 @@ bool initColors()
 	else
 		return false;
 
-	if(allycolor == opponentcolor)
+	if(allycolor == opp1color)
 		return false;
 	return true;
 }
