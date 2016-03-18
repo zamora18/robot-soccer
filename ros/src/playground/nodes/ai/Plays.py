@@ -45,7 +45,7 @@ def shoot(robot, ball, distance_from_center):
         distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball['xhat'], ball['yhat'])
 
         # if the ball is behind the robot, go back to set up
-        if (Utilities.is_ball_behind_robot(robot, ball): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
+        if (Utilities.is_ball_behind_robot(robot, ball)): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
             _shoot_state = ShootState.setup
         # if the ball is close enough, go to the shoot state
         elif(distance_from_kicker_to_ball <  0.08):
