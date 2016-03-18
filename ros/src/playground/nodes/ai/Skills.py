@@ -1,5 +1,8 @@
-import os
+import time
 import numpy as np
+
+import rospy
+from std_srvs.srv import Trigger
 
 import Utilities
 import Constants
@@ -10,14 +13,17 @@ _distance_behind_ball_for_dribbling = Constants.robot_width/2 + .05
 _distance_from_goal_for_arc_defense = Constants.goal_box_width + Constants.robot_width *2
 _distance_behind_ball_approach      = .3
 
-_kicker_count = 0
 
-# actuates solenoid
 def kick():
-    global _kicker_count
-    _kicker_count = _kicker_count + 1
-    print("Actuate: {}".format(_kicker_count))
-    os.system("echo 1 > /sys/class/gpio/gpio200/value; sleep .1; echo 0 > /sys/class/gpio/gpio200/value")
+    """Kick
+
+    Send a service call to kick the ball.
+    """
+    try:
+        kick_srv = rospy.ServiceProxy('/kick', Trigger)
+        kick_srv()
+    except rospy.ServiceException, e:
+        print "Kick service call failed: %s"%e
 
 def dribble_forward(robot, ball):
     x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])
@@ -82,9 +88,12 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     return (x_c, y_c, theta_c)
 
 def attack_ball(robot, ball):
-    a,b,c,theta = Utilities.find_triangle(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-    x_c = _distance_behind_ball_approach * np.cos(theta*np.pi/180) + a + ball['xhat']
-    y_c = _distance_behind_ball_approach * np.sin(theta*np.pi/180) + b + ball['yhat']
+    """
+    Simply pushes the ball along the "vector" from robot to ball
+    """
+    theta = Utilities.get_angle_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
+    x_c = ball['xhat'] + Constants.kick_dist*np.cos(theta)  		#*np.pi/180 <-- took this out of theta
+    y_c = ball['yhat'] + Constants.kick_dist*np.sin(theta) 		#*np.pi/180 <-- took this out of theta
     theta = Utilities.rad_to_deg(theta)
     
     return (x_c, y_c, theta)

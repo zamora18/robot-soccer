@@ -100,7 +100,7 @@ namespace gazebo
 		ros::NodeHandle node_handle;
 		ros::Subscriber command_sub;
 		ros::Publisher score_pub;
-		geometry_msgs::Vector3 command_msg;\
+		geometry_msgs::Vector3 command_msg;
 		bool newMessage;
 		int scoreHome;
 		int scoreAway;

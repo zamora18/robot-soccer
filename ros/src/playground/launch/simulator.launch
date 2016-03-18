@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
+    <param name="simulation_mode" type="bool" value="true" />
+
     <!-- Soccer Gazebo Simulator -->
     <include file="$(find soccersim)/launch/soccer.launch">
         <arg name="vision_home1" value="/vision_ally_position" />

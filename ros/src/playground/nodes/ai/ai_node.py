@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
 from std_msgs.msg import Bool
-from playground.msg import BallState
+from playground.msg import BallState, RobotState
 
 import numpy as np
 
@@ -17,10 +17,15 @@ _opponent = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
 _was_goal = False
 
 
-def _handle_estimated_robot_position(msg):
-    _robot['xhat'] = msg.x
-    _robot['yhat'] = msg.y
-    _robot['thetahat'] = msg.theta
+def _handle_robot_state(msg):
+    _robot['xhat'] = msg.xhat
+    _robot['yhat'] = msg.yhat
+    _robot['thetahat'] = msg.thetahat
+
+    _robot['xhat_future'] = msg.xhat_future
+    _robot['yhat_future'] = msg.yhat_future
+    _robot['thetahat_future'] = msg.thetahat_future
+
 
 def _handle_opponent_position(msg):
     _opponent['xhat'] = msg.x
@@ -40,7 +45,7 @@ def _handle_goal(msg):
 def main():
     rospy.init_node('ai', anonymous=False)
 
-    rospy.Subscriber('estimated_robot_position', Pose2D, _handle_estimated_robot_position)
+    rospy.Subscriber('robot_state', RobotState, _handle_robot_state)
     rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
     rospy.Subscriber('goal', Bool, _handle_goal)

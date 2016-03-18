@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 08-Mar-2016 19:37:52
+% Last Modified by GUIDE v2.5 15-Mar-2016 22:18:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,8 @@ function main_OpeningFcn(hObject, eventdata, handles, varargin)
 % Clear globals
 global ball
 ball = [];
+global bot
+bot = [];
 
 global view_resp
 view_resp = false;
@@ -69,6 +71,7 @@ handles.plot_position = plot(handles.fig_position,0,0);
 hold(handles.fig_position,'on');
 handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
 handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
+handles.plot_bot_vision = plot(handles.fig_position,0,0,'k*');
 set(handles.fig_position,'XLim',[-2 2],'YLim',[-1.6 1.6]);
 daspect(handles.fig_position, [1 1 1]);
 xlabel(handles.fig_position, 'width (meters)');
@@ -93,16 +96,15 @@ set(handles.table_ball_vision,'Data', {0 0 0});
 set(handles.table_ball_estimate,'Data', {0 0 0});
 
 % Setup ROS Subscribers
-handles.sub.vision_robot_position = rossubscriber('/vision_robot_position', 'geometry_msgs/Pose2D', {@visionRobotPositionCallback,handles});
+handles.sub.vision_robot_position = rossubscriber('/robot_state', 'playground/RobotState', {@robotStateCallback,handles});
 handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
 handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
 handles.sub.error = rossubscriber('/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
-handles.sub.vision_ball_position = rossubscriber('/vision_ball_position', 'geometry_msgs/Pose2D', {@visionBallPositionCallback,handles});
 handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
 
 % And Publishers
-handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D');
+handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -133,24 +135,37 @@ clear handles.pub
 % The GUI is no longer waiting, just close it
 delete(hObject);
 
-function visionRobotPositionCallback(src, msg, handles)
+function robotStateCallback(src, msg, handles)
 
     if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
         return
     end
     
+    % Save for when we are clicking to drive
     global pos
-    pos = [msg.X msg.Y msg.Theta];
+    pos = [msg.Xhat msg.Yhat msg.Thetahat];
+    
+    global bot
+    bot = [bot msg];
 
     x = get(handles.plot_position,'XData');
     y = get(handles.plot_position,'YData');
-    x = [x msg.X];
-    y = [y msg.Y];
+    x = [x msg.Xhat];
+    y = [y msg.Yhat];
     set(handles.plot_position,'XData',x,'YData',y);
     
     set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
 
-    set(handles.table_position,'Data', {msg.X msg.Y msg.Theta});
+    set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
+    
+%     % Predicted (red X)
+%     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
+%     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
+    
+    % Estimated (black asterisk)
+    if msg.Correction
+        set(handles.plot_bot_vision,'XData', msg.VisionX, 'YData', msg.VisionY);
+    end
     
 function desiredPositionCallback(src, msg, handles)
     if ~ishandle(handles.table_desired_position)
@@ -239,28 +254,29 @@ function pidInfoCB(src, msg, handles)
         
     end
     
-function visionBallPositionCallback(src, msg, handles)
-    if ~ishandle(handles.table_ball_vision)
-        return
-    end
-    
-    set(handles.plot_ball_vision,'XData', msg.X, 'YData', msg.Y);
-
-    set(handles.table_ball_vision,'Data', {msg.X msg.Y});
-    
-    
 function ballStateCallback(src, msg, handles)
-    if ~ishandle(handles.table_ball_estimate)
+    if ~ishandle(handles.table_ball_estimate) ...
+            ||  ~ishandle(handles.table_ball_vision)
         return
     end
     
-    % For grabbing ball data ot analyze later
+    % For grabbing ball data to analyze later
     global ball
     ball = [ball msg];
 
+    % Predicted (red X)
     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
-    
     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
+    
+    % Estimated (green circle)
+    set(handles.plot_ball_vision,'XData', msg.Xhat, 'YData', msg.Yhat);
+    set(handles.table_ball_vision,'Data', {msg.Xhat msg.Yhat});
+    
+    % Plot vision measured?
+    % You'd have to use the bool 'Correction' to know if you should plot it
+    % or not, as these come in faster than the camera. basically, if you
+    % just straight plot these measurements it will jump between its
+    % position and 0
     
 
 
@@ -425,3 +441,15 @@ view_resp_start = true;
 view_resp = ~view_resp;
 
 disp(view_resp);
+
+
+% --- Executes on button press in btn_kick.
+function btn_kick_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_kick (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    handles = guidata(hObject);
+    
+    kick = rossvcclient('/kick');
+    req = rosmessage(kick);
+    resp = call(kick,req,'Timeout',3);

@@ -9,7 +9,6 @@
 #include <pthread.h>
 
 #include <ros/ros.h>
-#include "playground/coords.h"
 
 #define ESC 1048603
 #define a_KEY 1048673
