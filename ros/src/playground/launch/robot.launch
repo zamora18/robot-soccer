@@ -5,22 +5,24 @@
     <arg name="role" default="BIG_MAC" />
     
     <!-- Hardware agnostic code -->
-    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py" />
-    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py">
-        <remap from="robot_estimator" to="ally1_estimator" />
-        <remap from="vision_position" to="vision_ally1_position" />
+    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py">
+        <remap from="vision_position" to="/vision_ball_position" />
     </node>
-    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py">
-        <remap from="robot_estimator" to="ally2_estimator" />
-        <remap from="vision_position" to="vision_ally2_position" />
+    <node name="ally1_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_ally1_position" />
+        <remap from="robot_state" to="ally1_state" />
     </node>
-    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py">
-        <remap from="robot_estimator" to="opponent1_estimator" />
-        <remap from="vision_position" to="vision_opponent1_position" />
+    <node name="ally2_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_ally2_position" />
+        <remap from="robot_state" to="ally2_state" />
     </node>
-    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py">
-        <remap from="robot_estimator" to="opponent2_estimator" />
-        <remap from="vision_position" to="vision_opponent2_position" />
+    <node name="opponent1_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_opponent1_position" />
+        <remap from="robot_state" to="opponent1_state" />
+    </node>
+    <node name="opponent2_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_opponent2_position" />
+        <remap from="robot_state" to="opponent2_state" />
     </node>
     <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
     <node name="controller" pkg="playground" type="controller_node.py">
