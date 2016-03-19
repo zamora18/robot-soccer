@@ -96,15 +96,15 @@ set(handles.table_ball_vision,'Data', {0 0 0});
 set(handles.table_ball_estimate,'Data', {0 0 0});
 
 % Setup ROS Subscribers
-handles.sub.vision_robot_position = rossubscriber('/robot_state', 'playground/RobotState', {@robotStateCallback,handles});
-handles.sub.desired_position = rossubscriber('/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
-handles.sub.vel_cmds = rossubscriber('/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
-handles.sub.error = rossubscriber('/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
-handles.sub.ball_state = rossubscriber('/ball_state', 'playground/BallState', {@ballStateCallback,handles});
+handles.sub.vision_robot_position = rossubscriber('/ally1/ally1_state', 'playground/RobotState', {@robotStateCallback,handles});
+handles.sub.desired_position = rossubscriber('/ally1/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
+handles.sub.vel_cmds = rossubscriber('/ally1/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
+handles.sub.error = rossubscriber('/ally1/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
+handles.sub.ball_state = rossubscriber('/ally1/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
 
 % And Publishers
-handles.pub.desired_position = rospublisher('/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
+handles.pub.desired_position = rospublisher('/ally1/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
 
 % Update handles structure
 guidata(hObject, handles);

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- declare arg to be passed in -->
+    <arg name="me" default="ally1" />
+    <arg name="ally" default="ally2" />
+    
+    <!-- Hardware agnostic code -->
+    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py">
+        <remap from="vision_position" to="/vision_ball_position" />
+    </node>
+    <node name="ally1_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_ally1_position" />
+        <remap from="robot_state" to="ally1_state" />
+    </node>
+    <node name="ally2_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_ally2_position" />
+        <remap from="robot_state" to="ally2_state" />
+    </node>
+    <node name="opponent1_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_opponent1_position" />
+        <remap from="robot_state" to="opponent1_state" />
+    </node>
+    <node name="opponent2_estimator" pkg="playground" type="robot_estimator_node.py">
+        <remap from="vision_position" to="/vision_opponent2_position" />
+        <remap from="robot_state" to="opponent2_state" />
+    </node>
+    <node name="ai" pkg="playground" type="ai_node.py">
+        <remap from="my_state" to="$(arg me)_state" />
+        <remap from="ally_state" to="$(arg ally)_state" />
+    </node>
+    <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
+    <node name="controller" pkg="playground" type="controller_node.py">
+        <remap from="robot_state" to="$(arg me)_state" />
+        <remap from="desired_position" to="desired_position_safe" />
+    </node>
+
+    <!-- Hardware Dependent -->
+    <node name="motion" pkg="playground" type="motion_node.py">
+        <remap from="robot_state" to="$(arg me)_state" />
+    </node>
+</launch>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <group ns="/ally1">
+    <group ns="/ally2">
 
         <!-- Set ROS Params -->
         <param name="robot_estimator_on" type="bool" value="false" />
@@ -9,8 +9,8 @@
 
         <!-- Start the robot up -->
         <include file="$(find playground)/launch/robot.launch">
-            <arg name="me" value="ally1" />
-            <arg name="ally" value="ally2" />
+            <arg name="me" value="ally2" />
+            <arg name="ally" value="ally1" />
         </include>
 
     </group>
