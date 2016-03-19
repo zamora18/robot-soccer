@@ -2,7 +2,8 @@
 <launch>
 
     <!-- declare arg to be passed in -->
-    <arg name="role" default="BIG_MAC" />
+    <arg name="me" default="ally1" />
+    <arg name="ally" default="ally2" />
     
     <!-- Hardware agnostic code -->
     <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py">
@@ -30,9 +31,12 @@
     </node>
     <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
     <node name="controller" pkg="playground" type="controller_node.py">
+        <remap from="robot_state" to="$(arg me)_state" />
         <remap from="desired_position" to="desired_position_safe" />
     </node>
 
     <!-- Hardware Dependent -->
-    <node name="motion" pkg="playground" type="motion_node.py" />
+    <node name="motion" pkg="playground" type="motion_node.py">
+        <remap from="robot_state" to="$(arg me)_state" />
+    </node>
 </launch>
