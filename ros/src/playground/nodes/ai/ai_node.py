@@ -10,21 +10,19 @@ import numpy as np
 
 import Strategy
 
-_robot = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
-_ball  = { 'xhat': 0, 'yhat': 0, 'xhat_future': 0, 'yhat_future': 0 }
-_opponent = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
+# _robot = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
+# _ball  = { 'xhat': 0, 'yhat': 0, 'xhat_future': 0, 'yhat_future': 0 }
+# _opponent = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 
+
+_ally1 = None
+
 
 _was_goal = False
 
 
 def _handle_robot_state(msg):
-    _robot['xhat'] = msg.xhat
-    _robot['yhat'] = msg.yhat
-    _robot['thetahat'] = msg.thetahat
-
-    _robot['xhat_future'] = msg.xhat_future
-    _robot['yhat_future'] = msg.yhat_future
-    _robot['thetahat_future'] = msg.thetahat_future
+    # Update the robot's current and future positions
+    _ally1.update_state(msg)
 
 
 def _handle_opponent_position(msg):
@@ -51,7 +49,13 @@ def main():
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
-    global _was_goal
+    global _was_goal, _ally1
+
+    # Create ...
+
+    role = Robot.BIG_MAC if rospy.get_param('role') == 'BIG_MAC' else Robot.HAPPY_MEAL
+
+    _ally1 = Robot(role)
 
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
