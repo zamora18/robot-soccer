@@ -51,7 +51,3 @@
   <include file="$(find soccersim)/launch/ball.launch">
   </include>
 </launch>
-
-
-
-

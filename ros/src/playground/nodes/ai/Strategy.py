@@ -50,7 +50,12 @@ def choose_strategy(robot, opponent, ball, goal):
     #if not Plays.is_trick_play_complete():
     #    return Plays.trick_play(robot, ball)
     #else:
-    return _aggressive_offense(robot, opponent, ball)
+
+
+    if rospy.get_param('captain'):
+        return _aggressive_offense(robot, opponent, ball)
+    else:
+        return _aag
     #return Plays.shoot(robot, ball,0)
 
 
