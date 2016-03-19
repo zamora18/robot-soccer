@@ -12,12 +12,12 @@ class BallEstimator(LowPassFilter):
     State Definition:
         x = (x y)'
     """
-    def __init__(self):
+    def __init__(self, _alpha=None, _tau=None, _update_type=None):
 
         T_ctrl = 1/100.0
-        alpha = 0.75
-        tau = 0.075
-        update_type = LowPassFilter.UPDATE_SIMPLE
+        alpha = 0.75 if _alpha is None else _alpha
+        tau = 0.075 if _tau is None else _tau
+        update_type = LowPassFilter.UPDATE_SIMPLE if _update_type is None else _update_type
         N = 2
 
         super(BallEstimator, self).__init__(T_ctrl, alpha, tau, update_type, N)

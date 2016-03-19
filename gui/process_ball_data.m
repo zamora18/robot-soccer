@@ -1,5 +1,6 @@
-% clear; close all; clc;
-load('data/ball07.mat');
+clear; clc;
+rerun = 0;
+load('data/ball08_rerun.mat');
 
 % Tcamera=1/30;
 % Tcontrol1/100;
@@ -43,7 +44,13 @@ corrections_y = (corrections-1) + mean(yhat);
 figure(1); clf;
 ax1 = subplot(411);
 plot(t,xhat,t,xhat_future,x_t,x);
-legend('estimated','predicted','camera');
+if rerun
+    hold on;
+    plot(t,xhat_rerun);
+    plot(t,xhat_future_rerun);
+    hold off
+end
+legend('estimated','predicted','camera','rerun','predicted rerun');
 xlim([0 t(end)]);
 title('x-position');
 xlabel('time (s)');
@@ -61,7 +68,13 @@ ylabel('Velocity (m/s)');
 
 ax3 = subplot(413);
 plot(t,yhat,t,yhat_future,y_t,y);
-legend('estimated','predicted','camera');
+if rerun
+    hold on;
+    plot(t,yhat_rerun);
+    plot(t,yhat_future_rerun);
+    hold off
+end
+legend('estimated','predicted','camera','rerun','predicted rerun');
 xlim([0 t(end)]);
 title('y-position');
 xlabel('time (s)');

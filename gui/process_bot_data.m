@@ -1,4 +1,5 @@
-% clear; close all; clc;
+clear; clc
+rerun = 0;
 load('data/ally07_rerun.mat');
 
 Tcamera=1/30;Tcontrol=1/100;
@@ -51,7 +52,7 @@ if rerun
     plot(t,xhat_future_rerun);
     hold off
 end
-legend('estimated','predicted','camera','rerun', 'predicted rerun');
+legend('estimated','predicted','camera','rerun','predicted rerun');
 xlim([0 t(end)]);
 title('x-position');
 xlabel('time (s)');
