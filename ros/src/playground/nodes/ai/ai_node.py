@@ -9,11 +9,14 @@ from playground.msg import BallState, RobotState
 import numpy as np
 
 import Strategy
+from Robot import Robot
 
 _me = None
 _ally = None
 _opp1 = None
 _opp2 = None
+
+_ball = {'xhat': 0}
 
 _was_goal = False
 
@@ -71,7 +74,6 @@ def main():
     rospy.Subscriber('opponent1_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp1'))
     rospy.Subscriber('opponent2_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp2'))
 
-    rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
@@ -81,12 +83,12 @@ def main():
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball, _was_goal)
-        msg = Pose2D()
-        msg.x = x_c
-        msg.y = y_c
-        msg.theta = theta_c
-        pub.publish(msg)
+        #(x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball, _was_goal)
+        #msg = Pose2D()
+        #msg.x = x_c
+        #msg.y = y_c
+        #msg.theta = theta_c
+        #pub.publish(msg)
 
         _was_goal = False
 
