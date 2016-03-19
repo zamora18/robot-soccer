@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE);
+	namedWindow("Ally2Control", CV_WINDOW_AUTOSIZE);
 	namedWindow("Opp1Control", CV_WINDOW_AUTOSIZE);
 	namedWindow("Opp2Control", CV_WINDOW_AUTOSIZE);
 
@@ -214,23 +214,23 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("LowV", "Opp1Control", &opp1LowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "Opp1Control", &opp1HighV, 255);
 
-	cvCreateTrackbar("LowH", "Ally2Control", &ally1LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Ally2Control", &ally1HighH, 179);
+	cvCreateTrackbar("LowH", "Ally2Control", &ally2LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Ally2Control", &ally2HighH, 179);
 
-	cvCreateTrackbar("LowS", "Ally2Control", &ally1LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Ally2Control", &ally1HighS, 255);
+	cvCreateTrackbar("LowS", "Ally2Control", &ally2LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Ally2Control", &ally2HighS, 255);
 
-	cvCreateTrackbar("LowV", "Ally2Control", &ally1LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Ally2Control", &ally1HighV, 255);
+	cvCreateTrackbar("LowV", "Ally2Control", &ally2LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Ally2Control", &ally2HighV, 255);
 
-	cvCreateTrackbar("LowH", "Opp2Control", &opp1LowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Opp2Control", &opp1HighH, 179);
+	cvCreateTrackbar("LowH", "Opp2Control", &opp2LowH, 179); //Hue (0 - 179)
+	cvCreateTrackbar("HighH", "Opp2Control", &opp2HighH, 179);
 
-	cvCreateTrackbar("LowS", "Opp2Control", &opp1LowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Opp2Control", &opp1HighS, 255);
+	cvCreateTrackbar("LowS", "Opp2Control", &opp2LowS, 255); //Saturation (0 - 255)
+	cvCreateTrackbar("HighS", "Opp2Control", &opp2HighS, 255);
 
-	cvCreateTrackbar("LowV", "Opp2Control", &opp1LowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Opp2Control", &opp1HighV, 255);
+	cvCreateTrackbar("LowV", "Opp2Control", &opp2LowV, 255); //Value (0 - 255)
+	cvCreateTrackbar("HighV", "Opp2Control", &opp2HighV, 255);
 
 	//initialize threads
 
@@ -780,7 +780,7 @@ bool initColors()
 	else
 		return false;
 
-	if(allycolor == opp1color)
+	if(ally1color == opp1color)
 		return false;
 	return true;
 }

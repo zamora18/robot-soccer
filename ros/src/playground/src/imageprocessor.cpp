@@ -183,8 +183,8 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 
 	robot->setOrientation(angle);
 
-	p1.x += boxloc.x;
-	p1.y += boxloc.y;
+	p1.x = (p1.x + p2.x)/2;
+	p1.y = (p1.y + p2.y)/2;
 
 	robot->setLocation(imageToFieldTransform(p1));
 
