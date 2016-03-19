@@ -9,7 +9,8 @@
 
         <!-- Start the robot up -->
         <include file="$(find playground)/launch/robot.launch">
-            <arg name="role" type="string" value="BIG_MAC" />
+            <arg name="me" value="ally1" />
+            <arg name="ally" value="ally2" />
         </include>
 
     </group>
