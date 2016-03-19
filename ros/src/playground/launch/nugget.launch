@@ -1,19 +1,16 @@
 <?xml version="1.0"?>
 <launch>
 
-    <param name="robot_estimator_on" type="bool" value="false" />
-    <param name="go_rogue" type="bool" value="false" />
-    
-    <node name="motion" pkg="playground" type="motion_node.py" />
-    <!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->
-    <node name="controller" pkg="playground" type="controller_node.py">
-        <remap from="desired_position" to="desired_position_safe" />
-    </node>
-    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py" />
-    <node name="robot_estimator" pkg="playground" type="robot_estimator_node.py" output="screen">
-        <remap from="vision_position" to="vision_ally_position" />
-    </node>
-    <!-- <node name="hack" pkg="playground" type="hack_node.py" /> -->
-    <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
-    <!-- <node name="teleop" pkg="playground" type="teleop_node.py" /> -->
+    <group ns="/ally1">
+
+        <!-- Set ROS Params -->
+        <param name="robot_estimator_on" type="bool" value="false" />
+        <param name="go_rogue" type="bool" value="false" />
+
+        <!-- Start the robot up -->
+        <include file="$(find playground)/launch/robot.launch">
+            <arg name="role" type="string" value="BIG_MAC" />
+        </include>
+
+    </group>
 </launch>
