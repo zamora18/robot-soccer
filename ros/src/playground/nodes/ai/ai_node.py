@@ -10,25 +10,24 @@ import numpy as np
 
 import Strategy
 
-# _robot = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 }
-# _ball  = { 'xhat': 0, 'yhat': 0, 'xhat_future': 0, 'yhat_future': 0 }
-# _opponent = { 'xhat': 0, 'yhat': 0, 'thetahat': 0 
-
-_ally1 = None
-
+_me = None
+_ally = None
+_opp1 = None
+_opp2 = None
 
 _was_goal = False
 
 
-def _handle_robot_state(msg):
-    # Update the robot's current and future positions
-    _ally1.update_state(msg)
-
-
-def _handle_opponent_position(msg):
-    _opponent['xhat'] = msg.x
-    _opponent['yhat'] = msg.y
-    _opponent['thetahat'] = msg.theta
+def _handle_robot_state(msg, which_robot):
+    # Update the given robot's current and future positions
+    if which_robot == 'me':
+        _me.update_state(msg)
+    elif which_robot == 'ally':
+        _ally.update_state(msg)
+    elif which_robot == 'opp1':
+        _opp1.update_state(msg)
+    elif which_robot == 'opp2':
+        _opp2.update_state(msg)
 
 def _handle_ball_state(msg):
     _ball['xhat'] = msg.xhat
@@ -40,22 +39,44 @@ def _handle_goal(msg):
     global _was_goal
     _was_goal = msg.data
 
+def _create_robots():
+    """Create Robots
+    This function uses the namespace of the node to know whether
+    this code is running on ally1 (Nugget) or ally2 (Fry).
+    Since `am_i_ally1` and `am_i_ally2` are mutually exclusive,
+    after creating the `_me` robot object, `_ally` has the
+    opposite designation than `_me`.
+
+    For example, if `am_i_ally1` is True, then `am_i_ally2` must
+    be False. Thus, `_me` will be ally1 and `_ally` will be ally2.
+    """
+    global  _me, _ally, _opp1, _opp2
+    am_i_ally1 = rospy.get_namespace() == 'ally1'
+    am_i_ally2 = rospy.get_namespace() == 'ally2'
+
+    _me = Robot(ally1=am_i_ally1, ally2=am_i_ally2)
+    _ally = Robot(ally1=(not am_i_ally1), ally2=(not am_i_ally2))
+    _opp1 = Robot()
+    _opp2 = Robot()
+
 def main():
     rospy.init_node('ai', anonymous=False)
 
-    rospy.Subscriber('robot_state', RobotState, _handle_robot_state)
+    # Create robot objects that store that current robot's state
+    _create_robots()
+
+    # Subscribe to Robot States
+    rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
+    rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
+    rospy.Subscriber('opponent1_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp1'))
+    rospy.Subscriber('opponent2_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp2'))
+
     rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
-    global _was_goal, _ally1
-
-    # Create ...
-
-    role = Robot.BIG_MAC if rospy.get_param('role') == 'BIG_MAC' else Robot.HAPPY_MEAL
-
-    _ally1 = Robot(role)
+    global _was_goal
 
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():

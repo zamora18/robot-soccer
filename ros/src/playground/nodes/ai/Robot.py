@@ -3,7 +3,7 @@ class Robot(object):
 	BIG_MAC = 0
 	HAPPY_MEAL = 1
 	OPPONENT = 2
-	def __init__(self, role):
+	def __init__(self, ally1=False, ally2=False):
 		super(Robot, self).__init__()
 		self.role = role
 
