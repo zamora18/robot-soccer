@@ -62,6 +62,7 @@ add_message_files(
   WorldVelocities.msg
   BallState.msg
   RobotState.msg
+  PIDInfo.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -82,6 +83,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   std_srvs
+  geometry_msgs
 )
 
 ################################################

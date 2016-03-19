@@ -9,7 +9,6 @@
 #include <pthread.h>
 
 #include <ros/ros.h>
-#include "playground/coords.h"
 
 #define ESC 1048603
 #define a_KEY 1048673
@@ -37,6 +36,12 @@ bool done1, start1;
 int threadstatus;
 bool away;
 
+bool showAlly1Thresh = false;
+bool showAlly2Thresh = false;
+bool showOpp1Thresh = false;
+bool showOpp2Thresh = false;
+bool showBallThresh = false;
+
 double scalingfactor;
 Point2d center;
 
@@ -60,7 +65,7 @@ int robot2HighH;
 int robot2LowS;
 int robot2HighS;
 int robot2LowV;
-int robot2HighV;	
+int robot2HighV;
 
 void* trackRobot(void* robotobject);
 
@@ -259,9 +264,11 @@ int main(int argc, char *argv[])
 
 
 		//thresh hold the image
-		// inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+
+
+		
 		inRange(imgHSV, Scalar(ballLowH, ballLowS, ballLowV), Scalar(ballHighH, ballHighS, ballHighV), imgBallThresh);
-		// inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+		
 
 
 
@@ -273,10 +280,7 @@ int main(int argc, char *argv[])
 		//otsu thresholding
 		//threshold(imgBW, imgBW, 0,255, THRESHopencv draw line between points_BINARY | THRESH_OTSU);
 
-
-		// video.erodeDilate(imgRobotThresh);
 		 video.erodeDilate(imgBallThresh);
-		// video.erodeDilate(imgRobot2Thresh);
 
 		// video.initializeRobot(&robot, imgRobotThresh);		
 		
@@ -316,9 +320,22 @@ int main(int argc, char *argv[])
 		// show the original image with tracking line
 		imshow("Raw Image", imgOriginal);
 		//show the new image
-		// imshow("robotthresh", imgRobotThresh);
-		// imshow("ballthresh", imgBallThresh);
-		// imshow("robot2thresh", imgRobot2Thresh);//*/
+		if(showAlly1Thresh)
+		{
+			inRange(imgHSV, Scalar(robot1LowH, robot1LowS, robot1LowV), Scalar(robot1HighH, robot1HighS, robot1HighV), imgRobotThresh);
+			video.erodeDilate(imgRobotThresh);
+			imshow("robotthresh", imgRobotThresh);
+		}
+		if (showBallThresh)
+		{
+			imshow("ballthresh", imgBallThresh);
+		}
+		if(showOpp1Thresh)
+		{
+			inRange(imgHSV, Scalar(robot2LowH, robot2LowS, robot2LowV), Scalar(robot2HighH, robot2HighS, robot2HighV), imgRobot2Thresh);
+			video.erodeDilate(imgRobot2Thresh);
+			imshow("robot2thresh", imgRobot2Thresh);//*/
+		}
 
 
 		//imshow("BWOTSU", imgBW);
@@ -339,6 +356,26 @@ int main(int argc, char *argv[])
 		else if(keypress % 256 == 'h' || keypress == 'h')
 		{
 			away = false;
+		}
+		else if(keypress % 256 == '1' || keypress == '1')
+		{
+			showAlly1Thresh = !showAlly1Thresh;
+		}
+		else if(keypress % 256 == '2' || keypress == '2')
+		{
+			showAlly2Thresh = !showAlly2Thresh;
+		}
+		else if(keypress % 256 == '3' || keypress == '3')
+		{
+			showOpp1Thresh = !showOpp1Thresh;
+		}
+		else if(keypress % 256 == '4' || keypress == '4')
+		{
+			showOpp2Thresh = !showOpp2Thresh;
+		}
+		else if(keypress % 256 == '5' || keypress == '5')
+		{
+			showBallThresh = !showBallThresh;
 		}
 		else if(keypress >= 0)
 		{
@@ -553,15 +590,26 @@ bool initColors()
 		robot1LowV = 110;
 		robot1HighV = 255;
 	}
-	else if (allycolor == "b")
+	else if (allycolor == "bc")
 	{
 		robot1LowH = 77;
-		robot1HighH = 117;
+		robot1HighH = 111;
 
 		robot1LowS = 0;
-		robot1HighS = 100;
+		robot1HighS = 87;
 
-		robot1LowV = 199;
+		robot1LowV = 230;
+		robot1HighV = 255;
+	}
+	else if (allycolor == "b")
+	{
+		robot1LowH = 81;
+		robot1HighH = 110;
+
+		robot1LowS = 174;
+		robot1HighS = 255;
+
+		robot1LowV = 189;
 		robot1HighV = 255;
 	}
 	else if (allycolor == "g")
@@ -570,7 +618,7 @@ bool initColors()
 		robot1HighH = 94;
 
 		robot1LowS = 0;
-		robot1HighS = 255;
+		robot1HighS = 179;
 
 		robot1LowV = 186;
 		robot1HighV = 255;
@@ -612,15 +660,26 @@ bool initColors()
 		robot2LowV = 110;
 		robot2HighV = 255;
 	}
-	else if (opponentcolor == "b")
+	else if (opponentcolor == "bc")
 	{
 		robot2LowH = 77;
-		robot2HighH = 117;
+		robot2HighH = 111;
 
 		robot2LowS = 0;
-		robot2HighS = 100;
+		robot2HighS = 87;
 
-		robot2LowV = 199;
+		robot2LowV = 230;
+		robot2HighV = 255;
+	}
+	else if (allycolor == "b")
+	{
+		robot2LowH = 81;
+		robot2HighH = 110;
+
+		robot2LowS = 174;
+		robot2HighS = 255;
+
+		robot2LowV = 189;
 		robot2HighV = 255;
 	}
 	else if (opponentcolor == "g")
@@ -629,7 +688,7 @@ bool initColors()
 		robot2HighH = 94;
 
 		robot2LowS = 0;
-		robot2HighS = 255;
+		robot2HighS = 179;
 
 		robot2LowV = 186;
 		robot2HighV = 255;

@@ -11,3 +11,7 @@ If you try and build the messages on MATLAB you may get an error about not being
 ```bash
 $ sudo mkdir -p /opt/ros/indigo/share/catkin/cmake
 ```
+
+
+Edit Java Class Path
+edit('~/.matlab/R2015b/javaclasspath.txt')

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- declare arg to be passed in -->
+  <arg name="vision_home1" default="/vision/home1" />
+  <arg name="vision_home2" default="/vision/home2" />
+  <arg name="vision_away1" default="/vision/away1" />
+  <arg name="vision_away2" default="/vision/away2" />
+  <arg name="vision_ball" default="/vision/ball" />
+
+  <!-- Soccer field world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find soccersim)/worlds/soccer_field.world"/>
+  </include>
+
+  <!-- Soccer robots -->
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="home1"/>
+    <arg name="jersey_color" value="Blue"/>
+    <arg name="x" value="-0.5"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="home2"/>
+    <arg name="jersey_color" value="Green"/>
+    <arg name="x" value="-1.0"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="away1"/>
+    <arg name="jersey_color" value="Red"/>
+    <arg name="x" value="0.5"/>
+  </include>
+  <include file="$(find soccersim)/launch/robot.launch">
+    <arg name="robot_name" value="away2"/>
+    <arg name="jersey_color" value="Purple"/>
+    <arg name="x" value="1.0"/>
+  </include>
+
+  <!-- Vision -->
+  <node name="vision_sim" pkg="soccersim" type="vision_sim" output="screen">
+    <remap from="/vision/home1" to="$(arg vision_home1)"/>
+    <remap from="/vision/home2" to="$(arg vision_home2)"/>
+    <remap from="/vision/away1" to="$(arg vision_away1)"/>
+    <remap from="/vision/away2" to="$(arg vision_away2)"/>
+    <remap from="/vision/ball"  to="$(arg vision_ball)"/>
+  </node>
+
+<!--   Home and away team controllers
+  <node name="home" pkg="soccersim" type="controller" args="_team:=home"/>
+  <node name="away" pkg="soccersim" type="controller" args="_team:=away"/> -->
+
+  <!-- Soccer ball -->
+  <include file="$(find soccersim)/launch/ball.launch">
+  </include>
+</launch>
+
+
+
+
