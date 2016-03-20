@@ -42,7 +42,7 @@ def _kick(req):
 
 # -----------------------------------------------------------------------------
 
-def myhook():
+def _shutdown_hook():
   print "Killing Robot"
   motion.kill()
 

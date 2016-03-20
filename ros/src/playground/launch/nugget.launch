@@ -4,7 +4,7 @@
     <group ns="/ally1">
 
         <!-- Set ROS Params -->
-        <param name="robot_estimator_on" type="bool" value="false" />
+        <param name="robot_estimator_on" type="bool" value="true" />
         <param name="go_rogue" type="bool" value="false" />
 
         <!-- Start the robot up -->

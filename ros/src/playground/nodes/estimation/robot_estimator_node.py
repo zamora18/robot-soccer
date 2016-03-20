@@ -80,8 +80,8 @@ def main():
         # Ts = (time.time() - _last_time)
         # (xhat, yhat, thetahat) = _robot.update(measurement=_measured, vel_cmd=_velocities)
 
-        # if _predictor_on:
-        #     (xhat_future, yhat_future) = _robot.predict(_predict_forward_seconds)
+        if _predictor_on:
+            (xhat_future, yhat_future, thetahat_future) = _robot.predict(_predict_forward_seconds)
 
         # Grab the estimated velocities of the ball
         # (vx, vy) = _ball.get_velocities()
