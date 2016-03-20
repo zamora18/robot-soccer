@@ -4,6 +4,8 @@ import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
 from std_msgs.msg import Bool
+from std_srvs.srv import SetBool, SetBoolResponse
+
 from playground.msg import BallState, RobotState
 
 import numpy as np
@@ -18,6 +20,7 @@ _opp2 = None
 
 _ball = {'xhat': 0}
 
+_ai_enabled = False
 _was_goal = False
 
 
@@ -41,6 +44,12 @@ def _handle_ball_state(msg):
 def _handle_goal(msg):
     global _was_goal
     _was_goal = msg.data
+
+def _set_ai(req):
+    global _ai_enabled
+    _ai_enabled = req.data
+    return SetBoolResponse(_ai_enabled, "")
+
 
 def _create_robots():
     """Create Robots
@@ -78,17 +87,20 @@ def main():
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
+    rospy.Service('set_ai', SetBool, _set_ai)
+
     global _was_goal
 
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
         #(x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball, _was_goal)
-        #msg = Pose2D()
-        #msg.x = x_c
-        #msg.y = y_c
-        #msg.theta = theta_c
-        #pub.publish(msg)
+        if _ai_enabled:
+            # msg = Pose2D()
+            # msg.x = x_c
+            # msg.y = y_c
+            # msg.theta = theta_c
+            # pub.publish(msg)
 
         _was_goal = False
 

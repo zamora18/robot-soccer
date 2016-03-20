@@ -102,9 +102,11 @@ handles.sub.vel_cmds = rossubscriber('/ally1/vel_cmds', 'geometry_msgs/Twist', {
 handles.sub.error = rossubscriber('/ally1/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
 handles.sub.ball_state = rossubscriber('/ally1/ball_state', 'playground/BallState', {@ballStateCallback,handles});
 
-
 % And Publishers
 handles.pub.desired_position = rospublisher('/ally1/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
+
+% Setup Service Calls
+handles.srv.get_battery = rossvcclient('/motion/main_battery');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -406,11 +408,10 @@ function btn_update_status_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     handles = guidata(hObject);
     
-    get_battery = rossvcclient('/motion/main_battery');
-    req = rosmessage(get_battery);
-    resp = call(get_battery,req,'Timeout',3);
+    req = rosmessage(handles.srv.get_battery);
+    resp = call(handles.srv.get_battery,req,'Timeout',1);
     
-    set(handles.lbl_battery,'String',[num2str(resp) 'v']);
+    set(handles.lbl_battery,'String',[resp.Message 'v']);
     
 
 
