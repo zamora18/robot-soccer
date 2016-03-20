@@ -93,8 +93,8 @@ class RobotEstimatorLPF(LowPassFilter):
     def __init__(self, _alpha=None, _tau=None, _update_type=None):
 
         T_ctrl = 1/100.0
-        alpha = 0.9 if _alpha is None else _alpha
-        tau = 0.075 if _tau is None else _tau
+        alpha = 0.02 if _alpha is None else _alpha
+        tau = 0.5 if _tau is None else _tau
         update_type = LowPassFilter.UPDATE_SIMPLE if _update_type is None else _update_type
         N = 3
 
