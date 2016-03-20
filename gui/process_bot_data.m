@@ -7,7 +7,7 @@ Tcamera=1/30;Tcontrol=1/100;
 % update_type = 'SIMPLE';
 % Q = diag([(5E-2)^2 (5E-2)^2 (10*pi/180)^2]);
 % R = diag([ 0.001^2 0.001^2 (1*pi/180)^2 ]);
-save('data/ally12.mat');
+save('data/ally13.mat');
 
 % How many samples are there?
 N = length(bot.Xhat);
