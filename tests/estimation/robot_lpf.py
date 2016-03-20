@@ -76,7 +76,7 @@ def rerun(alpha, tau, update_type, filename):
 def main():
     # Choose file
     data_dir = '../../gui/data/'
-    filename = data_dir + 'ally07'
+    filename = data_dir + 'ally08'
 
     # Choose LPF parameters
     alpha = 0.02

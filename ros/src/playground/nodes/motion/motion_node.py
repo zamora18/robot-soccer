@@ -42,8 +42,17 @@ def _kick(req):
 
 # -----------------------------------------------------------------------------
 
+def myhook():
+  print "Killing Robot"
+  motion.kill()
+
+# -----------------------------------------------------------------------------
+
 def main():
     rospy.init_node('motion', anonymous=False)
+
+    # Register a shutdown hook to kill motion
+    rospy.on_shutdown(_shutdown_hook)
 
     rospy.Subscriber('vel_cmds', Twist, _handle_velocity_command)
     pub = rospy.Publisher('encoder_estimates', EncoderEstimates, queue_size=10)
