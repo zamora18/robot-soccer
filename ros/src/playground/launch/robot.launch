@@ -29,7 +29,9 @@
         <remap from="my_state" to="$(arg me)_state" />
         <remap from="ally_state" to="$(arg ally)_state" />
     </node>
-    <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
+    <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen">
+        <remap from="my_state" to="$(arg me)_state" />
+    </node>
     <node name="controller" pkg="playground" type="controller_node.py">
         <remap from="robot_state" to="$(arg me)_state" />
         <remap from="desired_position" to="desired_position_safe" />
