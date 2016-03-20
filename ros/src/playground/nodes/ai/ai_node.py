@@ -4,9 +4,9 @@ import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
 from std_msgs.msg import Bool
-from std_srvs.srv import SetBool, SetBoolResponse
 
 from playground.msg import BallState, RobotState
+from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
 
@@ -96,6 +96,7 @@ def main():
 
         #(x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball, _was_goal)
         if _ai_enabled:
+            pass
             # msg = Pose2D()
             # msg.x = x_c
             # msg.y = y_c
