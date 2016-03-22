@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 		
 	
+	
+	if(!initColors())
+		exit(-1);
+	
 	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
 	away = false;
@@ -173,9 +177,6 @@ int main(int argc, char *argv[])
 
 	// //find position and angle of robot
 	//video.initializeRobot(&robot, imgTemp);
-
-	if(!initColors())
-		exit(-1);
 
 	ballLowH = 160;
 	ballHighH = 178;
