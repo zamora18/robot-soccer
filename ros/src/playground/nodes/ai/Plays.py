@@ -128,6 +128,21 @@ def shoot_off_the_wall(me, ball):
         return (x_c_before, y_c_before, theta_c)
 
 
+def steal_ball_from_opponent(me, opponent, ball):
+    """
+    Using xhat_future and yhat_future to predict where the ball will be, and 
+    put itself in front of the opponent, facing opponent's goal, ready to kick the 
+    ball towards their goal
+    """
+    theta = Utilities.get_angle_between_points(opponent.xhat, opponent.yhat, ball.xhat_future, ball.yhat_future)
+    x_c = ball.xhat_future - Utilities.steal_ball_dist*np.cos(theta)
+    y_c = ball.yhat_future - Utilities.steal_ball_dist*np.sin(theta)
+    theta_c = theta + np.pi 
+
+    return (x_c, y_c, theta_c)
+
+
+
 ##########################################
 # Plays mainly for "defender" position:  #
 ##########################################

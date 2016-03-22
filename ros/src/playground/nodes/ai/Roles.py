@@ -17,32 +17,7 @@ def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one):
 	# check to see who has possession first!
 	 # Always try and shoot the ball right at the goal. 
 
-	if (me.ally1):
-		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
-			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
-				if (ball.yhat > 0):
-					return Plays.shoot_on_goal(me, ball, -0.75)
-				else:
-					return Plays.shoot_on_goal(me, ball, 0.75)
-			else: #Basically, I don't have possession and I should be the one to steal the ball
-
-
-
-		
-		else: #My teammate is closer to the ball than me.
-			# Go to a point where my teammate can pass me the ball
-
-
-	else: # I am ally2
-		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
-			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
-				# I want to pass to my teammate
-			else: #Basically, I don't have possession, and I should be the one to steal the ball
-				
-
-		else: #My teammate is closer to the ball than me.
-			# Go to a point where my teammate can pass me the ball
-
+	
 
 
 	# pass
@@ -99,7 +74,45 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 ################################################################
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
-	# global _offensive, _defensive, _neutral
+	global _offensive, _defensive, _neutral
+	
+	if (strategy == _offensive):
+		goal_target = 0.80
+	elif (strategy == _defensive):
+		goal_target = 0.20
+	else:
+		goal_target = 0
+
+	if (me.ally1):
+		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
+			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
+				if (ball.yhat > 0): 
+					return Plays.shoot_on_goal(me, ball, -goal_target)
+				else: 
+					return Plays.shoot_on_goal(me, ball, goal_target)
+			else: #Basically, I don't have possession and I should be the one to steal the ball
+				closest_opp = get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
+				if (closest_opp == 1):
+					opp = opponent1
+				else:
+					opp = opponent2
+				return Plays.steal_ball_from_opponent(me, opp, ball)
+		else: #My teammate is closer to the ball than me.
+			# Go to a point where my teammate can pass me the ball
+			
+
+
+	else: # I am ally2
+		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
+			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
+				# I want to pass to my teammate
+			else: #Basically, I don't have possession, and I should be the one to steal the ball
+				
+
+		else: #My teammate is closer to the ball than me.
+			# Go to a point where my teammate can pass me the ball
+
+
 	middle_of_goal = 0
 	return Plays.shoot_on_goal(me, ball, middle_of_goal)
 
