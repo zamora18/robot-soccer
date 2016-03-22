@@ -21,5 +21,11 @@ push_ball_dist		= 0.2032 #(8.0in)
 goalie_x_pos       	= goal_position_home[0] + goal_box_length + robot_half_width
 goalie_radius		= goal_box_width/2
 
-dribble_distance	=robot_half_width + .05
+dribble_distance	= robot_half_width + .05
 kickable_distance   = 0.08
+
+distance_behind_ball_for_kick		= robot_width + 0.03
+distance_behind_ball_for_dribble	= robot_width/2 + 0.05
+
+ally1_start_pos		= [-0.50, 0, 0]
+ally2_start_pos		= [goal_position_home[0]+goalie_radius, 0, 0]

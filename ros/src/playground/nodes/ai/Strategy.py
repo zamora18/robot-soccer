@@ -19,11 +19,13 @@ _beginning_trick_shot = False
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
 
-def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal):
+def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one):
 	
 	#for now, we will just focus on aggressive offense
 	if goal:
 		return reset_positions_after_goal(me)
+	elif (one_v_one):
+		return one_on_one(me, opponent1, ball)
 	else:
 		return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
 
@@ -109,7 +111,10 @@ def passive_aggressive(me, my_teammate, opponent1, opponent2, ball): #AKA, mild 
     		return (robot.xhat, robot.yhat, robot.theta_hat) #default, returns current pos
 
 
-def one_on_one(me, my_teammate, opponent1, opponent2, ball):
+def one_on_one(me, opponent1, ball):
+	my_teammate = None
+	opponent2 = None
+
 	if   section == 1:
 		return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
     elif section == 2:
@@ -123,4 +128,7 @@ def one_on_one(me, my_teammate, opponent1, opponent2, ball):
 
 
 def reset_positions_after_goal(me):
-	pass
+	if me.ally1:
+		return (Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2])
+	else:
+		return (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
