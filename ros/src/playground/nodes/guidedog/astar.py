@@ -66,6 +66,8 @@ def init_grid(length_field, width_field, distance_between_points=.01, edge_weigh
         for j in xrange(numofypoints):
             graph.add_edges((i,j),edge_weight, diag_weight)
 
-    for i in xrange(numofxpoints):
-        for j in xrange(numofypoints):
-            print (graph.get_node((i,j)))
+    # for i in xrange(numofxpoints):
+    #     for j in xrange(numofypoints):
+    #         print (graph.get_node((i,j)))
+
+    return graph
