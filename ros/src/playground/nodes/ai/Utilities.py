@@ -6,11 +6,14 @@ import Constants
 
 
 def our_robot_closer_to_ball(robot, opponent, ball):
-    closest = _get_closest_robot_to_point(robot['xhat'], robot['yhat'], opponent['xhat'], opponent['yhat'], ball['xhat'], ball['yhat'])
+    closest = _get_closest_robot_to_point(robot.xhat, robot.yhat, opponent.xhat, opponent.yhat, ball.xhat, ball.yhat)
     if (closest == 1):
         return True 
     else:
         return False
+
+def get_closest_opponent_to_ball(rob1_x, rob1_y, rob2_x, rob2_y, ball):
+    return _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, ball.xhat, ball.yhat)
 
 def _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, point_x, point_y):
     rob_1_dist = get_distance_between_points(rob1_x, rob1_y, point_x, point_y)
@@ -21,7 +24,7 @@ def _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, point_x, point_y
         return 2
 
 def is_ball_behind_robot(robot, ball):
-    if (robot['xhat']-Constants.robot_half_width > ball['xhat']):
+    if (robot.xhat-Constants.robot_half_width > ball.xhat):
         return True 
     else: 
         return False
@@ -29,13 +32,13 @@ def is_ball_behind_robot(robot, ball):
 def is_ball_between_home_and_robot(robot, ball):
     epsilon = Constants.robot_width/4
 
-    crossproduct = (ball['yhat'] - robot['yhat']) * (Constants.goal_position_home[0] - robot['xhat']) - (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[1] - robot['yhat'])
+    crossproduct = (ball.yhat - robot.yhat) * (Constants.goal_position_home[0] - robot.xhat) - (ball.xhat - robot.xhat) * (Constants.goal_position_home[1] - robot.yhat)
     if abs(crossproduct) > epsilon : return False   # (or != 0 if using integers)
 
-    dotproduct = (ball['xhat'] - robot['xhat']) * (Constants.goal_position_home[0] - robot['xhat']) + (ball['yhat'] - robot['yhat'])*(Constants.goal_position_home[1] - robot['yhat'])
+    dotproduct = (ball.xhat - robot.xhat) * (Constants.goal_position_home[0] - robot.xhat) + (ball.yhat - robot.yhat)*(Constants.goal_position_home[1] - robot.yhat)
     if dotproduct < 0 : return False
 
-    squaredlengthba = (Constants.goal_position_home[0] - robot['xhat'])*(Constants.goal_position_home[0] - robot['xhat']) + (Constants.goal_position_home[1] - robot['yhat'])*(Constants.goal_position_home[1] - robot['yhat'])
+    squaredlengthba = (Constants.goal_position_home[0] - robot.xhat)*(Constants.goal_position_home[0] - robot.xhat) + (Constants.goal_position_home[1] - robot.yhat)*(Constants.goal_position_home[1] - robot.yhat)
     if dotproduct > squaredlengthba: return False
 
     return True
@@ -70,8 +73,8 @@ def find_triangle(x1,y1,x2,y2):
     return (a,b,c,theta)
 
 def get_front_of_robot(robot):
-    x_pos = robot['xhat']+Constants.robot_half_width*np.cos(robot['thetahat']) ### thetahat is in degrees, so we should change from degree to radians?? ----------
-    y_pos = robot['yhat']+Constants.robot_half_width*np.sin(robot['thetahat'])
+    x_pos = robot.xhat+Constants.robot_half_width*np.cos(robot.thetahat) ### thetahat is in degrees, so we should change from degree to radians?? ----------
+    y_pos = robot.yhat+Constants.robot_half_width*np.sin(robot.thetahat)
 
     return (x_pos, y_pos)
 

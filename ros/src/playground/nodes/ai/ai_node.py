@@ -11,14 +11,14 @@ from playground.srv import SetBool, SetBoolResponse
 import numpy as np
 
 import Strategy
-from Robot import Robot
+from Robot import Ball, Robot
 
 _me = None
 _ally = None
 _opp1 = None
 _opp2 = None
 
-_ball = {'xhat': 0}
+_ball = None
 
 _ai_enabled = False
 _was_goal = False
@@ -36,10 +36,12 @@ def _handle_robot_state(msg, which_robot):
         _opp2.update_state(msg)
 
 def _handle_ball_state(msg):
-    _ball['xhat'] = msg.xhat
-    _ball['yhat'] = msg.yhat
-    _ball['xhat_future'] = msg.xhat_future
-    _ball['yhat_future'] = msg.yhat_future
+    # _ball['xhat'] = msg.xhat
+    # _ball['yhat'] = msg.yhat
+    # _ball['xhat_future'] = msg.xhat_future
+    # _ball['yhat_future'] = msg.yhat_future
+
+    _ball.update_state(msg)
 
 def _handle_goal(msg):
     global _was_goal
@@ -76,6 +78,9 @@ def main():
 
     # Create robot objects that store that current robot's state
     _create_robots()
+ 
+    global _ball
+    _ball = Ball()
 
     # Subscribe to Robot States
     rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
