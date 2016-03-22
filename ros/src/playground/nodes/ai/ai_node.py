@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 import roslib; roslib.load_manifest('playground')
 import rospy
@@ -75,6 +76,19 @@ def _create_robots():
 
 def main():
     rospy.init_node('ai', anonymous=False)
+
+    if rospy.get_param('/simulation_mode', False):
+        # Kill the node to force the user to launch this node
+        # separate from `roslaunch ... simulator.launch`.
+        # Run: `roslaunch ... ai_sim.launch` instead; that way
+        # the ai_node.py can be launched and restarted without
+        # having to restart the entire Gazebo simulator.
+        if not rospy.get_param('/ai_sim_launched', False):
+            sys.exit(0)
+            return
+        else:
+            global _ai_enabled
+            _ai_enabled = True
 
     # Create robot objects that store that current robot's state
     _create_robots()
