@@ -98,7 +98,8 @@ class RobotEstimatorLPF(LowPassFilter):
         update_type = LowPassFilter.UPDATE_SIMPLE if _update_type is None else _update_type
         N = 3
 
-        super(RobotEstimatorLPF, self).__init__(T_ctrl, alpha, tau, update_type, N)
+        super(RobotEstimatorLPF, self).__init__(T_ctrl, alpha, tau, \
+                                        update_type, N, angle_state_position=3)
 
 
 class OpponentEstimator(KalmanFilter):

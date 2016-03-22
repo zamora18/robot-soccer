@@ -11,17 +11,13 @@ load('data/ball08_rerun.mat');
 
 % How many samples are there?
 N = length(ball.Xhat);
-% M = length(vision_ball);
 
 % Create a time vector
-t = (0:N-1)*Tcontrol;
-% t_camera = (0:M-1)*Tcamera;
+t = (1:N)*Tcontrol;
 
 fprintf('Processing %f seconds of ball data.\r\n\r\n', N*Tcontrol);
 
 % Initialize and unpackage
-% x = [vision_ball(:).X];
-% y = [vision_ball(:).Y];
 x = nonzeros([ball(:).VisionX]);
 y = nonzeros([ball(:).VisionY]);
 x_t = find([ball(:).VisionX]~=0)*Tcontrol;

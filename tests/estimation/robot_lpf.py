@@ -79,7 +79,7 @@ def main():
     filename = data_dir + 'ally08'
 
     # Choose LPF parameters
-    alpha = 0.02
+    alpha = 0.05
     tau = 0.5
     update_type = RobotEstimatorLPF.UPDATE_SIMPLE
 

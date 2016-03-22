@@ -18,11 +18,11 @@ class LowPassFilter(object):
     UPDATE_DELAY = 1
     UPDATE_BOUNCE = 2
 
-    def __init__(self, T_ctrl, alpha, tau, update_type, N):
+    def __init__(self, T_ctrl, alpha, tau, update_type, N, angle_state_position=None):
         """LowPassFilter init method
 
         Args:
-            T_ctrl          - 
+            T_ctrl          - Period of the control loop
             alpha           - The exponential parameter of the filter.
                               The higher the alpha, the more you trust
                               your own model, and not the new input.
@@ -30,7 +30,11 @@ class LowPassFilter(object):
                               allow derivatives to be more loose; i.e.,
                               0.001 creates lots of noise in velocity.
             update_type     - 
-            N               - 
+            N               - How many states are you tracking?
+            angle_state_pos - If your state is (x, y, theta) then this
+                              arg is 3. This tells the LPF to deal
+                              with periodicity (in degrees) for this
+                              position/angle.
         """
         super(LowPassFilter, self).__init__()
 
@@ -48,6 +52,9 @@ class LowPassFilter(object):
 
         # number of states
         self.N = N
+
+        # Is an angle involved? (for the robot)
+        self.angle_state_position = angle_state_position
 
         # Persistent variables (init better?)
         self.position = np.matrix(np.zeros(N))
@@ -123,8 +130,14 @@ class LowPassFilter(object):
             # Create a row vector (np.matrix) for easy computation
             measurement = np.matrix(measurement)
 
-            # low pass filter position 
-            self.position = self.alpha*self.position + (1-self.alpha)*measurement
+            # If angle is involved, deal with its periodicity
+            measurement = self._deal_with_circular_data_pre(measurement)
+
+            # low pass filter position
+            result = self.alpha*self.position + (1-self.alpha)*measurement
+
+            # Clean up periodicity fix, and save as position
+            self.position = self._deal_with_circular_data_post(result)
 
             # update velocity using position measurement
             self._update_velocity(measurement, Ts)
@@ -153,8 +166,14 @@ class LowPassFilter(object):
             # Create a row vector (np.matrix) for easy computation
             measurement = np.matrix(measurement)
 
+            # If angle is involved, deal with its periodicity
+            measurement = self._deal_with_circular_data_pre(measurement)
+
             # low pass filter position 
-            self.position_d1 = self.alpha*self.position_d1 + (1-self.alpha)*measurement
+            result = self.alpha*self.position_d1 + (1-self.alpha)*measurement
+
+            # Clean up periodicity fix, and save as position
+            self.position_d1 = self._deal_with_circular_data_post(result)
 
             # update velocity using position measurement
             self._update_velocity(measurement, Ts)
@@ -216,6 +235,69 @@ class LowPassFilter(object):
             xhat.append(mat.getA()[0][i])
 
         return xhat
+
+    def _deal_with_circular_data_pre(self, measurement):
+        """Deal with Circular Data Pre-LPF
+
+        This function must be called before the LPF equation. If there
+        are 3 states in self.position, it is assumed that state 3 is
+        an angle, in degrees. Thus, it is periodic with 360.
+
+        If the robot is at 0 degrees, and the camera has a std dev
+        of 5 degrees, every once in a while, the camera will send back
+        that the robot is oriented at 358 degrees, etc. If this
+        measurement is allowed to run through the LPF, there will be a
+        build up as the self.position[2] gets to 360 degrees. This will
+        cause up to a second of intermediate values between [0-360), 
+        causing the motion node rotation matrix to send the robot in
+        crazy places. This function aims to deal with that.
+
+        Must be called in conjunction with _deal_with_circular_data_post()
+
+        See also, `self.angle_state_position`
+
+        args:
+            measurement     - expected as an np.matrix (row vector)
+        """
+        if self.angle_state_position is not None:
+            i = self.angle_state_position - 1
+
+            # What is the distance between the past and new values?
+            a = measurement[0, i]
+            b = self.position[0, i]
+            diff = abs(a - b)
+
+            # If the difference is more than 180, we need to unwrap
+            if diff > 180:
+                if a > 180:
+                    a = a - 360
+                elif b > 180:
+                    b = b - 360
+
+            measurement[0, i] = a
+            self.position[0, i] = b
+
+        return measurement
+
+
+
+    def _deal_with_circular_data_post(self, lpf_result):
+        """Deal with Circular Data Post-LPF
+
+        args:
+            lpf_result      - output of LPF, expected as np.matrix (row vector)
+        """
+        if self.angle_state_position is not None:
+            i = self.angle_state_position - 1
+
+            # Unpack just the angle part of the result
+            angle_result = lpf_result[0, i]
+
+            if angle_result < 0:
+                angle_result = angle_result + 360
+                lpf_result[0, i] = angle_result
+
+        return lpf_result
 
     def _deal_with_bounces(self):
         """Deal with bounces
