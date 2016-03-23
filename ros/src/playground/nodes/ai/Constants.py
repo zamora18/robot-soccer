@@ -27,6 +27,7 @@ steal_ball_dist     = robot_half_width + 0.15
 
 distance_behind_ball_for_kick       = robot_width + 0.03
 distance_behind_ball_for_dribble    = robot_half_width + 0.05
+open_for_pass_y_pos                 = 1.05
 
 ally1_start_pos     = [-0.50, 0, 0]
 ally2_start_pos     = [goal_position_home[0]+goalie_radius, 0, 0]

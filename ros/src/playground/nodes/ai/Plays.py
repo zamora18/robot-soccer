@@ -134,8 +134,8 @@ def steal_ball_from_opponent(me, opponent, ball):
     ball towards their goal
     """
     theta = Utilities.get_angle_between_points(opponent.xhat, opponent.yhat, ball.xhat_future, ball.yhat_future)
-    x_c = ball.xhat_future - Utilities.steal_ball_dist*np.cos(theta)
-    y_c = ball.yhat_future - Utilities.steal_ball_dist*np.sin(theta)
+    x_c = ball.xhat_future - Constants.steal_ball_dist*np.cos(theta)
+    y_c = ball.yhat_future - Constants.steal_ball_dist*np.sin(theta)
     theta_c = theta + np.pi 
 
     return (x_c, y_c, theta_c)
@@ -159,14 +159,12 @@ def pass_to_teammate(me, my_teammate, ball):
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     dist_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
     
-    if (Utilities.close(me.thetahat, theta, tolerance = 10) and dist_to_ball <= Utilities.kickable_distance):
+    if (Utilities.close(me.thetahat, theta, tolerance = 10) and dist_to_ball <= Constants.kickable_distance):
         return Skills.attack_ball(me, ball)
     else:
-        return Skills.go_behind_ball_facing_target(ball, Utilities.kickable_distance, x_limit_for_pass, Constants.open_for_pass_y_pos)
+        return Skills.go_behind_ball_facing_target(ball, Constants.kickable_distance, x_limit_for_pass, Constants.open_for_pass_y_pos)
 
         
-
-
 
 ##########################################
 # Plays mainly for "defender" position:  #

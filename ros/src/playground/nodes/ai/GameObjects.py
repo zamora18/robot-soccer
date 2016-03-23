@@ -7,6 +7,13 @@ class Robot(object):
         super(Robot, self).__init__()
         self.ally1 = ally1
         self.ally2 = ally2
+        self.xhat = 0
+        self.yhat = 0
+        self.thetahat = 0
+        self.xhat_future = 0
+        self.yhat_future = 0
+        self.thetahat_future = 0
+
 
     def update_state(self, msg):
         self.xhat = msg.xhat
@@ -21,6 +28,10 @@ class Ball(object):
     """docstring for Ball"""
     def __init__(self):
         super(Ball, self).__init__()
+        self.xhat = 0
+        self.yhat = 0
+        self.xhat_future = 0
+        self.yhat_future = 0
 
     def update_state(self, msg):
         self.xhat = msg.xhat

@@ -1,3 +1,5 @@
+import numpy as np
+
 import Plays
 import Skills
 import Utilities
@@ -10,7 +12,7 @@ _nuetral = 2
 _ball_defend_position = None
 
 
-def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one):
+def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
     
     # Ideas for this Role:
@@ -39,7 +41,7 @@ def neutral_attacker(me, my_teammate, opponent1, opponent2, ball):
 
 
 
-def offensive_defender(me, my_teammate, opponent1, opponent2, ball):
+def offensive_defender(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
     # If me.ally2, then try and pass it to ally1 (not kicking, but )
     return defender(me, my_teammate, opponent1, opponent2, ball, _offensive)
@@ -57,17 +59,17 @@ def neutral_defender(me, my_teammate, opponent1, opponent2, ball):
 
 
 
-def offensive_goalie(me, my_teammate, opponent1, opponent2, ball):
+def offensive_goalie(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
-    return goalie(me, my_teammate, opponent1, opponent2, ball, _offensive):
+    return goalie(me, my_teammate, opponent1, opponent2, ball, _offensive)
 
 def defensive_goalie(me, my_teammate, opponent1, opponent2, ball):
     global _defensive
-    return goalie(me, my_teammate, opponent1, opponent2, ball, _defensive):
+    return goalie(me, my_teammate, opponent1, opponent2, ball, _defensive)
 
 def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
     global _nuetral
-    return goalie(me, my_teammate, opponent1, opponent2, ball, _nuetral):
+    return goalie(me, my_teammate, opponent1, opponent2, ball, _nuetral)
 
 
 
@@ -86,7 +88,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
     else:
         goal_target = 0
 
-    if am_i_closest_teammate_to_ball(me, my_teammate, ball):
+    if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if me.ally1:
                 if ball.yhat > 0: 
@@ -100,7 +102,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
                     return Plays.pass_to_teammate(me, my_teammate, ball)
 
         else: #Basically, I don't have possession and I should be the one to steal the ball
-            closest_opp = get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
+            closest_opp = Utilities.get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
             if (closest_opp == 1):
                 opp = opponent1
             else:
@@ -108,7 +110,10 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
             return Plays.steal_ball_from_opponent(me, opp, ball)
     else: #My teammate is closer to the ball than me.
         if me.ally1:
-            if (ball.yhat > 0): passing_toggle = -1 else: passing_toggle = 1
+            if (ball.yhat > 0): 
+                passing_toggle = -1 
+            else: 
+                passing_toggle = 1
             return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
         else: # I am ally2
             return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
@@ -143,9 +148,9 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy):
     global _ball_defend_position, _offensive, _defensive, _neutral
 
     # First, check to see if the ball is close enough to actuate the kicker, and kick it away
-    (x_pos, y_pos) = Utilities.get_front_of_robot(robot)
+    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat_future, ball.yhat_future) #changed to future and it seemed to work well in the simulator...
-    if (distance_from_kicker_to_ball <=  Utilities.kickable_distance):
+    if (distance_from_kicker_to_ball <=  Constants.kickable_distance):
         print "KICKING BALL AWAY"
         Skills.kick()
 

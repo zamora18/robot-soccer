@@ -12,7 +12,7 @@ from playground.srv import SetBool, SetBoolResponse
 import numpy as np
 
 import Strategy
-from Robot import Ball, Robot
+from GameObjects import Ball, Robot
 
 _me = None
 _ally = None
@@ -113,14 +113,13 @@ def main():
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        #(x_c, y_c, theta_c) = Strategy.choose_strategy(_robot, _opponent, _ball, _was_goal)
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal)
         if _ai_enabled:
-            pass
-            # msg = Pose2D()
-            # msg.x = x_c
-            # msg.y = y_c
-            # msg.theta = theta_c
-            # pub.publish(msg)
+            msg = Pose2D()
+            msg.x = x_c
+            msg.y = y_c
+            msg.theta = theta_c
+            pub.publish(msg)
 
         _was_goal = False
 
