@@ -40,6 +40,9 @@ def _handle_opponent_position(msg):
 def _handle_my_position(msg):
     global _ally
 
+    if _robot_desired is None:
+        return
+
     # Grab and save the ally's current location
     _ally = (msg.xhat, msg.yhat, msg.thetahat)
 
