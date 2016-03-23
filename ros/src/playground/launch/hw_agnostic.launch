@@ -33,7 +33,7 @@
     <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen">
         <remap from="my_state" to="$(arg me)_state" />
     </node>
-    <node name="controller" pkg="playground" type="controller_node.py">
+    <node name="controller" pkg="playground" type="controller_node.py" output="screen">
         <remap from="robot_state" to="$(arg me)_state" />
         <remap from="desired_position" to="desired_position_safe" />
         <!-- For simulation, remap the output -->
