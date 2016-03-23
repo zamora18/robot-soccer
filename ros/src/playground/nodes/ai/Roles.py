@@ -78,6 +78,7 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 ################################################################
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
+    print "INSIDE ATTACKER FUNCION"
     global _offensive, _defensive, _neutral
     middle_of_goal = 0
 
@@ -91,11 +92,13 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if me.ally1:
+                print "Attacker --> I am allyONE"
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target)
                 else: 
                     return Plays.shoot_on_goal(me, ball, -goal_target)
             else: # I am ally2
+                print "Attacker --> I am allyTWO"
                 if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
                     return Plays.shoot_on_goal(me, ball, middle_of_goal)
                 else:
