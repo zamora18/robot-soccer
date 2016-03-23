@@ -28,7 +28,12 @@ def _handle_robot_state(msg):
 
     if _initializing:
         _initializing = False
-        Controller.set_commanded_position(_xhat, _yhat, _thetahat)
+
+        x = rospy.get_param('x_init')
+        y = rospy.get_param('y_init')
+        theta = rospy.get_param('theta_init')
+
+        Controller.set_commanded_position(x, y, theta)
 
 def _handle_desired_position(msg):
     global _ctrl_on
