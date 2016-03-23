@@ -1,6 +1,7 @@
 from collections import defaultdict
 import numpy as np
 
+inf = 1e100
 
 class Graph:
     def __init__(self, n, m):
@@ -41,7 +42,7 @@ class Graph:
     def convert_coord_to_node(self, coord):
         """converts a coord to a nodes value"""
 
-        result = coord[1] + coord[0] * self.n
+        result = coord[0] + coord[1] * self.n
         if result < 0 or result >= self.n * self.m:
             return None
         return result
@@ -70,11 +71,10 @@ class Graph:
         return self.convert_coord_to_node(coord)
 
 
-    def find_f(self, coord, end, g):
-        pass
-
-
     def _find_path(self, closedict, end):
+        """starts and end and goes back to the start node to find the best path"""
+
+
         path = list()
         currentkey = end
         current = closedict[currentkey]
@@ -83,10 +83,16 @@ class Graph:
 
             currentkey = current[1]
             current = closedict[currentkey]
+
+        path.insert(0,currentkey)
+
         return path
 
     def _path(self, current, end, g, opendict, closedict, func=None):
+        """recursive function to find the quickest way to the end node.
+           Not to be called by the user"""
 
+        # add the current node to nodes that have been visited, and remove it from the open considered nodes
         closedict[current] = opendict[current];
         del opendict[current]
 
@@ -97,26 +103,36 @@ class Graph:
 
         lowest_f_node = None
         for n in adjacent:
+            # if we've already been there dont consider it
             if (closedict.get(n) == None):
                 node = opendict.get(n)
                 distance = self.distances[(current, n)]
-                f = (distance + g) + self.h(n, end)
-                if node != None:
-                    if (distance + g) < node[0]:
-                        node = ((distance + g), current)
-                        opendict[n] = node
-                else:
-                    opendict[n] = ((distance + g), current)
+                if distance != inf:
+                    f = (distance + g) + self.h(n, end)
+                    # if the node already exists in open
+                    if node != None:
+                        # check to see if the path through this current node is better then 
+                        # the other node it was calculated from
+                        if (distance + g) < node[0]:
+                            # update the node in the open list
+                            node = ((distance + g), current)
+                            opendict[n] = node
+                    else:
+                        # add the node to teh dictionary
+                        opendict[n] = ((distance + g), current)
 
+                    # searches for the lowest f value among the adjacent nodes considered
+                    if lowest_f_node == None or f < lowest_f_node[0]:
+                        lowest_f_node = (f, n, distance)
 
-                if lowest_f_node == None or f < lowest_f_node[0]:
-                    lowest_f_node = (f, n, distance)
-
+        # if all nodes were already visited, im trapped so just leave
         if (lowest_f_node == None):
             return None
 
+        # update g for the next call
         g = g + lowest_f_node[2]
 
+        # recursion!!!!
         return self._path(lowest_f_node[1], end, g, opendict, closedict)
 
     def path(self, start, end, func=None):
@@ -131,6 +147,7 @@ class Graph:
         # RECURSIVE PATHFINDING AHHHHHH
         result = self._path(start_node, self.convert_coord_to_node(end), 0, opendict, closedict)
 
+        print result
         # change everything back to coordinates
         result = map(self.convert_node_to_coord, result)
 
@@ -139,9 +156,34 @@ class Graph:
     def h(self, current, end):
         """right now just calculates the euclidean heuristic"""
 
+        # calculate the absolute distance to where we want to go
         start_point = self.convert_node_to_coord(current)
         end_point = self.convert_node_to_coord(end)
         return np.sqrt((end_point[0] - start_point[0])**2 + (end_point[1] - start_point[1])**2)
+
+    
+    def _add_obstacle(self, current, discrete_radius, setnodes):
+        if discrete_radius <= 0:
+            return
+        adjacent = self.get_adjacent_edges(current)
+        for n in adjacent:
+            if n not in setnodes:
+                self.distances[(current, n)] = inf
+                self.distances[(n, current)] = inf
+                setnodes.add(current)
+                self._add_obstacle(n, discrete_radius-1, setnodes)
+
+
+
+
+    def add_obstacle(self, center, discrete_radius):
+
+        current = self.convert_coord_to_node(center)
+        setnodes = set()
+        self._add_obstacle(current, discrete_radius, setnodes)
+        
+
+
 
 
 
@@ -167,6 +209,6 @@ def init_graph(length_field, width_field, distance_between_points=.01, edge_dist
     #     for j in xrange(numofypoints):
     #         print (graph.get_node((i,j)))
 
-    print graph.path((0,0), (9,9))
+    # print graph.path((40,3), (99,99))
 
     return graph

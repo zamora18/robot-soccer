@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 # TODO: walk through example with comments
 # TODO: post this example on wiki as a tutorial
 
-n = 5      # width/height of world
+n = 10      # width/height of world
 c = kapal.tools.rand_cost_map(n, n, min_val=1, max_val=10, flip=False)
 w = World2d(c, state_type=State2dAStar, diags=True)
 
