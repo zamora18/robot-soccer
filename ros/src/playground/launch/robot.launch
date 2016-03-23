@@ -6,7 +6,7 @@
     <arg name="ally" default="ally2" />
     
     <!-- Hardware agnostic code -->
-    <include file="hw_agnostic.launch">
+    <include file="$(find playground)/launch/hw_agnostic.launch">
     	<arg name="me" value="$(arg me)" />
     	<arg name="ally" value="$(arg ally)" />
     </include>
