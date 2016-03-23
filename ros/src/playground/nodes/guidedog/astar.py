@@ -74,25 +74,50 @@ class Graph:
         pass
 
 
-    def _path(self, current, end, g, currentpath, opendict, closedict, func=None):
+    def _find_path(self, closedict, end):
+        path = list()
+        currentkey = end
+        current = closedict[currentkey]
+        while current[1] != None:
+            path.insert(0,currentkey)
 
+            currentkey = current[1]
+            current = closedict[currentkey]
+        return path
+
+    def _path(self, current, end, g, opendict, closedict, func=None):
+
+        closedict[current] = opendict[current];
+        del opendict[current]
 
         if current == end:
-            return  currentpath
+            return  self._find_path(closedict, end)
 
         adjacent = self.get_adjacent_edges(current)
 
         lowest_f_node = None
         for n in adjacent:
-            distance = self.distances[(current, n)]
-            f = (distance + g) + self.h(n, end)
-            if lowest_f_node == None or f < lowest_f_node[0]:
-                lowest_f_node = (f, n, distance)
+            if (closedict.get(n) == None):
+                node = opendict.get(n)
+                distance = self.distances[(current, n)]
+                f = (distance + g) + self.h(n, end)
+                if node != None:
+                    if (distance + g) < node[0]:
+                        node = ((distance + g), current)
+                        opendict[n] = node
+                else:
+                    opendict[n] = ((distance + g), current)
 
-        currentpath.append(lowest_f_node[1])
+
+                if lowest_f_node == None or f < lowest_f_node[0]:
+                    lowest_f_node = (f, n, distance)
+
+        if (lowest_f_node == None):
+            return None
+
         g = g + lowest_f_node[2]
 
-        return self._path(lowest_f_node[1], end, g, currentpath, opendict, closedict)
+        return self._path(lowest_f_node[1], end, g, opendict, closedict)
 
     def path(self, start, end, func=None):
 
@@ -100,11 +125,11 @@ class Graph:
         start_node = self.convert_coord_to_node(start)
         currentpath.append(start_node)
 
-        opendict = {};
-        closedict = {start_node : (0, None)}
+        opendict = {start_node : (0, None)}
+        closedict = {}
 
         # RECURSIVE PATHFINDING AHHHHHH
-        result = self._path(start_node, self.convert_coord_to_node(end), 0, currentpath, opendict, closedict)
+        result = self._path(start_node, self.convert_coord_to_node(end), 0, opendict, closedict)
 
         # change everything back to coordinates
         result = map(self.convert_node_to_coord, result)
