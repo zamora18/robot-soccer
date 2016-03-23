@@ -16,7 +16,7 @@ def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one):
 	# Ideas for this Role:
 	# check to see who has possession first!
 	 # Always try and shoot the ball right at the goal. 
-
+	 return 
 	
 
 
@@ -40,17 +40,19 @@ def neutral_attacker(me, my_teammate, opponent1, opponent2, ball):
 
 
 def offensive_defender(me, my_teammate, opponent1, opponent2, ball):
-	# global _offensive
+	global _offensive
 	# If me.ally2, then try and pass it to ally1 (not kicking, but )
-	pass
+	return defender(me, my_teammate, opponent1, opponent2, ball, _offensive)
 
 def defensive_defender(me, my_teammate, opponent1, opponent2, ball):
-	# global _defensive
-	pass
+	global _defensive
+	return defender(me, my_teammate, opponent1, opponent2, ball, _defensive)
+
 
 def neutral_defender(me, my_teammate, opponent1, opponent2, ball):
-	# global _nuetral
-	pass
+	global _nuetral
+	return defender(me, my_teammate, opponent1, opponent2, ball, _neutral)
+
 
 
 
@@ -75,7 +77,8 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
 	global _offensive, _defensive, _neutral
-	
+	middle_of_goal = 0
+
 	if (strategy == _offensive):
 		goal_target = 0.80
 	elif (strategy == _defensive):
@@ -83,44 +86,56 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
 	else:
 		goal_target = 0
 
-	if (me.ally1):
-		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
-			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
-				if (ball.yhat > 0): 
-					return Plays.shoot_on_goal(me, ball, -goal_target)
-				else: 
+	if am_i_closest_teammate_to_ball(me, my_teammate, ball):
+		if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
+			if me.ally1:
+				if ball.yhat > 0: 
 					return Plays.shoot_on_goal(me, ball, goal_target)
-			else: #Basically, I don't have possession and I should be the one to steal the ball
-				closest_opp = get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
-				if (closest_opp == 1):
-					opp = opponent1
+				else: 
+					return Plays.shoot_on_goal(me, ball, -goal_target)
+			else: # I am ally2
+				if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
+					return Plays.shoot_on_goal(me, ball, middle_of_goal)
 				else:
-					opp = opponent2
-				return Plays.steal_ball_from_opponent(me, opp, ball)
-		else: #My teammate is closer to the ball than me.
-			# Go to a point where my teammate can pass me the ball
-			
+					return Plays.pass_to_teammate(me, my_teammate, ball)
 
+		else: #Basically, I don't have possession and I should be the one to steal the ball
+			closest_opp = get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
+			if (closest_opp == 1):
+				opp = opponent1
+			else:
+				opp = opponent2
+			return Plays.steal_ball_from_opponent(me, opp, ball)
+	else: #My teammate is closer to the ball than me.
+		if me.ally1:
+			if (ball.yhat > 0): passing_toggle = -1 else: passing_toggle = 1
+			return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
+		else: # I am ally2
+			return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
 
-	else: # I am ally2
-		if (am_i_closest_teammate_to_ball(me, my_teammate, ball)):
-			if (Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
-				# I want to pass to my teammate
-			else: #Basically, I don't have possession, and I should be the one to steal the ball
-				
-
-		else: #My teammate is closer to the ball than me.
-			# Go to a point where my teammate can pass me the ball
-
-
-	middle_of_goal = 0
-	return Plays.shoot_on_goal(me, ball, middle_of_goal)
 
 
 def defender(me, my_teammate, opponent1, opponent2, ball, strategy):
-	# global _offensive, _defensive, _neutral
-	halfway_between_robots = 0.5
-	return Plays.stay_between_points_at_distance(me.xhat, me.yhat, opponent1.xhat, opponent1.yhat, halfway_between_robots)
+	global _offensive, _defensive, _neutral
+	
+	if strategy == _offensive:
+		dist_to_maintain = 0.8
+	elif strategy == _defensive:
+		dist_to_maintain = 0.2
+	else:
+		dist_to_maintain = 0.5
+
+	if me.ally1:
+		if ball.yhat > 0:
+			passing_toggle = -1
+		else:
+			passing_toggle = 1
+		return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
+	else:
+		return Plays.stay_between_points_at_distance(me.xhat, me.yhat, opponent1.xhat, opponent1.yhat, dist_to_maintain)
+
+
+
 	
 
 

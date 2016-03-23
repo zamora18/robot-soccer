@@ -36,7 +36,7 @@ def shoot_on_goal(me, ball, distance_from_center):
     #########################
     ### transition states ###
     #########################
-    if(_shoot_state == ShootState.setup):
+    if _shoot_state == ShootState.setup:
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
         if Utilities.robot_close_to_point(me, *desired_setup_position) and not Utilities.is_ball_behind_robot(me, ball):
             _shoot_state = ShootState.attack
@@ -112,7 +112,6 @@ def shoot_off_the_wall(me, ball):
         _trick_state = ShootState.setup
 
     
-
     # Moore output
     if _trick_state == ShootState.setup:
         return (x_c_before, y_c_before, theta_c)
@@ -141,11 +140,44 @@ def steal_ball_from_opponent(me, opponent, ball):
 
     return (x_c, y_c, theta_c)
 
+def stay_open_for_pass(me, my_teammate, ball, r_l_toggle):
+    """
+    Teammate stays open for pass along y = 1.05 line, and stops at 
+    x = 1.0 line waiting for the ball to be passed to it
+    """
+    x_limit_for_pass = 1.00
+    y_c = Constants.open_for_pass_y_pos*r_l_toggle
+    x_c = ball.xhat + 0.50
+    if (x_c > x_limit_for_pass): x_c = x_limit_for_pass
+    theta_c = 90*r_l_toggle
+    return (x_c, y_c, theta_c)
+    
+
+def pass_to_teammate(me, my_teammate, ball):
+    x_limit_for_pass = 1.00
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, x_limit_for_pass, Constants.open_for_pass_y_pos)
+    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
+    dist_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
+    
+    if (Utilities.close(me.thetahat, theta, tolerance = 10) and dist_to_ball <= Utilities.kickable_distance):
+        return Skills.attack_ball(me, ball)
+    else:
+        return Skills.go_behind_ball_facing_target(ball, Utilities.kickable_distance, x_limit_for_pass, Constants.open_for_pass_y_pos)
+
+        
+
 
 
 ##########################################
 # Plays mainly for "defender" position:  #
 ##########################################
+
+def stay_at_midfield_follow_ball(me, opponent1, opponent2, ball):
+    x_c = Constants.half_field
+    y_c = ball.yhat
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, Constants.goal_position_opp[0], Constants.goal_position_opp[1])
+    theta = Utilities.rad_to_deg(theta)
+    return (x_c, y_c, theta)
 
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     """
