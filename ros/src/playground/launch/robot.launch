@@ -12,7 +12,7 @@
     </include>
 
     <!-- Hardware Dependent -->
-    <node name="motion" pkg="playground" type="motion_node.py">
+    <node name="motion" pkg="playground" type="motion_node.py" output="screen">
         <remap from="robot_state" to="$(arg me)_state" />
     </node>
 </launch>
