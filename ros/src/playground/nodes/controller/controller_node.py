@@ -21,13 +21,14 @@ _ctrl_on = True
 _initializing = True
 
 def _handle_robot_state(msg):
-    global _xhat, _yhat, _thetahat, _initializing
+    global _xhat, _yhat, _thetahat, _initializing, _ctrl_on
     _xhat = msg.xhat
     _yhat = msg.yhat
     _thetahat = msg.thetahat
 
     if _initializing:
         _initializing = False
+        _ctrl_on = True
 
         x = rospy.get_param('x_init')
         y = rospy.get_param('y_init')
