@@ -7,7 +7,7 @@ import Constants
 
 _offensive = 0
 _defensive = 1
-_nuetral = 2
+_neutral = 2
 
 _ball_defend_position = None
 
@@ -19,10 +19,6 @@ def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one=Fa
     # check to see who has possession first!
     # Always try and shoot the ball right at the goal. 
     return attacker(me, my_teammate, opponent1, opponent2, ball, _offensive)
-    
-
-
-    # pass
 
 def defensive_attacker(me, my_teammate, opponent1, opponent2, ball):
     global _defensive
@@ -35,8 +31,8 @@ def defensive_attacker(me, my_teammate, opponent1, opponent2, ball):
     return attacker(me, my_teammate, opponent1, opponent2, ball, _defensive)
 
 def neutral_attacker(me, my_teammate, opponent1, opponent2, ball):
-    global _nuetral
-    return attacker(me, my_teammate, opponent1, opponent2, ball, _nuetral)
+    global _neutral
+    return attacker(me, my_teammate, opponent1, opponent2, ball, _neutral)
 
 
 
@@ -52,7 +48,7 @@ def defensive_defender(me, my_teammate, opponent1, opponent2, ball):
 
 
 def neutral_defender(me, my_teammate, opponent1, opponent2, ball):
-    global _nuetral
+    global _neutral
     return defender(me, my_teammate, opponent1, opponent2, ball, _neutral)
 
 
@@ -68,8 +64,8 @@ def defensive_goalie(me, my_teammate, opponent1, opponent2, ball):
     return goalie(me, my_teammate, opponent1, opponent2, ball, _defensive)
 
 def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
-    global _nuetral
-    return goalie(me, my_teammate, opponent1, opponent2, ball, _nuetral)
+    global _neutral
+    return goalie(me, my_teammate, opponent1, opponent2, ball, _neutral)
 
 
 
@@ -78,7 +74,6 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 ################################################################
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
-    print "INSIDE ATTACKER FUNCION"
     global _offensive, _defensive, _neutral
     middle_of_goal = 0
 
@@ -92,19 +87,17 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy):
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if me.ally1:
-                print "Attacker --> I am allyONE"
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target)
                 else: 
                     return Plays.shoot_on_goal(me, ball, -goal_target)
             else: # I am ally2
-                print "Attacker --> I am allyTWO"
                 if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
                     return Plays.shoot_on_goal(me, ball, middle_of_goal)
                 else:
                     return Plays.pass_to_teammate(me, my_teammate, ball)
 
-        else: #Basically, I don't have possession and I should be the one to steal the ball
+        else: #Basically, we don't have possession and I should be the one to steal the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
             if (closest_opp == 1):
                 opp = opponent1
@@ -133,14 +126,26 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy):
     else:
         dist_to_maintain = 0.5
 
+    if strategy == _offensive:
+        if me.ally1:
+
     if me.ally1:
-        if ball.yhat > 0:
-            passing_toggle = -1
+        if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball) and Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
+            return Plays.shoot_off_the_wall(me, ball)
         else:
-            passing_toggle = 1
-        return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
+            if ball.yhat > 0:
+                passing_toggle = -1
+            else:
+                passing_toggle = 1
+            return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
     else:
-        return Plays.stay_between_points_at_distance(me.xhat, me.yhat, opponent1.xhat, opponent1.yhat, dist_to_maintain)
+        closest_opp = Utilities.get_closest_opponent_to_ball(opponent1.xhat, opponent1.yhat, opponent2.xhat, opponent2.yhat, ball)
+        if closest_opp == 1:
+            opp = opponent1
+        else:
+            opp = opponent2
+
+        return Plays.stay_between_points_at_distance(me.xhat, me.yhat, opp.xhat, opp.yhat, dist_to_maintain)
 
 
 

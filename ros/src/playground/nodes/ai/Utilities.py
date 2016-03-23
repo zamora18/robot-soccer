@@ -12,6 +12,7 @@ def our_robot_closer_to_ball(robot, opponent, ball):
     else:
         return False
 
+### I WANT TO CHANGE THESE FUNCTIONS SO THEY RETURN THE ACTUAL ROBOT THAT IS CLOSER! NOT JUST T/F OR 1/2 ############################
 def get_closest_opponent_to_ball(rob1_x, rob1_y, rob2_x, rob2_y, ball):
     return _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, ball.xhat, ball.yhat)
 

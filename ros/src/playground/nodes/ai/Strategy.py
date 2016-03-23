@@ -31,41 +31,29 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
-    print "Inside aggressive offense....."
     section = Utilities.get_field_section(ball.xhat)
-
 
     if me.ally1:
         if   section == 1:
-            print "Inside aggressive_offense and allyONE, section = 1"
             return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            print "Inside aggressive_offense and allyONE, section = 2"
             return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
-            print "Inside aggressive_offense and allyONE, section = 3"
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            print "Inside aggressive_offense and allyONE, section = 4"
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         else:
-            print "Inside aggressive_offense and allyONE, section = ERROR"
             return (me.xhat, me.yhat, me.theta_hat) #default, returns current pos
     else:
         if   section == 1:
-            print "Inside aggressive_offense and allyTWO????!, section = 1"
             return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            print "Inside aggressive_offense and allyTWO????!, section = 2"
             return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
-            print "Inside aggressive_offense and allyTWO????!, section = 3"
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            print "Inside aggressive_offense and allyTWO????!, section = 4"
             return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         else:
-            print "Inside aggressive_offense and allyTWO????!, section = ERROR"
             return (me.xhat, me.yhat, me.theta_hat) #default, returns current pos
 
 
