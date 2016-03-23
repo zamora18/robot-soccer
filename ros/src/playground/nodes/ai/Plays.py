@@ -27,7 +27,7 @@ def shoot_on_goal(me, ball, distance_from_center):
         0 signifies straight on, 1 is top corner and -1 is bottom corner
         it also attacks the ball then actuates the kicker"""
 
-	global _shoot_state
+    global _shoot_state
 
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
@@ -200,5 +200,5 @@ def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     return (x_desired, y_desired, theta)
 
 ##########################################
-# Plays mainly for "goalie" position:	 #
+# Plays mainly for "goalie" position:    #
 ##########################################
