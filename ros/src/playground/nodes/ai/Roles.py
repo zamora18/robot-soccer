@@ -126,9 +126,6 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy):
     else:
         dist_to_maintain = 0.5
 
-    if strategy == _offensive:
-        if me.ally1:
-
     if me.ally1:
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball) and Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
             return Plays.shoot_off_the_wall(me, ball)
