@@ -168,9 +168,9 @@ def _deal_with_calibration():
             sleep_time = 2
 
         try:
-            M1QPPS = float(other[2])
-            M2QPPS = float(other[3])
-            M3QPPS = float(other[4])
+            M1QPPS = int(other[2])
+            M2QPPS = int(other[3])
+            M3QPPS = int(other[4])
         except:
             M1QPPS = None
             M2QPPS = None
