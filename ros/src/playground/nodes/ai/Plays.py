@@ -18,7 +18,7 @@ _trick_state = ShootState.setup
 
 def _robot_close_to_point(robot, x, y, theta):
     return Utilities.close(x, robot['xhat'], tolerance = .10) and Utilities.close(y, robot['yhat'], tolerance=.10) \
-                and Utilities.close(theta, robot['thetahat'], tolerance = 10)
+                and Utilities.close(theta, robot['thetahat'], tolerance=20)
 
 
 def shoot(robot, ball, distance_from_center):
@@ -45,10 +45,10 @@ def shoot(robot, ball, distance_from_center):
         distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball['xhat'], ball['yhat'])
 
         # if the ball is behind the robot, go back to set up
-        if (Utilities.is_ball_behind_robot(robot, ball): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
+        if Utilities.is_ball_behind_robot(robot, ball): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
             _shoot_state = ShootState.setup
         # if the ball is close enough, go to the shoot state
-        elif(distance_from_kicker_to_ball <  0.08):
+        elif(distance_from_kicker_to_ball <=  0.08):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
