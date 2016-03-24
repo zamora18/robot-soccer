@@ -104,8 +104,8 @@ def deg_to_rad(deg):
     return deg*np.pi/180
 
 def robot_close_to_point(robot, point_x, point_y, theta):
-    return Utilities.close(point_x, robot.xhat, tolerance = .10) and Utilities.close(point_y, robot.yhat, tolerance=.10) \
-                and Utilities.close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
+    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
+                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
 
 def close(a, b, tolerance=0.010):
     """

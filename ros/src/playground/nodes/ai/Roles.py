@@ -146,8 +146,6 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy):
 
 
 
-    
-
 
 def goalie(me, my_teammate, opponent1, opponent2, ball, strategy):
     global _ball_defend_position, _offensive, _defensive, _neutral
@@ -159,10 +157,7 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy):
         print "KICKING BALL AWAY"
         Skills.kick()
 
-    ############# THIS IF STATEMENT MIGHT NOT BE RIGOROUS ENOUGH, but it will do for now !!!!!!********##########
-    ################################################################################################
-    # Should I check to see if the ball is behind me? If so, is it too late?
-    if (strategy == _offensive and Utilities.our_robot_closer_to_ball(me, opponent1, ball) and not Utilities.is_ball_behind_robot(me, ball)):
+    if (strategy == _offensive and Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
         return Skills.attack_ball(me, ball)
     # Goalie is always defending the goal in an arc
     else:
@@ -182,7 +177,6 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy):
 
         if _ball_defend_position is not None:
             y_c = _ball_defend_position.yhat_future
-
 
         return (x_c, y_c, theta_c_deg)
 

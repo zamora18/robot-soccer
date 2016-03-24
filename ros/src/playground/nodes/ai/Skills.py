@@ -50,8 +50,8 @@ def attack_ball(robot, ball):
     Simply pushes the ball along the "vector" from robot to ball
     """
     theta = Utilities.get_angle_between_points(robot.xhat, robot.yhat, ball.xhat, ball.yhat)
-    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)         #*np.pi/180 <-- took this out of theta
-    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)         #*np.pi/180 <-- took this out of theta
+    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)
+    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)
     theta = Utilities.rad_to_deg(theta)
     
     return (x_c, y_c, theta)
