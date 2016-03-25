@@ -120,9 +120,9 @@ def one_on_one(me, opponent1, ball):
     opponent2 = None
     section = Utilities.get_field_section(ball.xhat)
 
-    print "Section is: %d" % section
-    print ("BALL position is: (%d, %d)\n", ball.xhat, ball.yhat)
-    print ("Robot position is: (%d, %d)\n", me.xhat, me.yhat)
+    # print "Section is: %d" % section
+    # print ("BALL position is: (%d, %d)\n", ball.xhat, ball.yhat)
+    # print ("Robot position is: (%d, %d)\n", me.xhat, me.yhat)
 
     if   section == 1:
         return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)

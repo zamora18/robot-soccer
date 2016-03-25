@@ -44,7 +44,7 @@ def shoot_on_goal(me, ball, distance_from_center):
     elif _shoot_state == ShootState.attack:
         # get the distance to the ball
         (x_pos, y_pos) = Utilities.get_front_of_robot(me)
-        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat) # ****changed from _future
+        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat_future, ball.yhat_future) # ****changed from _future
 
         # if the ball is behind the robot, go back to set up
         if (Utilities.is_ball_behind_robot(me, ball)): #or distance_from_kicker_to_ball > Constants.distance_behind_ball_for_kick): # (or distance_from_kicker_to_ball > some distance?) <-- add this?

@@ -5,7 +5,7 @@ import Constants
 
 
 
-def get_closest_opponent_to_ball(opponent1, opponent2, rob1_x, rob1_y, rob2_x, rob2_y, ball):
+def get_closest_opponent_to_ball(opponent1, opponent2, ball):
     if opponent2 is None:
         return opponent1
     else:
@@ -89,14 +89,19 @@ def find_triangle(x1,y1,x2,y2):
 
 def get_front_of_robot(robot):
     ### thetahat is in degrees, so we should change from degree to radians?? ----------
-    x_pos = robot.xhat+Constants.robot_half_width*np.cos(robot.thetahat) 
-    y_pos = robot.yhat+Constants.robot_half_width*np.sin(robot.thetahat)
+    theta = deg_to_rad(robot.thetahat)
+    x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
+    y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
 
     return (x_pos, y_pos)
 
 
 def rad_to_deg(rad):
-    return rad*180/np.pi
+    deg = rad*180/np.pi
+    if deg < 0:
+        return deg+360
+    else:
+        return deg
 
 def deg_to_rad(deg):
     return deg*np.pi/180
