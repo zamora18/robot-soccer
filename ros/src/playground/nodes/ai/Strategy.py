@@ -36,25 +36,27 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
 
     if me.ally1:
-        if   section == 1:
-            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 2:
-            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 3:
+        if section == 1:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:
+        if section == 2:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+        if section == 3:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        if section == 4:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+            
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
         if   section == 1:
-            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 2:
-            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 3:
-            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:
             return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 2:
+            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 3:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 4:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+            
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
@@ -64,24 +66,24 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
 
     if me.ally1:
         if   section == 1:
-            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
         if   section == 1:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
@@ -91,24 +93,24 @@ def passive_aggressive(me, my_teammate, opponent1, opponent2, ball): #AKA, mild 
 
     if me.ally1:
         if   section == 1:
-            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
-            return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
         if   section == 1:
-            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
             return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
             return Roles.neutral_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            return Roles.neutral_goalie(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.neutral_attacker(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
@@ -123,13 +125,13 @@ def one_on_one(me, opponent1, ball):
     print ("Robot position is: (%d, %d)\n", me.xhat, me.yhat)
 
     if   section == 1:
-        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 2:
-        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 3:
-        return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 4:
         return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
+    elif section == 2:
+        return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball, True)
+    elif section == 3:
+        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
+    elif section == 4:
+        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
     else:
         return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
