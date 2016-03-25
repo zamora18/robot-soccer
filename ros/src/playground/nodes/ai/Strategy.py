@@ -21,13 +21,15 @@ _beginning_trick_shot = False
 
 def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
     
+    one_v_one = True
     #for now, we will just focus on aggressive offense
-    # if goal:
-    #     return reset_positions_after_goal(me)
-    # elif (one_v_one):
-    #     return one_on_one(me, opponent1, ball)
-    # else:
-    return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+    if goal:
+        # MAKE A DEBOUNCED GOAL SO THAT WE DON'T THINK THERE'S A GOAL WHEN IT'S JUST "CLOSE" AND NOT ALL THE WAY IN
+        return reset_positions_after_goal(me)
+    elif (one_v_one):
+        return one_on_one(me, opponent1, ball)
+    else:
+        return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
@@ -114,6 +116,11 @@ def passive_aggressive(me, my_teammate, opponent1, opponent2, ball): #AKA, mild 
 def one_on_one(me, opponent1, ball):
     my_teammate = None
     opponent2 = None
+    section = Utilities.get_field_section(ball.xhat)
+
+    print "Section is: %d" % section
+    print ("BALL position is: (%d, %d)\n", ball.xhat, ball.yhat)
+    print ("Robot position is: (%d, %d)\n", me.xhat, me.yhat)
 
     if   section == 1:
         return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)

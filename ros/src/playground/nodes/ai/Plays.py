@@ -38,16 +38,16 @@ def shoot_on_goal(me, ball, distance_from_center):
     #########################
     if _shoot_state == ShootState.setup:
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if Utilities.robot_close_to_point(me, *desired_setup_position) and not Utilities.is_ball_behind_robot(me, ball):
+        if Utilities.robot_close_to_point(me, *desired_setup_position): # and not Utilities.is_ball_behind_robot(me, ball): #commented this out so it might help?
             _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
         # get the distance to the ball
         (x_pos, y_pos) = Utilities.get_front_of_robot(me)
-        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat_future, ball.yhat_future) #changed to future and it seemed to work well in the simulator...
+        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat) # ****changed from _future
 
         # if the ball is behind the robot, go back to set up
-        if (Utilities.is_ball_behind_robot(me, ball)): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
+        if (Utilities.is_ball_behind_robot(me, ball)): #or distance_from_kicker_to_ball > Constants.distance_behind_ball_for_kick): # (or distance_from_kicker_to_ball > some distance?) <-- add this?
             _shoot_state = ShootState.setup
         # if the ball is close enough, go to the shoot state
         elif(distance_from_kicker_to_ball <=  Constants.kickable_distance):
@@ -99,7 +99,7 @@ def shoot_off_the_wall(me, ball):
 
     # transition
     if _trick_state == ShootState.setup:
-        if _robot_close_to_point(me, x_c_before, y_c_before, theta_c):
+        if Utilities.robot_close_to_point(me, x_c_before, y_c_before, theta_c):
             _trick_state = ShootState.attack
 
     elif _trick_state == ShootState.attack:
