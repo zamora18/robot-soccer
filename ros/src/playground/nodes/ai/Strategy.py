@@ -34,10 +34,10 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     one_v_one = True
 
     #for now, we will just focus on aggressive offense
-    if goal:
-        # MAKE A DEBOUNCED GOAL SO THAT WE DON'T THINK THERE'S A GOAL WHEN IT'S JUST "CLOSE" AND NOT ALL THE WAY IN
-        return reset_positions_after_goal(me)
-    elif (one_v_one):
+    # if goal:
+    #     # MAKE A DEBOUNCED GOAL SO THAT WE DON'T THINK THERE'S A GOAL WHEN IT'S JUST "CLOSE" AND NOT ALL THE WAY IN
+    #     return reset_positions_after_goal(me)
+    if (one_v_one):
         return one_on_one(me, opponent1, ball)
     else:
         return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
