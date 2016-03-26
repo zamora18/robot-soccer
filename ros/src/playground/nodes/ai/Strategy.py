@@ -28,10 +28,10 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
     global _goal_check_counter, _goal_counter_max
-    update_opponents_strategy_variables(opponent1, opponent2, ball)
+    # update_opponents_strategy_variables(opponent1, opponent2, ball)
     # Check to see if someone scored a goal
     
-    one_v_one = True
+    one_v_one = False
 
     #for now, we will just focus on aggressive offense
     # if goal:
