@@ -136,10 +136,10 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             if me.ally1 and not one_v_one:
                 return Plays.shoot_off_the_wall(me, ball)
             else: #ally2 or 1v1
-                Skills.attack_ball_with_kick(me, ball)
+                return Skills.attack_ball_with_kick(me, ball)
         else: # I am in charge of stealing the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
-            Plays.steal_ball_from_opponent(me, closest_opp, ball)
+            return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball
         if me.ally1:
             # call Utilities.are_both_opponents_attacking_goal?
