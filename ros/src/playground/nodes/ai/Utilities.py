@@ -38,6 +38,12 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
 def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
     pass
 
+def is_in_our_half(obj):
+    if obj.xhat < 0:
+        return True
+    else:
+        return False
+
 def has_possession():
     pass
 

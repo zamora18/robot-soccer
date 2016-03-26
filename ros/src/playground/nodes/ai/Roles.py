@@ -133,7 +133,7 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
-            elif me.ally1 and not one_v_one:
+            if me.ally1 and not one_v_one:
                 return Plays.shoot_off_the_wall(me, ball)
             else: #ally2 or 1v1
                 Skills.attack_ball_with_kick(me, ball)

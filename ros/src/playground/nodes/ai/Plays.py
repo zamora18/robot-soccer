@@ -143,7 +143,7 @@ def steal_ball_from_opponent(me, opponent, ball):
         return Skills.attack_ball_with_kick(me, ball)
     else:
         pretty_close_to_ball = 0.85
-        return Utilities.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, pretty_close_to_ball) 
+        return stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, pretty_close_to_ball) 
 
 def stay_open_for_pass(me, my_teammate, ball, r_l_toggle):
     """
