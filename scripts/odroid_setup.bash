@@ -1,7 +1,7 @@
 # Add this file to the bottom of your ~/.bashrc to include all of this goodness:
 # i.e.,     `source /path/to/repo/scripts/odroid_setup.bash`
 
-PATH_TO_REPO=`pwd`/..
+PATH_TO_REPO=~/dev/lusk/repo
 
 # Aliases
 alias ll='ls -lh --color'
