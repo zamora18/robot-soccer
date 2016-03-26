@@ -2,6 +2,7 @@ from collections import defaultdict
 import numpy as np
 
 inf = 1e100
+closest_h_node = None
 
 class Graph:
     def __init__(self, n, m):
@@ -15,7 +16,7 @@ class Graph:
 
 
 
-    def get_adjacent_edges(self, node):
+    def get_adjacent_nodes(self, node):
         return self.edges[node]
 
     def add_node(self, coord):
@@ -92,14 +93,19 @@ class Graph:
         """recursive function to find the quickest way to the end node.
            Not to be called by the user"""
 
+        global closest_h_node
+
         # add the current node to nodes that have been visited, and remove it from the open considered nodes
         closedict[current] = opendict[current];
         del opendict[current]
 
+        # print current
+
         if current == end:
+            print 'found end'
             return  self._find_path(closedict, end)
 
-        adjacent = self.get_adjacent_edges(current)
+        adjacent = self.get_adjacent_nodes(current)
 
         lowest_f_node = None
         for n in adjacent:
@@ -108,7 +114,14 @@ class Graph:
                 node = opendict.get(n)
                 distance = self.distances[(current, n)]
                 if distance != inf:
-                    f = (distance + g) + self.h(n, end)
+                    h = self.h(n,end)
+                    if closest_h_node == None or h < closest_h_node[1]:
+                        # if closest_h_node == None:
+                        #     print None
+                        closest_h_node = (n,h)
+                        print closest_h_node
+
+                    f = (distance + g) + h
                     # if the node already exists in open
                     if node != None:
                         # check to see if the path through this current node is better then 
@@ -127,7 +140,9 @@ class Graph:
 
         # if all nodes were already visited, im trapped so just leave
         if (lowest_f_node == None):
-            return None
+            print 'blocked off'
+            print closest_h_node
+            return self._find_path(closedict, closest_h_node[0])
 
         # update g for the next call
         g = g + lowest_f_node[2]
@@ -137,6 +152,9 @@ class Graph:
 
     def path(self, start, end, func=None):
 
+
+        global closest_h_node
+
         currentpath = list()
         start_node = self.convert_coord_to_node(start)
         currentpath.append(start_node)
@@ -144,12 +162,14 @@ class Graph:
         opendict = {start_node : (0, None)}
         closedict = {}
 
+        closest_h_node = None
+
         # RECURSIVE PATHFINDING AHHHHHH
         result = self._path(start_node, self.convert_coord_to_node(end), 0, opendict, closedict)
 
-        print result
         # change everything back to coordinates
-        result = map(self.convert_node_to_coord, result)
+        if result != None:
+            result = map(self.convert_node_to_coord, result)
 
         return result
 
@@ -162,16 +182,15 @@ class Graph:
         return np.sqrt((end_point[0] - start_point[0])**2 + (end_point[1] - start_point[1])**2)
 
     
-    def _add_obstacle(self, current, discrete_radius, setnodes):
-        if discrete_radius <= 0:
+    def _add_obstacle(self, current, discrete_radius):
+        if discrete_radius < 0:
             return
-        adjacent = self.get_adjacent_edges(current)
+        adjacent = self.get_adjacent_nodes(current)
         for n in adjacent:
-            if n not in setnodes:
-                self.distances[(current, n)] = inf
-                self.distances[(n, current)] = inf
-                setnodes.add(current)
-                self._add_obstacle(n, discrete_radius-1, setnodes)
+            self.distances[(current, n)] = inf
+            self.distances[(n, current)] = inf
+            self._add_obstacle(n, discrete_radius-1)
+
 
 
 
@@ -179,8 +198,13 @@ class Graph:
     def add_obstacle(self, center, discrete_radius):
 
         current = self.convert_coord_to_node(center)
-        setnodes = set()
-        self._add_obstacle(current, discrete_radius, setnodes)
+        self._add_obstacle(current, discrete_radius)
+        # print '\nSTART'
+        # testnode = 2
+        # adjacent = self.get_adjacent_nodes(testnode)
+        # for n in adjacent:
+        #     print str(testnode) + '->' + str(n) + ' = ' + str(self.distances[testnode, n])
+        #     print str(n) + '->' + str(testnode) + ' = ' + str(self.distances[n, testnode])
         
 
 

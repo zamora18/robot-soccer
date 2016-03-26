@@ -6,23 +6,25 @@ import matplotlib.pyplot as plt
 sys.path.append('../../ros/src/playground/nodes/guidedog/')
 import astar
 
-field_length = 0.100 #3.68;
-field_height = 0.100 #1.52;
-separation = 0.01 #0.200;
+field_length = 3.68;
+field_height = 1.52;
+separation = 0.0100;
 
 def main():
 
     graph = astar.init_graph(field_length, field_height, distance_between_points=separation)
 
 
-    obstacles = [ (5,4) ]
+    obstacles = [ (4,4), (7,1)]
 
     for obstacle in obstacles:
-        graph.add_obstacle(obstacle, 3)
+        graph.add_obstacle(obstacle, 1)
 
     # How many points in x, y directions
     Nx = field_length/separation;
     Ny = field_height/separation;
+
+    
 
     # x_max = (field_length/2);
     # y_max = (field_height/2);
@@ -34,15 +36,15 @@ def main():
     y = np.linspace(-(Ny-1), 0, Ny)
     X, Y = np.meshgrid(x, y)
 
-    start = (0,0)
-    end = (9,9)
+    start = (23,2)
+    end = (360,150)
 
     # Solve!
     start_time = time.time()
     path = graph.path(start, end)
     total_time = time.time() - start_time
 
-    print total_time, "seconds."
+    
 
     x = []
     y = []
@@ -61,8 +63,11 @@ def main():
     for obstacle in obstacles:
         plt.scatter(obstacle[0], -obstacle[1], color='w', marker='x', s=20)
 
+    print total_time, "seconds."
+
     # plt.grid()
     plt.show()
+    print("{}, {} = {}".format(Nx, Ny, Nx * Ny))
 
 if __name__ == "__main__":
     main()
