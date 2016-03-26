@@ -173,7 +173,7 @@ def update_opponents_strategy_variables(opponent1, opponent2, ball):
 
     if Utilities.is_in_our_half(ball):
         _percent_time_ball_in_our_half = (_percent_time_ball_in_our_half + 1)/_averaging_factor
-    else
+    else:
         _percent_time_ball_in_our_half = _percent_time_ball_in_our_half/_averaging_factor
 
     if Utilities.is_in_our_half(opponent1) and Utilities.is_in_our_half(opponent2):
