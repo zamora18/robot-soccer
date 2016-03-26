@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <group ns="/ally2">
+
+        <arg name="me" value="ally2" />
+        <arg name="ally" value="ally1" />
+
+        <node name="ai" pkg="playground" type="ai_node.py" output="screen">
+       		<remap from="my_state" to="$(arg me)_state" />
+        	<remap from="ally_state" to="$(arg ally)_state" />
+    	</node>
+
+    </group>
+</launch>

@@ -26,10 +26,10 @@
         <remap from="vision_position" to="/vision_opponent2_position" />
         <remap from="robot_state" to="opponent2_state" />
     </node>
-    <node name="ai" pkg="playground" type="ai_node.py" output="screen">
+<!--     <node name="ai" pkg="playground" type="ai_node.py" output="screen">
         <remap from="my_state" to="$(arg me)_state" />
         <remap from="ally_state" to="$(arg ally)_state" />
-    </node>
+    </node> -->
     <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen">
         <remap from="my_state" to="$(arg me)_state" />
     </node>

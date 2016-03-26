@@ -8,7 +8,7 @@
         <param name="go_rogue" type="bool" value="false" />
 
         <!-- Load this robot's param file -->
-        <rosparam command="load" file="$(find playground)/param/$(env ROBOT).yaml" />
+        <rosparam command="load" file="$(find playground)/param/$(optenv ROBOT nugget).yaml" />
 
         <!-- Start the robot up -->
         <include file="$(find playground)/launch/robot.launch">
