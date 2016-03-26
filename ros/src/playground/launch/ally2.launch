@@ -4,11 +4,11 @@
     <group ns="/ally2">
 
         <!-- Set ROS Params -->
-        <param name="robot_estimator_on" type="bool" value="false" />
+        <param name="robot_estimator_on" type="bool" value="true" />
         <param name="go_rogue" type="bool" value="false" />
 
         <!-- Load this robot's param file -->
-        <rosparam command="load" file="$(find playground)/param/fry.yaml" />
+        <rosparam command="load" file="$(find playground)/param/$(env ROBOT).yaml" />
 
         <!-- Start the robot up -->
         <include file="$(find playground)/launch/robot.launch">
