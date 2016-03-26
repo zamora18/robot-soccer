@@ -43,6 +43,13 @@ def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_
     return (x_c, y_c, theta)
 
 
+def attack_ball_with_kick(me, ball):
+    dist_to_ball = Utilities.get_distance_between_points(me.xhat, me.yhat, ball.xhat, ball.yhat)
+    if dist_to_ball < Constants.kickable_distance:
+        kick()
+    return attack_ball(me, ball)
+
+
 def attack_ball(robot, ball):
     """
     Simply pushes the ball along the "vector" from robot to ball

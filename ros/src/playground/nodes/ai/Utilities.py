@@ -13,8 +13,8 @@ def get_closest_opponent_to_ball(opponent1, opponent2, ball):
 
 def am_i_closest_teammate_to_ball(me, my_teammate, ball):
     if my_teammate is None: return True
-    closest = _get_closest_robot_to_point(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat, ball.xhat, ball.yhat)
-    if (closest == 1): return True
+    closest = _get_closest_robot_to_point(me, my_teammate, ball.xhat, ball.yhat)
+    if (closest == me): return True
     else: return False
 
 def am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
@@ -34,6 +34,9 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
         return rob1
     else:
         return rob2 
+
+def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
+    pass
 
 def has_possession():
     pass

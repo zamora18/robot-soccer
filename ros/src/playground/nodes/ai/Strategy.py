@@ -22,6 +22,7 @@ _beginning_trick_shot = False
 def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
     
     one_v_one = True
+
     #for now, we will just focus on aggressive offense
     if goal:
         # MAKE A DEBOUNCED GOAL SO THAT WE DON'T THINK THERE'S A GOAL WHEN IT'S JUST "CLOSE" AND NOT ALL THE WAY IN

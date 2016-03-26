@@ -95,7 +95,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                 if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
                     return Plays.shoot_on_goal(me, ball, middle_of_goal)
                 else:
-                    return Plays.pass_to_teammate(me, my_teammate, ball)
+                    return Plays.pass_to_teammate(me, my_teammate, ball) #maybe he should just kick it directly in front of him?
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
@@ -116,27 +116,40 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
     global _offensive, _defensive, _neutral
     
     if strategy == _offensive:
-        dist_to_maintain = 0.8
-    elif strategy == _defensive:
-        dist_to_maintain = 0.2
-    else:
-        dist_to_maintain = 0.5
-
-    if me.ally1 or one_v_one:
-        if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball) and Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
-            return Plays.shoot_off_the_wall(me, ball)
-        elif my_teammate is None:
-            return Plays.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, dist_to_maintain)
+        if me.ally1:
+            dist_to_maintain = 0.85
         else:
+            dist_to_maintain = 0.40
+    elif strategy == _defensive:
+        if me.ally1:
+            dist_to_maintain = 0.65
+        else:
+            dist_to_maintain = 0.20
+    else:
+        if me.ally1:
+            dist_to_maintain = 0.55
+        else:
+            dist_to_maintain = 0.00
+
+    if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
+        if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
+            elif me.ally1 and not one_v_one:
+                return Plays.shoot_off_the_wall(me, ball)
+            else: #ally2 or 1v1
+                Skills.attack_ball_with_kick(me, ball)
+        else: # I am in charge of stealing the ball
+            closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
+            Plays.steal_ball_from_opponent(me, closest_opp, ball)
+    else: #My teammate is closer to the ball
+        if me.ally1:
+            # call Utilities.are_both_opponents_attacking_goal?
             if ball.yhat > 0:
                 passing_toggle = -1
             else:
                 passing_toggle = 1
             return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
-    else: # I am ally2
-        dist_to_maintain = 0.5
-        return Plays.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, dist_to_maintain)
-
+        else: # ally2
+            return Plays.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, dist_to_maintain)
 
 
 def goalie(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
