@@ -1,6 +1,11 @@
 #include "visionobject.h"
 #include <iostream>
 
+typedef struct 
+{
+	int colors[6];
+} colorarray;
+
 VisionObject::VisionObject()
 {
 	location.x = 0;
@@ -75,4 +80,44 @@ string VisionObject::getNodeIdent()
 }
 
 
+bool VisionObject::initColor(string color, int* LowH, int* LowS, int* LowV, int* HighH, int* HighS, int* HighV)
+{
+	colorarray colors;
+	if(color == "b")
+	{
+		colors = (colorarray){81,110,160,255,189,255};
+	}
+	else if(color == "bc")
+	{
+		colors = (colorarray){77,111,0,87,230,255};
+	}
+	else if(color == "o")
+	{
+		colors = (colorarray){10,24,58,255,207,255};
+	}
+	else if(color == "g")
+	{
+		colors = (colorarray){49,80,16,1424,186,255};
+	}
+	else if(color == "p")
+	{
+		colors = (colorarray){125, 164,0,78,200,255};
+	}
+	else if(color == "r")
+	{
+		colors = (colorarray){0,179,81,105,226,255};
+	}
+	else 
+		return false;
 
+	*LowH = colors.colors[0];
+	*HighH = colors.colors[1];
+	*LowS = colors.colors[2];
+	*HighS = colors.colors[3];
+	*LowV = colors.colors[4];
+	*HighV = colors.colors[5];
+
+	return true;
+
+
+}

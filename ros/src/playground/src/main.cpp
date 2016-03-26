@@ -453,6 +453,15 @@ int main(int argc, char *argv[])
 		{
 			showBallThresh = !showBallThresh;
 		}
+		else if(keypress % 256 == 's' || keypress == 's')
+		{
+			showAlly1Thresh = false;
+			showAlly2Thresh = false;
+			showOpp1Thresh = false;
+			showOpp2Thresh = false;
+			showBallThresh = false;
+
+		}
 		else if(keypress >= 0)
 		{
 			cout << keypress << endl;
@@ -630,6 +639,7 @@ bool initColors()
 {
 		// put in the values of the thing
 	string ally1color, ally2color, opp1color, opp2color;
+	VisionObject vo = VisionObject();
 	cout << "Ally1 Color :";
 	cin >> ally1color;
 
@@ -642,146 +652,15 @@ bool initColors()
 	cout << "OPP2 Color :";
 	cin >> opp2color;
 
-	if (ally1color == "r")
-	{
-		ally1LowH = 0;
-		ally1HighH = 179;
-
-		ally1LowS = 81;
-		ally1HighS = 105;
-
-		ally1LowV = 226;
-		ally1HighV = 255;
-	}
-	else if (ally1color == "o")
-	{
-		ally1LowH = 10;
-		ally1HighH = 24;
-
-		ally1LowS = 58;
-		ally1HighS = 255;
-
-		ally1LowV = 207;
-		ally1HighV = 255;
-	}
-	else if (ally1color == "p")
-	{
-		ally1LowH = 125;
-		ally1HighH = 164;
-
-		ally1LowS = 0;
-		ally1HighS = 78;
-
-		ally1LowV = 200;
-		ally1HighV = 255;
-	}
-	else if (ally1color == "bc")
-	{
-		ally1LowH = 77;
-		ally1HighH = 111;
-
-		ally1LowS = 0;
-		ally1HighS = 87;
-
-		ally1LowV = 230;
-		ally1HighV = 255;
-	}
-	else if (ally1color == "b")
-	{
-		ally1LowH = 81;
-		ally1HighH = 110;
-
-		ally1LowS = 174;
-		ally1HighS = 255;
-
-		ally1LowV = 189;
-		ally1HighV = 255;
-	}
-	else if (ally1color == "g")
-	{
-		ally1LowH = 46;
-		ally1HighH = 94;
-
-		ally1LowS = 0;
-		ally1HighS = 179;
-
-		ally1LowV = 186;
-		ally1HighV = 255;
-	}
-	else
+	
+	if (!vo.initColor(ally1color, &ally1LowH, &ally1LowS,&ally1LowV,&ally1HighH,&ally1HighS,&ally1HighV))
+		return false;
+	if (!vo.initColor(ally2color, &ally2LowH, &ally2LowS,&ally2LowV,&ally2HighH,&ally2HighS,&ally2HighV))
+		return false;
+	if (!vo.initColor(opp1color, &opp1LowH, &opp1LowS,&opp1LowV,&opp1HighH,&opp1HighS,&opp1HighV))
+		return false;
+	if (!vo.initColor(opp2color, &opp2LowH, &opp2LowS,&opp2LowV,&opp2HighH,&opp2HighS,&opp2HighV))
 		return false;
 
-	// opp1 colors
-	if (opp1color == "r")
-	{
-		opp1LowH = 0;
-		opp1HighH = 179;
-
-		opp1LowS = 81;
-		opp1HighS = 105;
-
-		opp1LowV = 226;
-		opp1HighV = 255;
-	}
-	else if (opp1color == "o")
-	{
-		opp1LowH = 10;
-		opp1HighH = 24;
-
-		opp1LowS = 58;
-		opp1HighS = 255;
-
-		opp1LowV = 207;
-		opp1HighV = 255;
-	}
-	else if (opp1color == "p")
-	{
-		opp1LowH = 125;
-		opp1HighH = 164;
-
-		opp1LowS = 0;
-		opp1HighS = 78;
-
-		opp1LowV = 200;
-		opp1HighV = 255;
-	}
-	else if (opp1color == "bc")
-	{
-		opp1LowH = 77;
-		opp1HighH = 111;
-
-		opp1LowS = 0;
-		opp1HighS = 87;
-
-		opp1LowV = 230;
-		opp1HighV = 255;
-	}
-	else if (opp1color == "b")
-	{
-		opp1LowH = 81;
-		opp1HighH = 110;
-
-		opp1LowS = 174;
-		opp1HighS = 255;
-
-		opp1LowV = 189;
-		opp1HighV = 255;
-	}
-	else if (opp1color == "g")
-	{
-		opp1LowH = 46;
-		opp1HighH = 94;
-
-		opp1LowS = 0;
-		opp1HighS = 179;
-
-		opp1LowV = 186;
-		opp1HighV = 255;
-	}
-	else
-		return false;
-
-	if(ally1color == opp1color)
-		return false;
 	return true;
 }
