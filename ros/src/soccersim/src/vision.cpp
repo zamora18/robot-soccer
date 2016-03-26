@@ -14,14 +14,16 @@
 using namespace std;
 using namespace cv;
 
-#define FIELD_WIDTH     3.048  // in meters
-#define FIELD_HEIGHT    1.524 
+#define FIELD_WIDTH     3.6576  // in meters
+#define FIELD_HEIGHT    2.6289 
 #define ROBOT_RADIUS    0.10
 #define GUI_NAME        "Soccer Overhead Camera"
 
-// Mouse click parameters
-#define FIELD_WIDTH_PIXELS      625.0
-#define FIELD_HEIGHT_PIXELS     300.0
+// Mouse click parameters, empirically found
+// The smaller the number, the more positive the error
+// (i.e., it will be above the mouse in +y region)
+#define FIELD_WIDTH_PIXELS      605.0
+#define FIELD_HEIGHT_PIXELS     405.0
 #define CAMERA_WIDTH            640.0
 #define CAMERA_HEIGHT           480.0
 
@@ -182,6 +184,8 @@ void sendBallMessage(int x, int y) {
 
     // mirror y over y-axis
     y_meters = -1*y_meters;
+
+    // cout << "x: " << x_meters << ", y: " << y_meters << endl;
 
     geometry_msgs::Vector3 msg;
     msg.x = x_meters;
