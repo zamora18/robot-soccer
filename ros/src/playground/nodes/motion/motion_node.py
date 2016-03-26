@@ -51,6 +51,14 @@ def _shutdown_hook():
 def main():
     rospy.init_node('motion', anonymous=False)
 
+    # Get this robot's motor's QPPS from rosparam
+    m1 = rospy.get_param('M1QPPS', None)
+    m2 = rospy.get_param('M2QPPS', None)
+    m3 = rospy.get_param('M3QPPS', None)
+
+    # init wheelbase
+    wheelbase.init(m1qpps=m1, m2qpps=m2, m3qpps=m3)
+
     # Register a shutdown hook to kill motion
     rospy.on_shutdown(_shutdown_hook)
 
@@ -63,14 +71,6 @@ def main():
 
     # So that we know the robot's theta
     rospy.Subscriber('robot_state', RobotState, _handle_theta)
-
-    # Get this robot's motor's QPPS from rosparam
-    m1 = rospy.get_param('M1QPPS', None)
-    m2 = rospy.get_param('M2QPPS', None)
-    m3 = rospy.get_param('M3QPPS', None)
-
-    # init wheelbase
-    wheelbase.init(m1qpps=m1, m2qpps=m2, m3qpps=m3)
 
     rospy.spin()
     return
