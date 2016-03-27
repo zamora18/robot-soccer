@@ -178,7 +178,7 @@ def pass_to_teammate(me, my_teammate, ball):
 
 def stay_at_midfield_follow_ball(me, opponent1, opponent2, ball):
     x_c = Constants.half_field
-    y_c = ball.yhat
+    y_c = ball.yhat_future
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, Constants.goal_position_opp[0], Constants.goal_position_opp[1])
     theta = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta)

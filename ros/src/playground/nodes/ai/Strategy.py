@@ -38,9 +38,13 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     #     # MAKE A DEBOUNCED GOAL SO THAT WE DON'T THINK THERE'S A GOAL WHEN IT'S JUST "CLOSE" AND NOT ALL THE WAY IN
     #     return reset_positions_after_goal(me)
     if (one_v_one):
-        return one_on_one(me, opponent1, ball)
+        (x,y,theta) = one_on_one(me, opponent1, ball)
+        (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
+        return (x_c, y_c, theta)
     else:
-        return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+        (x,y,theta) = aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+        (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
+        return (x_c, y_c, theta)
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):

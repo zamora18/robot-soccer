@@ -106,7 +106,10 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                 passing_toggle = -1 
             else: 
                 passing_toggle = 1
-            return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
+            if Utilities.am_i_too_close_to_teammate(me, my_teammate):
+                return Skills.give_my_teammate_some_space(me, my_teammate)
+            else:
+                return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
         else: # I am ally2
             return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
 

@@ -23,12 +23,19 @@ goalie_x_pos        = goal_position_home[0] + goal_box_length + robot_half_width
 goalie_radius       = goal_box_width/2
 
 dribble_distance    = robot_half_width + .05
-kickable_distance   = 0.06
+kickable_distance   = 0.04
 steal_ball_dist     = robot_half_width + 0.15
+
+ally1_start_pos     = [-0.50, 0, 0]
+ally2_start_pos     = [goal_position_home[0]+goalie_radius, 0, 0]
+
+teammate_gap        = robot_width + 0.15
 
 distance_behind_ball_for_kick       = robot_width
 distance_behind_ball_for_dribble    = robot_half_width + 0.05
 open_for_pass_y_pos                 = 1.05
 
-ally1_start_pos     = [-0.50, 0, 0]
-ally2_start_pos     = [goal_position_home[0]+goalie_radius, 0, 0]
+field_x_lim         = field_length/2 - robot_width#*0.4
+field_y_lim         = field_width/2 - robot_width#*0.4
+
+
