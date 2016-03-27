@@ -589,13 +589,32 @@ void drawRobotLine(Mat img, Robot robot)
 
 	////cout << "robot stuffs done" << endl;
 
+    string robotident = robot.getNodeIdent();
 
-	line(img, robotlocation, end, Scalar(0,0,255), 2);
+    Scalar color;
+
+    if (robotident == "ally1")
+    {
+        //blue for nugget
+        color = Scalar(255,0,0);
+    }
+    else if (robotident == "ally2")
+    {
+        //yellow for fry
+        color = Scalar(255,255,0);
+    }
+    else
+    {
+        //red for enemy
+        color = Scalar(0,0,255);
+    }
+
+	line(img, robotlocation, end, color, 2);
 
 	stringstream ss;
 
 	ss << "(" << robot.getLocation().x << "," << robot.getLocation().y << "," << (int)robot.getOrientation() << ")";
-	putText(img, ss.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
+	putText(img, ss.str(), video.fieldToImageTransform(robot.getLocation()), 1, FONT_HERSHEY_PLAIN, color);
 }
 
 
