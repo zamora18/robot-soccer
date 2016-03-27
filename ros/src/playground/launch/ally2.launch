@@ -11,7 +11,7 @@
         <rosparam command="load" file="$(find playground)/param/$(optenv ROBOT fry).yaml" />
 
         <!-- Load this position (ally1/ally2) param file -->
-        <rosparam command="load" file="$(find playground)/param/ally1.yaml" />
+        <rosparam command="load" file="$(find playground)/param/ally2.yaml" />
 
         <!-- Start the robot up -->
         <include file="$(find playground)/launch/robot.launch">
