@@ -5,43 +5,50 @@ import Constants
 
 
 
-def our_robot_closer_to_ball(robot, opponent, ball):
-    closest = _get_closest_robot_to_point(robot.xhat, robot.yhat, opponent.xhat, opponent.yhat, ball.xhat, ball.yhat)
-    if (closest == 1):
-        return True 
+def get_closest_opponent_to_ball(opponent1, opponent2, ball):
+    if opponent2 is None:
+        return opponent1
     else:
-        return False
-
-### I WANT TO CHANGE THESE FUNCTIONS SO THEY RETURN THE ACTUAL ROBOT THAT IS CLOSER! NOT JUST T/F OR 1/2 ############################
-def get_closest_opponent_to_ball(rob1_x, rob1_y, rob2_x, rob2_y, ball):
-    return _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, ball.xhat, ball.yhat)
+        return _get_closest_robot_to_point(opponent1, opponent2, ball.xhat, ball.yhat)
 
 def am_i_closest_teammate_to_ball(me, my_teammate, ball):
-    closest = _get_closest_robot_to_point(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat, ball.xhat, ball.yhat)
-    if (closest == 1): return True
+    if my_teammate is None: return True
+    closest = _get_closest_robot_to_point(me, my_teammate, ball.xhat, ball.yhat)
+    if (closest == me): return True
     else: return False
 
 def am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
-    me_and_opp1 = _get_closest_robot_to_point(me.xhat, me.yhat, opponent1.xhat, opponent1.yhat, ball.xhat, ball.yhat)
-    me_and_opp2 = _get_closest_robot_to_point(me.xhat, me.yhat, opponent2.xhat, opponent2.yhat, ball.xhat, ball.yhat)
-    if (me_and_opp1 == 1 and me_and_opp2 == 1):
+    me_or_opp1 = _get_closest_robot_to_point(me, opponent1, ball.xhat, ball.yhat)
+    me_or_opp2 = _get_closest_robot_to_point(me, opponent2, ball.xhat, ball.yhat)
+
+    if (me_or_opp1 == me and me_or_opp2 == me):
         return True
     else:
         return False
 
-def _get_closest_robot_to_point(rob1_x, rob1_y, rob2_x, rob2_y, point_x, point_y):
-    rob_1_dist = get_distance_between_points(rob1_x, rob1_y, point_x, point_y)
-    rob_2_dist = get_distance_between_points(rob2_x, rob2_y, point_x, point_y)
+def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
+    if rob2 is None: return rob1
+    rob_1_dist = get_distance_between_points(rob1.xhat, rob1.yhat, point_x, point_y)
+    rob_2_dist = get_distance_between_points(rob2.xhat, rob2.yhat, point_x, point_y)
     if (rob_1_dist < rob_2_dist):
-        return 1 #rob1 is closer
+        return rob1
     else:
-        return 2 #rob2 is closer
+        return rob2 
+
+def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
+    pass
+
+def is_in_our_half(obj):
+    if obj.xhat < 0:
+        return True
+    else:
+        return False
 
 def has_possession():
     pass
 
 def is_ball_behind_robot(robot, ball):
-    if (robot.xhat+Constants.robot_half_width > ball.xhat):
+    if (robot.xhat > ball.xhat):
         return True 
     else: 
         return False
@@ -91,21 +98,26 @@ def find_triangle(x1,y1,x2,y2):
 
 def get_front_of_robot(robot):
     ### thetahat is in degrees, so we should change from degree to radians?? ----------
-    x_pos = robot.xhat+Constants.robot_half_width*np.cos(robot.thetahat) 
-    y_pos = robot.yhat+Constants.robot_half_width*np.sin(robot.thetahat)
+    theta = deg_to_rad(robot.thetahat)
+    x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
+    y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
 
     return (x_pos, y_pos)
 
 
 def rad_to_deg(rad):
-    return rad*180/np.pi
+    deg = rad*180/np.pi
+    if deg < 0:
+        return deg+360
+    else:
+        return deg
 
 def deg_to_rad(deg):
     return deg*np.pi/180
 
 def robot_close_to_point(robot, point_x, point_y, theta):
-    return Utilities.close(point_x, robot.xhat, tolerance = .10) and Utilities.close(point_y, robot.yhat, tolerance=.10) \
-                and Utilities.close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
+    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
+                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
 
 def close(a, b, tolerance=0.010):
     """

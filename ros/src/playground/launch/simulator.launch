@@ -10,10 +10,30 @@
         <arg name="vision_away1" value="/vision_opponent1_position" />
         <arg name="vision_away2" value="/vision_opponent2_position" />
         <arg name="vision_ball" value="/vision_ball_position" />
-
-        <arg name="vel_cmd_home1" value="/ally1/vel_cmds" />
-        <arg name="vel_cmd_home2" value="/ally2/vel_cmds" />
-        <arg name="vel_cmd_away1" value="/opponent1/vel_cmds" />
-        <arg name="vel_cmd_away2" value="/opponent2/vel_cmds" />
     </include>
+
+    <!-- Ally1 (default attacker) -->
+    <group ns="/ally1">
+        <!-- Load this robot's param file -->
+        <rosparam command="load" file="$(find playground)/param/nugget.yaml" />
+
+        <include file="$(find playground)/launch/hw_agnostic.launch">
+            <arg name="me" value="ally1" />
+            <arg name="ally" value="ally2" />
+            <arg name="vel_cmds_remap" value="/home1/command" />
+        </include>
+    </group>
+
+    <!-- Ally2 (default goalie) -->
+    <group ns="/ally2">
+        <!-- Load this robot's param file -->
+        <rosparam command="load" file="$(find playground)/param/fry.yaml" />
+
+        <include file="$(find playground)/launch/hw_agnostic.launch">
+            <arg name="me" value="ally2" />
+            <arg name="ally" value="ally1" />
+            <arg name="vel_cmds_remap" value="/home2/command" />
+        </include>
+    </group>
+
 </launch>
