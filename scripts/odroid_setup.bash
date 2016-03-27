@@ -1,9 +1,9 @@
 # Add this file to the bottom of your ~/.bashrc to include all of this goodness:
 # i.e.,     `source /path/to/repo/scripts/odroid_setup.bash`
 
-# For SCRIPTPATH, see http://stackoverflow.com/a/4774063
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-PATH_TO_REPO="$SCRIPTPATH/.."
+# For DIR, see http://stackoverflow.com/a/246128
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH_TO_REPO="$DIR/.."
 
 # Aliases
 alias ll='ls -lh --color'
