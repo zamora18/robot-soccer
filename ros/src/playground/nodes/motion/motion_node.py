@@ -67,7 +67,7 @@ def main():
 
     # Services
     rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
-    rospy.Service('/kick', Trigger, _kick)
+    rospy.Service('kick', Trigger, _kick)
 
     # So that we know the robot's theta
     rospy.Subscriber('robot_state', RobotState, _handle_theta)

@@ -16,7 +16,7 @@ def kick():
     Send a service call to kick the ball.
     """
     try:
-        kick_srv = rospy.ServiceProxy('/kick', Trigger)
+        kick_srv = rospy.ServiceProxy('kick', Trigger)
         kick_srv()
     except rospy.ServiceException, e:
         print "Kick service call failed: %s"%e
