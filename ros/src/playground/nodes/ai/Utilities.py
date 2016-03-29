@@ -35,6 +35,15 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
     else:
         return rob2 
 
+
+def am_i_too_close_to_teammate(me, my_teammate):
+    dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
+    if dist_from_each_other < Constants.teammate_gap:
+        return True
+    else:
+        return False
+
+
 def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
     pass
 
@@ -103,6 +112,20 @@ def get_front_of_robot(robot):
     y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
 
     return (x_pos, y_pos)
+
+
+def limit_xy_too_close_to_walls(x,y):
+    if abs(x) > Constants.field_x_lim:
+        if x > 0:
+            x = Constants.field_x_lim
+        else:
+            x = -Constants.field_x_lim
+    if abs(y) > Constants.field_y_lim:
+        if y > 0:
+            y = Constants.field_y_lim
+        else:
+            y = -Constants.field_y_lim
+    return (x,y)
 
 
 def rad_to_deg(rad):

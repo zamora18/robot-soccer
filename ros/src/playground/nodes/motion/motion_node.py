@@ -51,6 +51,10 @@ def _shutdown_hook():
 def main():
     rospy.init_node('motion', anonymous=False)
 
+    if rospy.get_param('simulation_mode', False):
+        print "[motion] Bye!"
+        return
+
     # Get this robot's motor's QPPS from rosparam
     m1 = rospy.get_param('M1QPPS', None)
     m2 = rospy.get_param('M2QPPS', None)
