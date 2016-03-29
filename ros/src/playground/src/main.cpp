@@ -40,6 +40,9 @@ bool done1, start1;
 int threadstatus;
 bool away;
 
+int allynumplayers;
+int oppnumplayers;
+
 bool showAlly1Thresh = false;
 bool showAlly2Thresh = false;
 bool showOpp1Thresh = false;
@@ -101,8 +104,12 @@ int main(int argc, char *argv[])
 
 	ros::NodeHandle n;
 		
+	cout << "How many Allies? : ";
+	cin >> allynumplayers;
 	
-	
+	cout << "How many Opponents? : ";
+	cin >> oppnumplayers;
+
 	if(!initColors())
 		exit(-1);
 	
@@ -251,9 +258,13 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mrobot1done, NULL);
 
 	pthread_create(&ally1thread, NULL, trackRobot, &ally1);
-	pthread_create(&ally2thread, NULL, trackRobot, &ally2);
+	if(allynumplayers > 1)
+		pthread_create(&ally2thread, NULL, trackRobot, &ally2);
+
 	pthread_create(&opp1thread, NULL, trackRobot, &opp1);
-	pthread_create(&opp2thread, NULL, trackRobot, &opp2);
+
+	if(oppnumplayers > 1)
+		pthread_create(&opp2thread, NULL, trackRobot, &opp2);
 
 
 
@@ -486,9 +497,11 @@ int main(int argc, char *argv[])
 	//pthread_exit(NULL);
 	int exitstatus = 1;
 	exitstatus = pthread_cancel(ally1thread);
-	exitstatus |= pthread_cancel(ally2thread);
+	if (allynumplayers > 1)
+		exitstatus |= pthread_cancel(ally2thread);
 	exitstatus |= pthread_cancel(opp1thread);
-	exitstatus |= pthread_cancel(opp2thread);
+	if (oppnumplayers > 1)
+		exitstatus |= pthread_cancel(opp2thread);
 	pthread_mutex_destroy(&mrobot1cond);
 	pthread_mutex_destroy(&mrobot1done);
 	pthread_cond_destroy(&robot1cond);
@@ -662,24 +675,31 @@ bool initColors()
 	cout << "Ally1 Color :";
 	cin >> ally1color;
 
-	cout << "Ally2 Color :";
-	cin >> ally2color;
+	if (allynumplayers > 1)
+	{
+		cout << "Ally2 Color :";
+		cin >> ally2color;
+	}
 
 	cout << "OPP1 Color :";
 	cin >> opp1color;
 
-	cout << "OPP2 Color :";
-	cin >> opp2color;
-
+	if (oppnumplayers > 1)
+	{
+		cout << "OPP2 Color :";
+		cin >> opp2color;
+	}
 	
 	if (!vo.initColor(ally1color, &ally1LowH, &ally1LowS,&ally1LowV,&ally1HighH,&ally1HighS,&ally1HighV))
 		return false;
-	if (!vo.initColor(ally2color, &ally2LowH, &ally2LowS,&ally2LowV,&ally2HighH,&ally2HighS,&ally2HighV))
-		return false;
+	if (allynumplayers > 1)
+		if (!vo.initColor(ally2color, &ally2LowH, &ally2LowS,&ally2LowV,&ally2HighH,&ally2HighS,&ally2HighV))
+			return false;
 	if (!vo.initColor(opp1color, &opp1LowH, &opp1LowS,&opp1LowV,&opp1HighH,&opp1HighS,&opp1HighV))
 		return false;
-	if (!vo.initColor(opp2color, &opp2LowH, &opp2LowS,&opp2LowV,&opp2HighH,&opp2HighS,&opp2HighV))
-		return false;
+	if (oppnumplayers > 1)
+		if (!vo.initColor(opp2color, &opp2LowH, &opp2LowS,&opp2LowV,&opp2HighH,&opp2HighS,&opp2HighV))
+			return false;
 
 	return true;
 }
