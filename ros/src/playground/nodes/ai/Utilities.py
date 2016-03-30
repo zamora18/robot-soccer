@@ -14,8 +14,10 @@ def get_closest_opponent_to_ball(opponent1, opponent2, ball):
 def am_i_closest_teammate_to_ball(me, my_teammate, ball):
     if my_teammate is None: return True
     closest = _get_closest_robot_to_point(me, my_teammate, ball.xhat, ball.yhat)
-    if (closest == me): return True
-    else: return False
+    if (closest == me): 
+        return True
+    else: 
+        return False
 
 def am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
     me_or_opp1 = _get_closest_robot_to_point(me, opponent1, ball.xhat, ball.yhat)
@@ -75,6 +77,21 @@ def is_ball_between_home_and_robot(robot, ball):
     if dotproduct > squaredlengthba: return False
 
     return True
+
+def get_perpendicular_point_from_ball(me, ball):
+    x_c = ball.xhat_future
+    if me.yhat > ball.yhat:
+        y_c = ball.yhat_future + Constants.own_goal_y_dist
+    else:
+        y_c = ball.yhat_future - Constants.own_goal_y_dist
+    theta_c = 0
+    return (x_c, y_c, theta_c)
+
+def get_own_goal_dist_behind_ball(me, ball):
+    x_c = ball.xhat_future - Constants.own_goal_x_dist
+    y_c = ball.yhat_future
+    theta_c = 0
+    return (x_c, y_c, theta_c)
 
 def get_sides_of_triangle(x1,x2,y1,y2):
     (a,b,c,theta) = find_triangle(x1,x2,y1,y2)

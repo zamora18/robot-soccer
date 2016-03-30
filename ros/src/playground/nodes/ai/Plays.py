@@ -5,17 +5,32 @@ import Utilities
 import Constants
 
 class ShootState:
-    setup = 0
-    attack = 1
-    shoot = 2
+    setup   = 0
+    attack  = 1
+    shoot   = 2
+
+class TrickState:
+    setvars = 0
+    setup   = 1
+    attack  = 2
+    shoot   = 3
 
 
-_shoot_state = ShootState.setup
-_trick_state = ShootState.setup
+_shoot_state        = ShootState.setup
+_trick_state        = TrickState.setvars
+_steal_ball_state   = ShootState.setup
 
-_offensive = 0
-_defensive = 1
-_neutral = 2
+_wait_steal_timer   = 0
+_WAIT_STEAL_MAX     = 20
+
+_offensive  = 0
+_defensive  = 1
+_neutral    = 2
+
+_trick_x_before = None
+_trick_y_before = None
+_trick_x_after  = None
+_trick_y_after  = None
 
 
 ##########################################
@@ -31,7 +46,10 @@ def shoot_on_goal(me, ball, distance_from_center):
 
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
-    desired_setup_position = Skills.set_up_kick_facing_goal(ball, distance_from_center)
+    desired_setup_position = Skills.set_up_kick_facing_goal(ball, distance_from_center)#!!!!!!should we try and do future? So it predicts
+    # get the distance to the ball
+    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
+    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat) # ****changed from _future
 
     #########################
     ### transition states ###
@@ -42,10 +60,6 @@ def shoot_on_goal(me, ball, distance_from_center):
             _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
-        # get the distance to the ball
-        (x_pos, y_pos) = Utilities.get_front_of_robot(me)
-        distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat_future, ball.yhat_future) # ****changed from _future
-
         # if the ball is behind the robot, go back to set up
         if (Utilities.is_ball_behind_robot(me, ball)):
             _shoot_state = ShootState.setup
@@ -54,7 +68,9 @@ def shoot_on_goal(me, ball, distance_from_center):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
-        _shoot_state = ShootState.setup # if we just shot, go back to setup
+        # If the ball is still close to the kicker, we need to kick until it is far away.
+        if distance_from_kicker_to_ball > Constants.kickable_distance:
+            _shoot_state = ShootState.setup 
     # default state, go to setup
     else:
         _shoot_state = ShootState.setup
@@ -74,15 +90,17 @@ def shoot_on_goal(me, ball, distance_from_center):
     elif _shoot_state == ShootState.shoot:
         print "KICKING"
         Skills.kick()
-        return Skills.attack_ball(me, ball) # keep attacking the ball as you kick
+        return Skills.attack_ball_with_kick(me, ball) # keep attacking the ball as you kick
 
     # wait for state machine to start
     else:
         print ('default')
         return (me.xhat, me.yhat, me.thetahat)
 
+
 def shoot_off_the_wall(me, ball):
     global _trick_state
+    global _trick_x_before, _trick_x_after, _trick_y_before, _trick_y_after
 
     (x,y) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x, y, ball.xhat, ball.yhat)
@@ -93,43 +111,52 @@ def shoot_off_the_wall(me, ball):
         theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, Constants.field_length/2, Constants.field_width*y_tweak_value-ball.yhat)
     else:
         theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, Constants.field_length/2, -Constants.field_width*y_tweak_value+ball.yhat)
-    
-    x_c_before = ball.xhat-set_up_distance*np.cos(theta_c)
-    y_c_before = ball.yhat-set_up_distance*np.sin(theta_c)
-
-    x_c_after = ball.xhat+set_up_distance*np.cos(theta_c)
-    y_c_after = ball.yhat+set_up_distance*np.sin(theta_c)
-
     theta_c = Utilities.rad_to_deg(theta_c)
 
-    # transition
-    if _trick_state == ShootState.setup:
-        if Utilities.robot_close_to_point(me, x_c_before, y_c_before, theta_c):
-            _trick_state = ShootState.attack
+    #########################
+    ### transition states ###
+    #########################
+    if _trick_state == TrickState.setvars:
+        # Assign desired positions
+        _trick_x_before = ball.xhat-set_up_distance*np.cos(theta_c)
+        _trick_y_before = ball.yhat-set_up_distance*np.sin(theta_c)
 
-    elif _trick_state == ShootState.attack:
+        _trick_x_after = ball.xhat+set_up_distance*np.cos(theta_c)
+        _trick_y_after = ball.yhat+set_up_distance*np.sin(theta_c)
+        # Transition to setup state
+        _trick_state = TrickState.setup
+
+    elif _trick_state == TrickState.setup:
+        if Utilities.robot_close_to_point(me, _trick_x_before, _trick_y_before, theta_c):
+            _trick_state = TrickState.attack
+
+    elif _trick_state == TrickState.attack:
         if(distance_from_kicker_to_ball <= Constants.kickable_distance):
-            _trick_state = ShootState.shoot
+            _trick_state = TrickState.shoot
 
-    elif _trick_state == ShootState.shoot:
-        _trick_state == ShootState.setup
+    elif _trick_state == TrickState.shoot:
+        if distance_from_kicker_to_ball > Constants.kickable_distance:
+            _trick_state == TrickState.setvars
+
     else:
-        _trick_state = ShootState.setup
+        _trick_state = TrickState.setvars
 
     
-    # Moore output
-    if _trick_state == ShootState.setup:
-        return (x_c_before, y_c_before, theta_c)
+    ###############################
+    ### Moore Outputs in states ###
+    ###############################
+    if _trick_state == TrickState.setup:
+        return (_trick_x_before, _trick_y_before, theta_c)
 
-    elif _trick_state == ShootState.attack:
-        return (x_c_after, y_c_after, theta_c)
+    elif _trick_state == TrickState.attack:
+        return (_trick_x_after, _trick_y_after, theta_c)
 
-    elif _trick_state == ShootState.shoot:
+    elif _trick_state == TrickState.shoot:
         Skills.kick()
-        return (x_c_before, y_c_before, theta_c)
+        return (_trick_x_after, _trick_y_after, theta_c)
 
     else:
-        return (x_c_before, y_c_before, theta_c)
+        return (_trick_x_before, _trick_y_before, theta_c)
 
 
 def steal_ball_from_opponent(me, opponent, ball):
@@ -138,12 +165,49 @@ def steal_ball_from_opponent(me, opponent, ball):
     put itself in front of the opponent, facing opponent's goal, ready to kick the 
     ball towards their goal
     """
-    opp_dist_from_ball = Utilities.get_distance_between_points(opponent.xhat, opponent.yhat, ball.xhat, ball.yhat)
-    if opp_dist_from_ball > Constants.steal_ball_dist:
+    global _steal_ball_state
+    global _wait_steal_timer, _WAIT_STEAL_MAX
+
+    # WE ARE USING FUTURE POSITIONS SO WE WILL BE WHERE THE BALL IS HOPEFULLY BEFORE THE OPPONENT
+    theta_des = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, opponent.xhat, opponent.yhat)
+    x_des = ball.xhat_future - Constants.steal_ball_dist*np.cos(theta_des)
+    y_des = ball.yhat_future - Constants.steal_ball_dist*np.sin(theta_des)
+    # but we need the kicker to get the current position so it will kick correctly
+    (x,y) = Utilities.get_front_of_robot(me)
+    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x, y, ball.xhat, ball.yhat)
+
+    #########################
+    ### transition states ###
+    #########################
+    if _steal_ball_state == ShootState.setup:
+        opp_dist_from_ball = Utilities.get_distance_between_points(opponent.xhat, opponent.yhat, ball.xhat_future, ball.yhat_future)
+        if Utilities.robot_close_to_point(me, x_des, y_des, theta_des):
+            _wait_steal_timer = _wait_steal_timer + 1
+            if (opp_dist_from_ball >= Constants.steal_ball_dist or _wait_steal_timer >= _WAIT_STEAL_MAX):
+                _wait_steal_timer = 0
+                _steal_ball_state = ShootState.attack
+    elif _steal_ball_state == ShootState.attack:
+        if distance_from_kicker_to_ball <= Constants.kickable_distance:
+            _steal_ball_state = ShootState.shoot
+    elif _steal_ball_state == ShootState.shoot:
+        if distance_from_kicker_to_ball > Constants.kickable_distance:
+            _steal_ball_state = ShootState.setup
+    else:
+        _steal_ball_state = ShootState.setup
+
+    ###############################
+    ### Moore Outputs in states ###
+    ###############################
+    if _steal_ball_state == ShootState.setup:
+        return (x_des, y_des, theta_des)
+    elif _steal_ball_state == ShootState.attack:
+        return Skills.attack_ball_with_kick(me, ball)
+    elif _steal_ball_state == ShootState.shoot:
+        Skills.kick()
         return Skills.attack_ball_with_kick(me, ball)
     else:
-        pretty_close_to_ball = 0.85
-        return stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, pretty_close_to_ball) 
+        return (me.xhat, me.yhat, Utilities.rad_to_deg(me.thetahat))
+
 
 def stay_open_for_pass(me, my_teammate, ball, r_l_toggle):
     """

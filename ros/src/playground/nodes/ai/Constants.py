@@ -23,7 +23,7 @@ goalie_x_pos        = goal_position_home[0] + goal_box_length + robot_half_width
 goalie_radius       = goal_box_width/2
 
 dribble_distance    = robot_half_width + .05
-kickable_distance   = 0.04
+kickable_distance   = 0.05
 steal_ball_dist     = robot_half_width + 0.15
 
 ally1_start_pos     = [-0.50, 0, 0]
@@ -37,5 +37,8 @@ open_for_pass_y_pos                 = 1.05
 
 field_x_lim         = field_length/2 - robot_width#*0.4
 field_y_lim         = field_width/2 - robot_width#*0.4
+
+own_goal_y_dist		= robot_half_width + 0.10
+own_goal_x_dist		= robot_half_width + 0.10
 
 
