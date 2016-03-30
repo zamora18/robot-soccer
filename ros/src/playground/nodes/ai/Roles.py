@@ -136,10 +136,14 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
-            if me.ally1 and not one_v_one:
-                return Plays.shoot_off_the_wall(me, ball)
-            else: #ally2 or 1v1
-                return Skills.attack_ball_with_kick(me, ball)
+            if Utilities.is_ball_behind_robot(me, ball):
+                des_dist_behind_ball = 0.15
+                return Skills.go_behind_ball_facing_target(ball, des_dist_behind_ball, Constants.goal_position_opp[0], Constants.goal_position_opp[1])
+            else:
+                if me.ally1 and not one_v_one:
+                    return Plays.shoot_off_the_wall(me, ball)
+                else: #ally2 or 1v1
+                    return Skills.attack_ball_with_kick(me, ball)
         else: # I am in charge of stealing the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
             return Plays.steal_ball_from_opponent(me, closest_opp, ball)

@@ -51,7 +51,7 @@ def _shutdown_hook():
 def main():
     rospy.init_node('motion', anonymous=False)
 
-    if rospy.get_param('simulation_mode', False):
+    if rospy.get_param('/simulation_mode', False):
         print "[motion] Bye!"
         return
 

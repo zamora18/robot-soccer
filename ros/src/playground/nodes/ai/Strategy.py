@@ -31,7 +31,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     # update_opponents_strategy_variables(opponent1, opponent2, ball)
     # Check to see if someone scored a goal
     
-    one_v_one = False
+    one_v_one = True
 
     #for now, we will just focus on aggressive offense
     # if goal:
@@ -153,7 +153,8 @@ def one_on_one(me, opponent1, ball):
     else:
         return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
-# def check_for_goal(ball):
+def check_for_goal(ball):
+    pass
 #     global
 #     if ball.xhat < (Constants.goal_position_home[0]+Constants.goal_score_threshold):
 #         _goal_check_counter = _goal_check_counter + 1

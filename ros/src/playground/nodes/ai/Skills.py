@@ -18,6 +18,7 @@ def kick():
     try:
         kick_srv = rospy.ServiceProxy('kick', Trigger)
         kick_srv()
+        print "kicking?"
     except rospy.ServiceException, e:
         print "Kick service call failed: %s"%e
 
@@ -45,7 +46,7 @@ def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_
 
 def attack_ball_with_kick(me, ball):
     dist_to_ball = Utilities.get_distance_between_points(me.xhat, me.yhat, ball.xhat, ball.yhat)
-    if dist_to_ball < Constants.kickable_distance:
+    if dist_to_ball <= Constants.kickable_distance:
         kick()
     return attack_ball(me, ball)
 

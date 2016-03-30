@@ -38,7 +38,7 @@ function simulator_1v1() {
     # To launch the simulation environment in the background, with ally1
     # ready to go (delete home2 and away2 robots)
     roslaunch "$ROBOT_PKG" simulator.launch &
-    sleep 6 # Otherwise there is a race condition
+    sleep 9 # Otherwise there is a race condition
 
     # Delete unneccesary models
     rosservice call /gazebo/delete_model home2

@@ -5,7 +5,7 @@
 
         <!-- Set ROS Params -->
         <param name="robot_estimator_on" type="bool" value="true" />
-        <param name="go_rogue" type="bool" value="false" />
+        <param name="go_rogue" type="bool" value="true" />
 
         <!-- Load this robot's param file with physical props -->
         <rosparam command="load" file="$(find playground)/param/$(optenv ROBOT nugget).yaml" />
