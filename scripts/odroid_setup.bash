@@ -10,7 +10,7 @@ alias ll='ls -lh --color'
 alias l='ls -alh --color'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias teleop='cd "%SCRIPTPATH"/tests/motors/ && ipython teleop.py'
+alias teleop='cd "$PATH_TO_REPO"/tests/motors/ && ipython teleop.py'
 alias gpio='cd /sys/class/gpio/ && cd gpio200'
 
 # ROS
