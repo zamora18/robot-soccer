@@ -16,7 +16,6 @@ _ball_defend_position = None
 ###################
 def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
-    
     # Ideas for this Role:
     # check to see who has possession first!
     # Always try and shoot the ball right at the goal. 
@@ -83,9 +82,9 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
     global _offensive, _defensive, _neutral
     middle_of_goal = 0
 
-    if (strategy == _offensive):
+    if strategy == _offensive:
         goal_target = 0.80
-    elif (strategy == _defensive):
+    elif strategy == _defensive:
         goal_target = 0.20
     else:
         goal_target = 0
@@ -105,6 +104,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
+            print "TRYING TO STEAL BALL??????"
             return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball than me.
         if me.ally1:
