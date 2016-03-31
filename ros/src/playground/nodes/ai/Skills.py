@@ -155,7 +155,7 @@ def avoid_own_goal(me, ball):
         if distance_from_kicker_to_ball > Utilities.kickable_distance:
             _own_goal_st = OwnGoalState.perp_setup
     else:
-        _own_goal_st = OwnGoalState.setup
+        _own_goal_st = OwnGoalState.perp_setup
 
 
     ###############################
@@ -173,6 +173,3 @@ def avoid_own_goal(me, ball):
     else:
         return (desired_perp_setup)
 
-# perp_setup      = 0
-#     behind_setup    = 1
-#     attack 

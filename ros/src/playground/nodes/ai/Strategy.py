@@ -52,9 +52,8 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
 
     if me.ally1:
-        if not _beginning_trick_shot:
-            _beginning_trick_shot = True
-            return Plays.shoot_off_the_wall(me, ball)
+        # if not Plays.beginning_trick_shot_done():
+        #     return Plays.shoot_off_the_wall(me, ball)
         if section == 1:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:

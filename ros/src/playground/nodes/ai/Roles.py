@@ -91,7 +91,9 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
-            if me.ally1 or one_v_one:
+            if Utilities.is_ball_behind_robot(me, ball):
+                return Skills.avoid_own_goal(me, ball)
+            elif me.ally1 or one_v_one:
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target, opponent1, opponent2)
                 else: 
@@ -104,11 +106,16 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                     # return Plays.pass_to_teammate(me, my_teammate, ball) #maybe he should just kick it directly in front of him?
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
-            closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
-            return Plays.steal_ball_from_opponent(me, closest_opp, ball)
+            if Utilities.is_ball_behind_robot(me, ball):
+                return Skills.avoid_own_goal(me, ball)
+            else:
+                closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
+                return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball than me.
         if Utilities.am_i_too_close_to_teammate(me, my_teammate):
             return Skills.give_my_teammate_some_space(me, my_teammate)
+        elif Utilities.is_ball_behind_robot(me, ball):
+            return Skills.avoid_own_goal(me, ball)
         else:
             if me.ally1:
                 return Plays.stay_open_for_pass(me, my_teammate, ball)
@@ -150,8 +157,11 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             else: #ally2 or 1v1
                 return Skills.clear_ball_from_half(me, ball)
         else: # I am in charge of stealing the ball
-            closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
-            return Plays.steal_ball_from_opponent(me, closest_opp, ball)
+            if Utilities.is_ball_behind_robot(me, ball):
+                return Skills.avoid_own_goal(me, ball)
+            else:
+                closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
+                return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball
         if Utilities.is_ball_behind_robot(me, ball):
             return Skills.avoid_own_goal(me, ball)
@@ -171,18 +181,18 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fals
 
     # First, check to see if the ball is close enough to actuate the kicker, and kick it away
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
-    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat_future, ball.yhat_future) #changed to future and it seemed to work well in the simulator...
+    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat) #changed from future 
     if (distance_from_kicker_to_ball <=  Constants.kickable_distance and not Utilities.is_ball_behind_robot(me, ball)):
         print "KICKING BALL AWAY"
         Skills.kick()
 
     if Utilities.is_ball_behind_robot(me, ball):
         return Skills.avoid_own_goal(me, ball)
-    elif (strategy == _offensive and Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball)):
+    elif Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball) and Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
         return Skills.clear_ball_from_half(me, ball)
     # Goalie is always defending the goal in an arc
     else:
-        theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat)
+        theta_c = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat_future, ball.yhat_future)
         # theta_c_future = Utilities.get_angle_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat_future, ball.yhat_future)
         theta_c_deg = Utilities.rad_to_deg(theta_c)
 
@@ -190,14 +200,14 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fals
         y_c = Constants.goal_position_home[1] + Constants.goalie_radius*np.sin(theta_c)
 
         #Updating global variable that will predict where the ball will intersect with the "goalie arc" and maintain that position
-        if abs(ball.xhat_future) > abs(x_c):
-            if _ball_defend_position is None:
-                _ball_defend_position = ball
-        else:
-            _ball_defend_position = None
+        # if abs(ball.xhat_future) > abs(x_c):
+        #     if _ball_defend_position is None:
+        #         _ball_defend_position = ball
+        # else:
+        #     _ball_defend_position = None
 
-        if _ball_defend_position is not None:
-            y_c = _ball_defend_position.yhat_future
+        # if _ball_defend_position is not None:
+        #     y_c = _ball_defend_position.yhat_future
 
         return (x_c, y_c, theta_c_deg)
 

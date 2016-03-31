@@ -164,6 +164,21 @@ def limit_xy_too_close_to_walls(x,y):
     return (x,y)
 
 
+def limit_xy_passing(x,y):
+    if abs(x) >= Constants.field_x_lim - 0.15:
+        if x > 0:
+            x = Constants.field_x_lim - 0.15
+        else:
+            x = -Constants.field_x_lim - 0.15
+    if abs(y) > Constants.field_y_lim - 0.15:
+        if y > 0:
+            y = Constants.field_y_lim - 0.15
+        else:
+            y = -Constants.field_y_lim - 0.15
+    return (x,y)
+
+
+
 def rad_to_deg(rad):
     deg = rad*180/np.pi
     if deg < 0:

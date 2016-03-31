@@ -22,8 +22,8 @@ _steal_ball_state   = ShootState.setup
 
 _wait_steal_timer   = 0
 _WAIT_STEAL_MAX     = 20
-_wait_shoot_timer   = 0
-_WAIT_SHOOT_MAX     = 200
+_ball_stuck_timer   = 0
+_BALL_STUCK_MAX     = 350
 
 _offensive  = 0
 _defensive  = 1
@@ -33,6 +33,14 @@ _trick_x_before = None
 _trick_y_before = None
 _trick_x_after  = None
 _trick_y_after  = None
+
+_beginning_trick_shot = False
+
+
+def beginning_trick_shot_done():
+    global _beginning_trick_shot
+
+    return _beginning_trick_shot
 
 
 ##########################################
@@ -45,6 +53,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
         it also attacks the ball then actuates the kicker"""
 
     global _shoot_state
+    global _ball_stuck_timer, _BALL_STUCK_MAX
 
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
@@ -57,9 +66,11 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     ### transition states ###
     #########################
     if _shoot_state == ShootState.setup:
+        _ball_stuck_timer = _ball_stuck_timer + 1
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if Utilities.robot_close_to_point(me, *desired_setup_position) or Utilities.is_ball_close_to_edges(ball):
+        if Utilities.robot_close_to_point(me, *desired_setup_position) or Utilities.is_ball_close_to_edges(ball) or _ball_stuck_timer >= _BALL_STUCK_MAX:
             if not Utilities.is_ball_behind_robot(me, ball): 
+                _ball_stuck_timer = 0
                 _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
@@ -107,6 +118,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 def shoot_off_the_wall(me, ball):
     global _trick_state
     global _trick_x_before, _trick_x_after, _trick_y_before, _trick_y_after
+    global _beginning_trick_shot
 
     (x,y) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x, y, ball.xhat, ball.yhat)
@@ -159,6 +171,7 @@ def shoot_off_the_wall(me, ball):
 
     elif _trick_state == TrickState.shoot:
         Skills.kick()
+        _beginning_trick_shot = True
         return (_trick_x_after, _trick_y_after, theta_c)
 
     else:
@@ -228,8 +241,9 @@ def stay_open_for_pass(me, my_teammate, ball):
 
     y_c = my_teammate.yhat + Constants.open_for_pass_y_dist*r_l_toggle
     x_c = ball.xhat_future + 0.50
-    (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x_c, y_c)
-    theta_c = -90*r_l_toggle
+
+    (x_c, y_c) = Utilities.limit_xy_passing(x_c, y_c)
+    theta_c = -45*r_l_toggle
     return (x_c, y_c, theta_c)
     
 
