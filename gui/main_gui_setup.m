@@ -31,7 +31,10 @@ end
 function h = setup_field_plots( field_ax, ally, field_ButtonDownCB )
 
     % Create the position plot by putting it in the middle of the field
-    h.plot_position = plot(field_ax, 0, 0); hold(field_ax,'on');
+    h.plot_ally_position = plot(field_ax, 0, 0); hold(field_ax,'on');
+    
+    % Create the opponent plot
+    h.plot_opp_position = plot(field_ax, 0, 0, 'ks');
 
     % Create a black * for where the vision says the bot is. You should see
     % jumps as the blue line pushes ahead (the estimator).

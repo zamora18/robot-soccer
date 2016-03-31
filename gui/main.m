@@ -142,12 +142,12 @@ function clearFieldCB(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if strcmp(hObject.Parent.Tag, 'ally1'),
-    plot_position = handles.ally1.plot_position;
+    plot_ally_position = handles.ally1.plot_ally_position;
 elseif strcmp(hObject.Parent.Tag, 'ally2'),
-    plot_position = handles.ally2.plot_position;
+    plot_ally_position = handles.ally2.plot_ally_position;
 end
 
-set(plot_position,'XData',0,'YData',0)
+set(plot_ally_position,'XData',0,'YData',0)
 
 
 % --- Executes on button press in ally1_btn_set_desired_position.
@@ -324,7 +324,7 @@ disp(view_resp);
 
 function robotStateCallback(~, msg, handles, ally)
 
-    if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
+    if ~ishandle(handles.plot_ally_position) || ~ishandle(handles.plot_ally_position)
         return
     end
     
@@ -339,25 +339,28 @@ function robotStateCallback(~, msg, handles, ally)
         ally1_bot = [ally1_bot msg];
     elseif ally == 2,
         ally2_pos = [msg.Xhat msg.Yhat msg.Thetahat];
-        ally2_bot = [ally2_bot msg];
+        ally2_bot = [ally2_bot msg];        
     end
     
-    x = get(handles.plot_position,'XData');
-    y = get(handles.plot_position,'YData');
-    x = [x msg.Xhat];
-    y = [y msg.Yhat];
-    set(handles.plot_position,'XData',x,'YData',y);
-    
-    set(handles.field_ax, 'ButtonDownFcn', {@field_ButtonDownCB,ally});
+    if ally == 1 || ally == 2,
+        x = get(handles.plot_ally_position,'XData');
+        y = get(handles.plot_ally_position,'YData');
+        x = [x msg.Xhat];
+        y = [y msg.Yhat];
+        set(handles.plot_ally_position,'XData',x,'YData',y);
+        set(handles.field_ax, 'ButtonDownFcn', {@field_ButtonDownCB,ally});
+        set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
+    else
+        set(handles.plot_opp_position,'XData',msg.Xhat,'YData',msg.Yhat);
+    end
 
-    set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
     
 %     % Predicted (red X)
 %     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
 %     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
     
     % Estimated (black asterisk)
-    if msg.Correction
+    if msg.Correction && (ally == 1 || ally == 2)
         set(handles.plot_bot_vision,'XData', msg.VisionX, 'YData', msg.VisionY);
     end
     
