@@ -38,11 +38,7 @@ function simulator_1v1() {
     # To launch the simulation environment in the background, with ally1
     # ready to go (delete home2 and away2 robots)
     roslaunch "$ROBOT_PKG" simulator.launch &
-    sleep 9 # Otherwise there is a race condition
-
-    # Delete unneccesary models
-    rosservice call /gazebo/delete_model home2
-    rosservice call /gazebo/delete_model away2
+    sleep 6 # Otherwise there is a race condition
 
     roslaunch "$ROBOT_PKG" ally1.launch &
     export SIM_ROBOTS=1
@@ -61,10 +57,16 @@ function simulator_2v2() {
 
 function sim_go() {
     if [[ $SIM_ROBOTS -eq 1 ]]; then
+        # Delete unneccesary models
+        rosservice call /gazebo/delete_model home2
+        rosservice call /gazebo/delete_model away2
         roslaunch "$ROBOT_PKG" ai_ally1.launch &
+        export SIM_PID_1=$!
     elif [[ $SIM_ROBOTS -eq 2 ]]; then
         roslaunch "$ROBOT_PKG" ai_ally1.launch &
+        export SIM_PID_1=$!
         roslaunch "$ROBOT_PKG" ai_ally2.launch &
+        export SIM_PID_2=$!
     else
         echo
         echo "ERROR!"
@@ -76,6 +78,31 @@ function sim_go() {
         echo
     fi
 
+    # Update for sim_stop
+    export LAST_SIM_ROBOTS=$SIM_ROBOTS
+
     # Remove env var for next run
     unset SIM_ROBOTS
+}
+
+function sim_stop() {
+    if [[ $LAST_SIM_ROBOTS -eq 1 ]]; then
+        kill "$SIM_PID_1"
+        unset SIM_PID_1
+    elif [[ $SIM_ROBOTS -eq 2 ]]; then
+        kill "$SIM_PID_1"
+        kill "$SIM_PID_2"
+        unset SIM_PID_1
+        unset SIM_PID_2
+    else
+        echo
+        echo "ERROR!"
+        echo "You must start the simulator AI first using:"
+        echo "    sim_go"
+        echo
+        echo "... noob."
+        echo
+    fi
+
+    unset LAST_SIM_ROBOTS
 }

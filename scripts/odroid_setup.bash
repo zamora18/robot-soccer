@@ -25,6 +25,11 @@ alias kick='$PATH_TO_REPO/scripts/kick.py'
 
 function killbot() {
     killall roslaunch
+    sleep 2
+    $PATH_TO_REPO/scripts/killbot.py
+
+    # Let's just make sure...
+    sleep 6
     $PATH_TO_REPO/scripts/killbot.py
 }
 

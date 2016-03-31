@@ -6,6 +6,8 @@ Getting bi-directional communication with MATLAB's ROS: http://www.mathworks.com
 Alternatively, add the correct hosts to your `/etc/hosts` file
 
 ### Building Custom Messages and Services with MATLAB ###
+First thing, make sure that you have support for ROS Custom Messages (run `roboticsAddons` and go through the installer).
+
 If you try and build the messages on MATLAB you may get an error about not being able to follow a symlink to the `toplevel.cmake`. In this case, create the path to the cmake file and add the correct contents (from a machine with the actual file).
 
 ```bash
