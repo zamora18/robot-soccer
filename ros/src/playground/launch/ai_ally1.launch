@@ -11,5 +11,7 @@
         	<remap from="ally_state" to="$(arg ally)_state" />
     	</node>
 
+        <!-- launch-prefix="xterm -e" -->
+
     </group>
 </launch>

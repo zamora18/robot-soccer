@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 15-Mar-2016 22:18:51
+% Last Modified by GUIDE v2.5 30-Mar-2016 18:47:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -64,55 +64,53 @@ view_resp = false;
 % Choose default command line output for main
 handles.output = hObject;
 
+% Show the toolbar on the figure
 set(gcf,'toolbar','figure');
 
-% Setup Position Plot
-handles.plot_position = plot(handles.fig_position,0,0);
-hold(handles.fig_position,'on');
-handles.plot_ball_vision = plot(handles.fig_position,0,0,'ro');
-handles.plot_ball_estimate = plot(handles.fig_position,0,0,'gx');
-handles.plot_bot_vision = plot(handles.fig_position,0,0,'k*');
-set(handles.fig_position,'XLim',[-2 2],'YLim',[-1.6 1.6]);
-daspect(handles.fig_position, [1 1 1]);
-xlabel(handles.fig_position, 'width (meters)');
-ylabel(handles.fig_position, 'height (meters)');
-set(handles.fig_position, 'XGrid', 'on', 'YGrid', 'on');
-set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
+% Setup Field Plot for Ally1 (and Opponent1)
+handles.ally1 = main_gui_setup(...
+        handles.ally1_field_ax,...
+        handles.ally1_vel_ax,...
+        handles.ally1_table_desired_position,...
+        handles.ally1_table_velocity,...
+        handles.ally1_table_position,...
+        handles.ally1_table_error,...
+        @field_ButtonDownCB,...
+        1); % ally 1
 
-% Setup Velocity Plot
-handles.plot_velocity = quiver(handles.fig_velocity,0,0,0,0,0);
-set(handles.fig_velocity,'XLim',[-1.5 1.5],'YLim',[-1.5 1.5]);
-daspect(handles.fig_velocity, [1 1 1]);
-xlabel(handles.fig_velocity,'x (m/s)');
-ylabel(handles.fig_velocity,'y (m/s)');
-set(handles.fig_velocity, 'XGrid', 'on', 'YGrid', 'on');
 
-% Setup Tables
-set(handles.table_desired_position,'Data', {0 0 0});
-set(handles.table_velocity,'Data', {0 0 0});
-set(handles.table_position,'Data', {0 0 0});
-set(handles.table_error,'Data', {0 0 0});
+% Setup ROS Sub/Pub
+handles.ally1 = main_ros_setup( handles.ally1, 1,... % ally 1
+        @robotStateCallback, @desiredPositionCallback, @velCmdsCallback,...
+        @pidInfoCB, @ballStateCallback);
+    
+% % Setup Field Plot for Ally2 (and Opponent2)
+% handles.ally2 = main_setup_gui(...
+%         handles.ally2_field_ax,...
+%         handles.ally2_vel_ax,...
+%         handles.ally1_table_desired_position,...
+%         handles.ally1_table_velocity,...
+%         handles.ally1_table_position,...
+%         handles.ally1_table_error,...
+%         2); % ally 2
+% 
+% 
+% % Setup ROS Sub/Pub
+% handles.ally1 = main_ros_setup( handles.ally2, 2,... % ally 2
+%         @robotStateCallback, @desiredPositionCallback, @velCmdsCallback,...
+%         @pidInfoCB, @ballStateCallback);
+    
+
+% Set up ball stuff
 set(handles.table_ball_vision,'Data', {0 0 0});
 set(handles.table_ball_estimate,'Data', {0 0 0});
 
-% Setup ROS Subscribers
-handles.sub.vision_robot_position = rossubscriber('/ally1/ally1_state', 'playground/RobotState', {@robotStateCallback,handles});
-handles.sub.desired_position = rossubscriber('/ally1/desired_position', 'geometry_msgs/Pose2D', {@desiredPositionCallback,handles});
-handles.sub.vel_cmds = rossubscriber('/ally1/vel_cmds', 'geometry_msgs/Twist', {@velCmdsCallback,handles});
-handles.sub.error = rossubscriber('/ally1/pidinfo', 'playground/PIDInfo', {@pidInfoCB,handles});
-handles.sub.ball_state = rossubscriber('/ally1/ball_state', 'playground/BallState', {@ballStateCallback,handles});
-
-% And Publishers
-handles.pub.desired_position = rospublisher('/ally1/desired_position', 'geometry_msgs/Pose2D', 'IsLatching', false);
-
-% Setup Service Calls
-handles.srv.get_battery = rossvcclient('/motion/main_battery');
 
 % Update handles structure
 guidata(hObject, handles);
 
 % UIWAIT makes main wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% uiwait(handles.main);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -125,58 +123,257 @@ function varargout = main_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
+% --- Executes when user attempts to close main.
+function main_CloseRequestFcn(hObject, ~, handles)
+% hObject    handle to main (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-clear handles.sub
-clear handles.pub
+clear handles
 
 % The GUI is no longer waiting, just close it
-delete(hObject);
+delete(hObject);    
 
-function robotStateCallback(src, msg, handles)
 
-    if ~ishandle(handles.plot_position) || ~ishandle(handles.plot_position)
+% --- Executes on button press in ally1_btn_clear_position.
+function clearFieldCB(hObject, eventdata, handles)
+% hObject    handle to ally1_btn_clear_position (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if strcmp(hObject.Parent.Tag, 'ally1'),
+    plot_ally_position = handles.ally1.plot_ally_position;
+elseif strcmp(hObject.Parent.Tag, 'ally2'),
+    plot_ally_position = handles.ally2.plot_ally_position;
+end
+
+set(plot_ally_position,'XData',0,'YData',0)
+
+
+% --- Executes on button press in ally1_btn_set_desired_position.
+function btn_setDesPosCB(hObject, eventdata, handles)
+% hObject    handle to ally1_btn_set_desired_position (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+c = get(handles.ally1_table_desired_position,'Data');
+desired = cell2mat(c);
+
+msg = rosmessage(handles.pub.desired_position);
+msg.X = desired(1);
+msg.Y = desired(2);
+msg.Theta = desired(3);
+send(handles.pub.desired_position, msg);
+
+% --- Executes on mouse press over axes background.
+function field_ButtonDownCB(hObject, eventdata, handles)
+% hObject    handle to ally1_field_ax (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    handles = guidata(hObject);
+    
+    if strcmp(hObject.Parent.Tag, 'ally1'),
+        chk_clickToDrive = handles.ally1_chk_clickToDrive;
+    elseif strcmp(hObject.Parent.Tag, 'ally2'),
+        chk_clickToDrive = handles.ally2_chk_point_move;
+    end
+
+    if get(chk_clickToDrive,'Value') == 1
+        % Get the x,y point of the click
+        point = eventdata.IntersectionPoint(1:2);
+        
+        % Create the first point of the line
+        h1 = line('XData',point(1),'YData',point(2));
+        set(h1,'Color','r');
+        
+        if strcmp(hObject.Parent.Tag, 'ally1'),
+            ally = 1;
+        elseif strcmp(hObject.Parent.Tag, 'ally2'),
+            ally = 2;
+        end
+        
+        hObject.Parent.Parent.WindowButtonMotionFcn = {@winBtnMotionCB,h1,point};
+        hObject.Parent.Parent.WindowButtonUpFcn = {@winBtnUpCB,h1,ally};
+    end
+
+function winBtnMotionCB(hObject, ~, h1, p_init)
+
+    % Get the x,y point that the mouse is hovering over.
+    point = hObject.CurrentAxes.CurrentPoint(1,1:2);
+    
+    % Create a new line
+    xdat = [p_init(1) point(1)];
+    ydat = [p_init(2) point(2)];
+    
+    set(h1,'XData',xdat,'YData',ydat);
+    
+function winBtnUpCB(hObject, ~, h1, ally)
+    global ally1_pos;
+    global ally2_pos;
+
+    handles = guidata(hObject);
+    
+    if ally == 1,
+        if ~isempty(ally1_pos),
+            current_theta = ally1_pos(2);
+        else
+            current_theta = 0;
+        end
+        
+        pub_desired_position = handles.ally1.pub.desired_position;
+        table_desired_position = handles.ally1.table_desired_position;
+    elseif ally == 2,
+        if ~isempty(ally2_pos),
+            current_theta = ally2_pos(2);
+        else
+            current_theta = 0;
+        end
+        
+        pub_desired_position = handles.ally2.pub.desired_position;
+        table_desired_position = handles.ally2.table_desired_position;
+    end
+
+    % Clear the callbacks
+    hObject.WindowButtonMotionFcn = '';
+    hObject.WindowButtonUpFcn = '';
+
+    % Get the line so we can calc angle
+    xdat = get(h1, 'XData');
+    ydat = get(h1, 'YData');
+
+    if length(xdat) == 2
+
+        theta = atan2(diff(ydat),diff(xdat));
+
+        % Take care of the fact that atan2 returns [-pi, pi]
+        if theta < 0
+            theta = theta + 2*pi;
+        end
+
+        % Convert to degrees
+        theta = theta*180/pi;
+    else
+        theta = current_theta;
+    end
+
+    delete(h1);
+    
+    % The set point is always the first place there was a click
+    point = [xdat(1) ydat(1)];
+        
+    set(table_desired_position,'Data', {0 0 0});
+
+    msg = rosmessage(pub_desired_position);
+    msg.X = point(1);
+    msg.Y = point(2);
+    msg.Theta = theta;
+    send(pub_desired_position, msg);
+
+% --- Executes on button press in ally1_btn_stop_moving.
+function btn_stopMovingCB(hObject, eventdata, handles)
+% hObject    handle to ally1_btn_stop_moving (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    if strcmp(hObject.Parent.Tag, 'ally1'),
+        table_position = handles.ally1.table_position;
+        pub_des_pos = handles.ally1.pub.desired_position;
+    elseif strcmp(hObject.Parent.Tag, 'ally2'),
+        table_position = handles.ally2.table_position;
+        pub_des_pos = handles.ally2.pub.desired_position;
+    end
+
+    c = get(table_position,'Data');
+    desired = cell2mat(c);
+
+    msg = rosmessage(pub_des_pos);
+    msg.X = desired(1);
+    msg.Y = desired(2);
+    msg.Theta = desired(3);
+    send(pub_des_pos, msg);
+
+
+% --- Executes on button press in ally1_btn_step_resp.
+function btn_stepRespCB(hObject, eventdata, handles)
+% hObject    handle to ally1_btn_step_resp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global view_resp
+global view_resp_start
+
+view_resp_start = true;
+view_resp = ~view_resp;
+
+disp(view_resp);
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ROS Callbacks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function robotStateCallback(~, msg, handles, ally)
+
+    if ~ishandle(handles.plot_ally_position) || ~ishandle(handles.plot_ally_position)
         return
     end
     
+    global ally1_pos
+    global ally2_pos
+    global ally1_bot
+    global ally2_bot
+    
     % Save for when we are clicking to drive
-    global pos
-    pos = [msg.Xhat msg.Yhat msg.Thetahat];
+    if ally == 1,
+        ally1_pos = [msg.Xhat msg.Yhat msg.Thetahat];
+        ally1_bot = [ally1_bot msg];
+    elseif ally == 2,
+        ally2_pos = [msg.Xhat msg.Yhat msg.Thetahat];
+        ally2_bot = [ally2_bot msg];        
+    end
     
-    global bot
-    bot = [bot msg];
+    if ally == 1 || ally == 2,
+        x = get(handles.plot_ally_position,'XData');
+        y = get(handles.plot_ally_position,'YData');
+        x = [x msg.Xhat];
+        y = [y msg.Yhat];
+        set(handles.plot_ally_position,'XData',x,'YData',y);
+        set(handles.field_ax, 'ButtonDownFcn', {@field_ButtonDownCB,ally});
+        set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
+    else
+        set(handles.plot_opp_position,'XData',msg.Xhat,'YData',msg.Yhat);
+    end
 
-    x = get(handles.plot_position,'XData');
-    y = get(handles.plot_position,'YData');
-    x = [x msg.Xhat];
-    y = [y msg.Yhat];
-    set(handles.plot_position,'XData',x,'YData',y);
-    
-    set(handles.fig_position, 'ButtonDownFcn', @fig_position_ButtonDownFcn);
-
-    set(handles.table_position,'Data', {msg.Xhat msg.Yhat msg.Thetahat});
     
 %     % Predicted (red X)
 %     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
 %     set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
     
     % Estimated (black asterisk)
-    if msg.Correction
+    if msg.Correction && (ally == 1 || ally == 2)
         set(handles.plot_bot_vision,'XData', msg.VisionX, 'YData', msg.VisionY);
     end
     
-function desiredPositionCallback(src, msg, handles)
+% function desiredPositionCallback(~, msg, handles)
+    
+function desiredPositionCallback(~, msg, handles, ally)
     if ~ishandle(handles.table_desired_position)
         return
     end
 
     set(handles.table_desired_position,'Data', {msg.X msg.Y msg.Theta});
 
-function velCmdsCallback(src, msg, handles)
+function velCmdsCallback(~, msg, handles, ally)
     if ~ishandle(handles.plot_velocity) || ~ishandle(handles.table_velocity)
         return
     end
@@ -189,7 +386,7 @@ function velCmdsCallback(src, msg, handles)
 
     set(handles.table_velocity,'Data', {vx vy w});
     
-function pidInfoCB(src, msg, handles)
+function pidInfoCB(~, msg, handles, ally)
     global view_resp
     global view_resp_start
     
@@ -233,7 +430,7 @@ function pidInfoCB(src, msg, handles)
                 ylabel(labelYs(i));
                 xlabel('samples (n)');
                 if i == 1
-                    title('Step Response');
+                    title(['Ally ', num2str(ally), ' Step Response']);
                 end
             end
             
@@ -256,201 +453,36 @@ function pidInfoCB(src, msg, handles)
         
     end
     
-function ballStateCallback(src, msg, handles)
-    if ~ishandle(handles.table_ball_estimate) ...
-            ||  ~ishandle(handles.table_ball_vision)
-        return
-    end
+function ballStateCallback(src, msg, handles, ally)
+    global ally1_ball
+    global ally2_ball
     
     % For grabbing ball data to analyze later
-    global ball
-    ball = [ball msg];
+    if ally == 1,
+        ally1_ball = [ally1_ball msg];
+    elseif ally == 2,
+        ally2_ball = [ally2_ball msg];
+    end
+    
+    % Get global handles to access ball tables
+    gHandles = guidata(handles.field_ax);
+
+    % Make sure these things even exist
+    if ~ishandle(gHandles.table_ball_estimate) ...
+            ||  ~ishandle(gHandles.table_ball_vision)
+        return
+    end
 
     % Predicted (red X)
     set(handles.plot_ball_estimate,'XData', msg.XhatFuture, 'YData', msg.YhatFuture);
-    set(handles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
+    set(gHandles.table_ball_estimate,'Data', {msg.XhatFuture msg.YhatFuture});
     
     % Estimated (green circle)
     set(handles.plot_ball_vision,'XData', msg.Xhat, 'YData', msg.Yhat);
-    set(handles.table_ball_vision,'Data', {msg.Xhat msg.Yhat});
+    set(gHandles.table_ball_vision,'Data', {msg.Xhat msg.Yhat});
     
     % Plot vision measured?
     % You'd have to use the bool 'Correction' to know if you should plot it
     % or not, as these come in faster than the camera. basically, if you
     % just straight plot these measurements it will jump between its
     % position and 0
-    
-
-
-% --- Executes on button press in btn_clear_position.
-function btn_clear_position_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_clear_position (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-set(handles.plot_position,'XData',0,'YData',0)
-
-
-% --- Executes on button press in btn_set_desired_position.
-function btn_set_desired_position_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_set_desired_position (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-c = get(handles.table_desired_position,'Data');
-desired = cell2mat(c);
-
-msg = rosmessage(handles.pub.desired_position);
-msg.X = desired(1);
-msg.Y = desired(2);
-msg.Theta = desired(3);
-send(handles.pub.desired_position, msg);
-
-
-% --- Executes on button press in chk_point_move.
-function chk_point_move_Callback(hObject, eventdata, handles)
-% hObject    handle to chk_point_move (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of chk_point_move
-
-
-% --- Executes on mouse press over axes background.
-function fig_position_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to fig_position (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-    handles = guidata(hObject);
-    
-    if get(handles.chk_point_move,'Value') == 1
-        % Get the x,y point of the click
-        point = eventdata.IntersectionPoint(1:2);
-        
-        % Create the first point of the line
-        h1 = line('XData',point(1),'YData',point(2));
-        set(h1,'Color','r');
-        
-        hObject.Parent.Parent.WindowButtonMotionFcn = {@winBtnMotionCB,h1,point};
-        hObject.Parent.Parent.WindowButtonUpFcn = {@winBtnUpCB,h1};
-    end
-
-function winBtnMotionCB(hObject, eventdata, h1, p_init)
-
-    % Get the x,y point that the mouse is hovering over.
-    point = hObject.CurrentAxes.CurrentPoint(1,1:2);
-    
-    % Create a new line
-    xdat = [p_init(1) point(1)];
-    ydat = [p_init(2) point(2)];
-    
-    set(h1,'XData',xdat,'YData',ydat);
-    
-function winBtnUpCB(hObject, eventdata, h1)
-    global pos;
-    
-    handles = guidata(hObject);
-
-    % Clear the callbacks
-    hObject.WindowButtonMotionFcn = '';
-    hObject.WindowButtonUpFcn = '';
-
-    % Get the line so we can calc angle
-    xdat = get(h1,'XData');
-    ydat = get(h1,'YData');
-
-    if length(xdat) == 2
-
-        theta = atan2(diff(ydat),diff(xdat));
-
-        % Take care of the fact that atan2 returns [-pi, pi]
-        if theta < 0
-            theta = theta + 2*pi;
-        end
-
-        % Convert to degrees
-        theta = theta*180/pi;
-        
-    else
-        theta = pos(2);
-
-    end
-
-    delete(h1);
-    
-    % The set point is always the first place there was a click
-    point = [xdat(1) ydat(1)];
-        
-    set(handles.table_desired_position,'Data', {0 0 0});
-
-    msg = rosmessage(handles.pub.desired_position);
-    msg.X = point(1);
-    msg.Y = point(2);
-    msg.Theta = theta;
-    send(handles.pub.desired_position, msg);
-
-
-% --- Executes on button press in chk_node_controller.
-function chk_node_controller_Callback(hObject, eventdata, handles)
-% hObject    handle to chk_node_controller (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    handles = guidata(hObject);
-    if get(handles.chk_node_controller,'Value') == 1
-        disp('Not implemented... Oops.');
-    end
-
-
-% --- Executes on button press in btn_update_status.
-function btn_update_status_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_update_status (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    handles = guidata(hObject);
-    
-    req = rosmessage(handles.srv.get_battery);
-    resp = call(handles.srv.get_battery,req,'Timeout',1);
-    
-    set(handles.lbl_battery,'String',[resp.Message 'v']);
-    
-
-
-% --- Executes on button press in btn_stop_moving.
-function btn_stop_moving_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_stop_moving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    c = get(handles.table_position,'Data');
-    desired = cell2mat(c);
-
-    msg = rosmessage(handles.pub.desired_position);
-    msg.X = desired(1);
-    msg.Y = desired(2);
-    msg.Theta = desired(3);
-    send(handles.pub.desired_position, msg);
-
-
-% --- Executes on button press in btn_step_resp.
-function btn_step_resp_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_step_resp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global view_resp
-global view_resp_start
-
-view_resp_start = true;
-view_resp = ~view_resp;
-
-disp(view_resp);
-
-
-% --- Executes on button press in btn_kick.
-function btn_kick_Callback(hObject, eventdata, handles)
-% hObject    handle to btn_kick (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    handles = guidata(hObject);
-    
-    kick = rossvcclient('/kick');
-    req = rosmessage(kick);
-    resp = call(kick,req,'Timeout',3);

@@ -66,8 +66,8 @@ def _create_robots():
     be False. Thus, `_me` will be ally1 and `_ally` will be ally2.
     """
     global  _me, _ally, _opp1, _opp2
-    am_i_ally1 = rospy.get_namespace() == 'ally1'
-    am_i_ally2 = rospy.get_namespace() == 'ally2'
+    am_i_ally1 = 'ally1' in rospy.get_namespace()
+    am_i_ally2 = 'ally2' in rospy.get_namespace()
 
     _me = Robot(ally1=am_i_ally1, ally2=am_i_ally2)
     _ally = Robot(ally1=(not am_i_ally1), ally2=(not am_i_ally2))
