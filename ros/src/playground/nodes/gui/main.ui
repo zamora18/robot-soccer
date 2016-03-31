@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>825</width>
+    <height>906</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Chicken McThuggets Command Center</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupAlly1">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>811</width>
+      <height>391</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Ally 1 (Nugget)</string>
+    </property>
+    <widget class="QCheckBox" name="chkAlly1CTD">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>111</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Click To Drive</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1Clear">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>330</y>
+       <width>85</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear Plot</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1SetDesPos">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>274</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Set Commanded Position</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1StopMoving">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>320</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop Moving</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1StepResp">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>330</y>
+       <width>121</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Step Response</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1Kick">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>320</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kick!</string>
+     </property>
+    </widget>
+    <widget class="MPL_Widget" name="plotAlly1Field" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>381</width>
+       <height>301</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+    <widget class="MPL_Widget" name="plotAlly1Vel" native="true">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>28</y>
+       <width>161</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly1EstPos">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>42</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly1PIDError">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>112</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly1DesPos">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>181</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly1Vel">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>182</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly1Battery">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>274</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Battery: 0.0v</string>
+     </property>
+    </widget>
+    <zorder>chkAlly1CTD</zorder>
+    <zorder>btnAlly1Clear</zorder>
+    <zorder>btnAlly1SetDesPos</zorder>
+    <zorder>btnAlly1StopMoving</zorder>
+    <zorder>btnAlly1StepResp</zorder>
+    <zorder>btnAlly1Kick</zorder>
+    <zorder>plotAlly1Field</zorder>
+    <zorder>plotAlly1Vel</zorder>
+    <zorder>tblAlly1EstPos</zorder>
+    <zorder>tblAlly1EstPos</zorder>
+    <zorder>tblAlly1PIDError</zorder>
+    <zorder>tblAlly1DesPos</zorder>
+    <zorder>tblAlly1Vel</zorder>
+    <zorder>btnAlly1Battery</zorder>
+    <zorder>groupAlly1_2</zorder>
+   </widget>
+   <widget class="QGroupBox" name="groupAlly1_2">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>390</y>
+      <width>811</width>
+      <height>391</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Ally 2 (Fry)</string>
+    </property>
+    <widget class="QCheckBox" name="chkAlly2CTD">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>111</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Click To Drive</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2Clear">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>330</y>
+       <width>85</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear Plot</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2SetDesPos">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>274</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Set Commanded Position</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2StopMoving">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>320</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop Moving</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2StepResp">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>330</y>
+       <width>121</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Step Response</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2Kick">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>320</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kick!</string>
+     </property>
+    </widget>
+    <widget class="MPL_Widget" name="plotAlly2Field" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>381</width>
+       <height>301</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+    <widget class="MPL_Widget" name="plotAlly2Vel" native="true">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>28</y>
+       <width>161</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly2EstPos">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>42</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly2PIDError">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>112</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly2DesPos">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>181</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblAlly2Vel">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>182</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnAlly2Battery">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>274</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Battery: 0.0v</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>780</y>
+      <width>811</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Ball State</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>825</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MPL_Widget</class>
+   <extends>QWidget</extends>
+   <header>mpl_custom_widget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
