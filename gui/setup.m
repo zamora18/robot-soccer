@@ -6,6 +6,7 @@ address = java.net.InetAddress.getLocalHost;
 IPaddress = char(address.getHostAddress);
 
 setenv('ROS_MASTER_URI','http://ronald:11311')
+% setenv('ROS_MASTER_URI','http://192.168.2.3:11311')
 setenv('ROS_IP',IPaddress) % my IP address
 
 rosinit
