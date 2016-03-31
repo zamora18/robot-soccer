@@ -84,8 +84,8 @@ def attack_ball(robot, ball):
 
 def give_my_teammate_some_space(me, my_teammate):
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
-    x_c = my_teammate.xhat + (Constants.teammate_gap+0.05)*np.cos(theta)
-    y_c = my_teammate.yhat + (Constants.teammate_gap+0.05)*np.cos(theta)
+    x_c = my_teammate.xhat - (Constants.teammate_gap+0.05)*np.cos(theta)
+    y_c = my_teammate.yhat - (Constants.teammate_gap+0.05)*np.cos(theta)
     theta_c = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta_c)
 

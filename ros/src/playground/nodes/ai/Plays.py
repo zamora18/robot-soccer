@@ -22,6 +22,8 @@ _steal_ball_state   = ShootState.setup
 
 _wait_steal_timer   = 0
 _WAIT_STEAL_MAX     = 20
+_wait_shoot_timer   = 0
+_WAIT_SHOOT_MAX     = 200
 
 _offensive  = 0
 _defensive  = 1
@@ -37,7 +39,7 @@ _trick_y_after  = None
 # Plays mainly for "attacker" position:  #
 ##########################################
 
-def shoot_on_goal(me, ball, distance_from_center):
+def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     """ this sets up for a shot at a distance from the center. Distance from center should be between -1 and 1 (really like .75 and -.75).
         0 signifies straight on, 1 is top corner and -1 is bottom corner
         it also attacks the ball then actuates the kicker"""
@@ -56,8 +58,9 @@ def shoot_on_goal(me, ball, distance_from_center):
     #########################
     if _shoot_state == ShootState.setup:
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if Utilities.robot_close_to_point(me, *desired_setup_position) and not Utilities.is_ball_behind_robot(me, ball): 
-            _shoot_state = ShootState.attack
+        if Utilities.robot_close_to_point(me, *desired_setup_position) or Utilities.is_ball_close_to_edges(ball):
+            if not Utilities.is_ball_behind_robot(me, ball): 
+                _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
         # if the ball is behind the robot, go back to set up
@@ -88,8 +91,11 @@ def shoot_on_goal(me, ball, distance_from_center):
 
     # GGGGGOOOOOOOOOOOAAAAAAAAAALLLLLLLLLLLL!!!!!!!!!!!!!!!!!!
     elif _shoot_state == ShootState.shoot:
-        print "KICKING"
-        Skills.kick()
+        if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
+            print "KICKING"
+            Skills.kick()
+        else:
+            print "Opponent too close and could damage our kicker"
         return Skills.attack_ball_with_kick(me, ball) # keep attacking the ball as you kick
 
     # wait for state machine to start
@@ -209,23 +215,28 @@ def steal_ball_from_opponent(me, opponent, ball):
         return (me.xhat, me.yhat, Utilities.rad_to_deg(me.thetahat))
 
 
-def stay_open_for_pass(me, my_teammate, ball, r_l_toggle):
+def stay_open_for_pass(me, my_teammate, ball):
     """
-    Teammate stays open for pass along y = 1.05 line, and stops at 
-    x = 1.0 line waiting for the ball to be passed to it
+    Teammate(me) stays a 0.5 meters ahead of the ball and follows 'my_teammate' towards the goal
+    'me' maintains a distance away from 'my_teammate' and normally should be 
     """
     print "staying open for pass......."
-    x_limit_for_pass = 1.00
-    y_c = Constants.open_for_pass_y_pos*r_l_toggle
-    x_c = ball.xhat + 0.50
-    if (x_c > x_limit_for_pass): x_c = x_limit_for_pass
-    theta_c = 90*r_l_toggle
+    if (ball.yhat > 0): 
+        r_l_toggle = -1 
+    else: 
+        r_l_toggle = 1
+
+    y_c = my_teammate.yhat + Constants.open_for_pass_y_dist*r_l_toggle
+    x_c = ball.xhat_future + 0.50
+    (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x_c, y_c)
+    theta_c = -90*r_l_toggle
     return (x_c, y_c, theta_c)
     
 
 def pass_to_teammate(me, my_teammate, ball):
     x_limit_for_pass = 1.00
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, x_limit_for_pass, Constants.open_for_pass_y_pos)
+    theta = Utilities.rad_to_deg(theta)
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     dist_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
     
@@ -246,6 +257,15 @@ def stay_at_midfield_follow_ball(me, opponent1, opponent2, ball):
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, Constants.goal_position_opp[0], Constants.goal_position_opp[1])
     theta = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta)
+
+
+def stay_at_front_quarter_follow_ball(me, opponent1, opponent2, ball):
+    x_c = Constants.field_length/4
+    y_c = ball.yhat_future
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, Constants.goal_position_opp[0], Constants.goal_position_opp[1])
+    theta = Utilities.rad_to_deg(theta)
+    return (x_c, y_c, theta)
+
 
 def stay_between_points_at_distance(x1, y1, x2, y2, distance):
     """

@@ -5,6 +5,15 @@ import Constants
 
 
 
+def get_front_of_robot(robot):
+    ### thetahat is in degrees, so we should change from degree to radians?? ----------
+    theta = deg_to_rad(robot.thetahat)
+    x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
+    y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
+
+    return (x_pos, y_pos)
+
+
 def get_closest_opponent_to_ball(opponent1, opponent2, ball):
     if opponent2 is None:
         return opponent1
@@ -45,6 +54,17 @@ def am_i_too_close_to_teammate(me, my_teammate):
     else:
         return False
 
+def is_opp_too_close_to_kicker(me, opp1, opp2, ball):
+    closest_opp = get_closest_opponent_to_ball(opp1, opp2, ball)
+    (x_kicker, y_kicker) = get_front_of_robot(me)
+    dist_kicker_to_opp = get_distance_between_points(x_kicker, y_kicker, closest_opp.xhat, closest_opp.yhat)
+
+    if dist_kicker_to_opp <= Constants.robot_half_width+0.05:
+        return True
+    else:
+        return False    
+
+
 
 def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
     pass
@@ -78,12 +98,18 @@ def is_ball_between_home_and_robot(robot, ball):
 
     return True
 
+def is_ball_close_to_edges(ball):
+    if abs(ball.xhat) > Constants.field_x_lim or abs(ball.yhat) > Constants.field_y_lim:
+        return True
+    else:
+        return False
+
 def get_perpendicular_point_from_ball(me, ball):
     x_c = ball.xhat_future
     if me.yhat > ball.yhat:
-        y_c = ball.yhat_future + Constants.own_goal_y_dist
+        y_c = ball.yhat + Constants.own_goal_y_dist
     else:
-        y_c = ball.yhat_future - Constants.own_goal_y_dist
+        y_c = ball.yhat - Constants.own_goal_y_dist
     theta_c = 0
     return (x_c, y_c, theta_c)
 
@@ -122,13 +148,6 @@ def find_triangle(x1,y1,x2,y2):
 
     return (a,b,c,theta)
 
-def get_front_of_robot(robot):
-    ### thetahat is in degrees, so we should change from degree to radians?? ----------
-    theta = deg_to_rad(robot.thetahat)
-    x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
-    y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
-
-    return (x_pos, y_pos)
 
 
 def limit_xy_too_close_to_walls(x,y):

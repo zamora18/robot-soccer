@@ -16,7 +16,6 @@ _ball_defend_position = None
 ###################
 def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
-    print "(3)Offensive Attacker. Aqui"
     # Ideas for this Role:
     # check to see who has possession first!
     # Always try and shoot the ball right at the goal. 
@@ -80,7 +79,6 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 ################################################################
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
-    print "(4)Normal Attacker"
     global _offensive, _defensive, _neutral
     middle_of_goal = 0
 
@@ -93,35 +91,33 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
-            print "(5) Closest Teammate and robot to ball"
             if me.ally1 or one_v_one:
-                print "(6) Somehow I am Ally ONE NOW?????"
                 if ball.yhat > 0: 
-                    return Plays.shoot_on_goal(me, ball, goal_target)
+                    return Plays.shoot_on_goal(me, ball, goal_target, opponent1, opponent2)
                 else: 
-                    return Plays.shoot_on_goal(me, ball, -goal_target)
+                    return Plays.shoot_on_goal(me, ball, -goal_target, opponent1, opponent2)
             else: # I am ally2
-                print "(7) OR Ally TWO now....here...k"
                 if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
-                    return Plays.shoot_on_goal(me, ball, middle_of_goal)
+                    return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
                 else:
-                    return Plays.pass_to_teammate(me, my_teammate, ball) #maybe he should just kick it directly in front of him?
+                    return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
+                    # return Plays.pass_to_teammate(me, my_teammate, ball) #maybe he should just kick it directly in front of him?
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
             return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball than me.
-        if me.ally1:
-            if (ball.yhat > 0): 
-                passing_toggle = -1 
-            else: 
-                passing_toggle = 1
-            if Utilities.am_i_too_close_to_teammate(me, my_teammate):
-                return Skills.give_my_teammate_some_space(me, my_teammate)
-            else:
-                return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
-        else: # I am ally2
-            return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
+        if Utilities.am_i_too_close_to_teammate(me, my_teammate):
+            return Skills.give_my_teammate_some_space(me, my_teammate)
+        else:
+            if me.ally1:
+                return Plays.stay_open_for_pass(me, my_teammate, ball)
+            else: # I am ally2 
+                field_section = Utilities.get_field_section(ball.xhat) 
+                if field_section == 3:
+                    return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
+                else:
+                    return Plays.stay_at_front_quarter_follow_ball(me, opponent1, opponent2, ball)
 
 
 
@@ -148,23 +144,26 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
-            elif me.ally1 and not one_v_one:
-                return Plays.shoot_off_the_wall(me, ball)
+            # elif me.ally1 and not one_v_one:
+            #     print "trying to shoot off the wall"
+            #     return Plays.shoot_off_the_wall(me, ball)
             else: #ally2 or 1v1
                 return Skills.clear_ball_from_half(me, ball)
         else: # I am in charge of stealing the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
             return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball
-        if me.ally1:
-            # call Utilities.are_both_opponents_attacking_goal?
-            if ball.yhat > 0:
-                passing_toggle = -1
+        if Utilities.is_ball_behind_robot(me, ball):
+            return Skills.avoid_own_goal(me, ball)
+        else:
+            if Utilities.am_i_too_close_to_teammate(me, my_teammate):
+                return Skills.give_my_teammate_some_space(me, my_teammate)
             else:
-                passing_toggle = 1
-            return Plays.stay_open_for_pass(me, my_teammate, ball, passing_toggle)
-        else: # ally2
-            return Plays.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, dist_to_maintain)
+                if me.ally1:
+                    # call Utilities.are_both_opponents_attacking_goal?
+                    return Plays.stay_open_for_pass(me, my_teammate, ball)
+                else: # ally2
+                    return Plays.stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball.xhat, ball.yhat, dist_to_maintain)
 
 
 def goalie(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
