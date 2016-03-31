@@ -79,7 +79,7 @@ function sim_go() {
     fi
 
     # Update for sim_stop
-    export LAST_SIM_ROBOTS=$SIM_ROBOTS
+    export LAST_SIM_ROBOTS=${SIM_ROBOTS}
 
     # Remove env var for next run
     unset SIM_ROBOTS
