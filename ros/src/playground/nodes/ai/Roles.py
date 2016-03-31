@@ -16,6 +16,7 @@ _ball_defend_position = None
 ###################
 def offensive_attacker(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _offensive
+    print "(3)Offensive Attacker. Aqui"
     # Ideas for this Role:
     # check to see who has possession first!
     # Always try and shoot the ball right at the goal. 
@@ -79,6 +80,7 @@ def neutral_goalie(me, my_teammate, opponent1, opponent2, ball):
 ################################################################
 
 def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
+    print "(4)Normal Attacker"
     global _offensive, _defensive, _neutral
     middle_of_goal = 0
 
@@ -91,12 +93,15 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
+            print "(5) Closest Teammate and robot to ball"
             if me.ally1 or one_v_one:
+                print "(6) Somehow I am Ally ONE NOW?????"
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target)
                 else: 
                     return Plays.shoot_on_goal(me, ball, -goal_target)
             else: # I am ally2
+                print "(7) OR Ally TWO now....here...k"
                 if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
                     return Plays.shoot_on_goal(me, ball, middle_of_goal)
                 else:
@@ -104,7 +109,6 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
             closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
-            print "TRYING TO STEAL BALL??????"
             return Plays.steal_ball_from_opponent(me, closest_opp, ball)
     else: #My teammate is closer to the ball than me.
         if me.ally1:
