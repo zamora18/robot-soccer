@@ -18,37 +18,6 @@ MAX_Y_VEL = 2
 class AllyUI(object):
     """docstring for AllyUI"""
 
-    # Plots
-    plot_field = None
-    plot_vel = None
-
-    # Tables
-    tbl_est_pos = None
-    tbl_PID_error = None
-    tbl_des_pos = None
-    tbl_vel = None
-
-    # Buttons
-    btn_step_resp = None
-    btn_clear = None
-    btn_battery = None
-    btn_kick = None
-    btn_set_des_pos = None
-    btn_stop_moving = None
-
-    # Checkboxes
-    chk_click_to_drive = None
-
-    # Plots and axes
-    axes = {
-        'position': None,
-        'velocity': None,
-        'ball': None,
-        'ball_predicted': None,
-        'opponent': None
-    }
-
-
     def __init__(self, ui, ally=None):
         super(AllyUI, self).__init__()
 
@@ -75,6 +44,15 @@ class AllyUI(object):
 
         # Checkboxes
         self.chk_click_to_drive = getattr(ui, 'chkAlly{}CTD'.format(ally))
+
+        # Plots and axes
+        self.axes = {
+            'position': None,
+            'velocity': None,
+            'ball': None,
+            'ball_predicted': None,
+            'opponent': None
+        }
 
         # ---------------------------------------------------------------------
         # Initialize the GUI
@@ -109,13 +87,13 @@ class AllyUI(object):
         self.axes['position'] = canvas.ax.plot([],[], linewidth=0.4)[0]
 
         # Create an axis for the current position (estimate) of the ball
-        self.axes['ball'] = canvas.ax.plot([],[],'ro')[0]
+        self.axes['ball'] = None #canvas.ax.plot([],[],'ro')[0]
 
         # Create an axis for the predicted position of the ball
-        self.axes['ball_predicted'] = canvas.ax.plot([],[])[0]
+        self.axes['ball_predicted'] = None #canvas.ax.plot([],[])[0]
 
         # Create an axis for the current position (estimate) of the opponent
-        self.axes['opponent'] = canvas.ax.plot([],[])[0]
+        self.axes['opponent'] = None #canvas.ax.plot([],[])[0]
 
     def _init_vel(self):
         canvas = self.plot_vel.canvas
@@ -203,6 +181,100 @@ class AllyUI(object):
         except:
             pass
 
+    def draw_circle(self, canvas, circle, new_center, color='r', size=0.05):
+        """Draw Circle
+        """
+        tolerance = 0.001 # 1mm
+
+        # Enough has changed that we should plot
+        plot = True
+
+        # Remove last circle
+        if circle is not None:           
+            # is the new center much different than the old one?
+            if abs(new_center[0]-circle.center[0]) < tolerance and \
+                    abs(new_center[1]-circle.center[1]) < tolerance:
+                plot = False
+
+            if plot:
+                # Fill in old circle
+                old = plt.Circle(circle.center, (size+0.015), fc='w',ec='w',fill=True)
+                canvas.ax.add_artist(old)
+                self.fast_redraw(canvas,old)
+                canvas.ax.artists.remove(old)
+
+                # circle.remove()
+                canvas.ax.artists.remove(circle)
+
+                # canvas.ax.draw_idle()
+
+        if plot:
+            # Create new circle
+            circle = plt.Circle(new_center, size, fc=color, ec=color, fill=False)
+
+            canvas.ax.add_artist(circle)
+            self.fast_redraw(canvas, circle)
+
+            return circle
+
+        # plot.set_xdata([msg.xhat])
+        # plot.set_ydata([msg.yhat])
+
+        # circle = plt.Circle((msg.xhat,msg.yhat), 0.1, fc='r')
+        # plot.axes.add_patch(circle)
+        # circle.set_axes(canvas.ax)
+
+        # canvas.ax.draw_artist(canvas.ax.patch)
+        
+        # canvas.ax.add_artist(self.ui.axes['position'])
+        # canvas.ax.redraw_in_frame()
+        # ball.axes.draw_idle()
+        # canvas.ax.draw_artist(ball)
+        # canvas.update()
+        # canvas.flush_events()
+        
+
+        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+        # import ipdb; ipdb.set_trace()
+
+
+    def draw_diamond(self, canvas, rect, new_corner, color='r', size=0.05):
+        """Draw Diamond
+        """
+        tolerance = 0.001 # 1mm
+
+        # Enough has changed that we should plot
+        plot = True
+
+        # Remove last rect
+        if rect is not None:           
+            # is the new corner much different than the old one?
+            if abs(new_corner[0]-rect.xy[0]) < tolerance and \
+                    abs(new_corner[1]-rect.xy[1]) < tolerance:
+                plot = False
+
+            if plot:
+                # Fill in old rect
+                old = plt.Rectangle(rect.xy,(size+0.02),(size+0.02),angle=45.0,fc='w',ec='w',fill=True)
+                canvas.ax.add_artist(old)
+                self.fast_redraw(canvas,old)
+                canvas.ax.artists.remove(old)
+
+                # rect.remove()
+                canvas.ax.artists.remove(rect)
+
+                # canvas.ax.draw_idle()
+
+        if plot:
+            # Create new rect
+            rect = plt.Rectangle(new_corner, size, size,angle=45.0,fc=color,ec=color,fill=False)
+
+            canvas.ax.add_artist(rect)
+            self.fast_redraw(canvas, rect)
+
+            return rect
+
+
 class Ally(object):
     """docstring for Ally"""
     def __init__(self, ui, ally=None):
@@ -218,14 +290,17 @@ class Ally(object):
 
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
-
-        # self.ui.axes['position'].set_xdata(np.random.randn(20))
         
         # Connect ROS things
         rospy.Subscriber('{}/ally{}_state'.format(ns,ally), \
                             RobotState, self._handle_my_state)
+        rospy.Subscriber('{}/opponent{}_state'.format(ns,ally), \
+                            RobotState, self._handle_opponent_state)
         rospy.Subscriber('{}/ball_state'.format(ns,ally), \
                             BallState, self._handle_ball_state)
+
+        # Connect Qt Buttons
+        self.ui.btn_clear.clicked.connect(self._btn_clear)
 
     def _handle_my_state(self, msg):
         plot = self.ui.axes['position']
@@ -249,43 +324,34 @@ class Ally(object):
         # import ipdb; ipdb.set_trace()
 
     def _handle_opponent_state(self, msg):
-        plot = self.ui.axes['position']
+        opponent = self.ui.axes['opponent']
         canvas = self.ui.plot_field.canvas
 
-        xdata = plot.get_xdata()
-        ydata = plot.get_ydata()
+        artist = self.ui.draw_circle(canvas, opponent, \
+                        (msg.xhat,msg.yhat), color='c', size=0.05)
+        if artist is not None:
+            self.ui.axes['opponent'] = artist
 
-        xstart = [msg.xhat] if len(xdata) == 0 else [xdata[-1]]
-        ystart = [msg.yhat] if len(ydata) == 0 else [ydata[-1]]
-
-        xdata = np.concatenate( (xstart, [msg.xhat]) )
-        ydata = np.concatenate( (ystart, [msg.yhat]) )
-
-        plot.set_data(xdata,ydata)
-        # plot.set_ydata(ydata)
-
-        self.ui.fast_redraw(canvas, plot)
-
-        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
 
     def _handle_ball_state(self, msg):
-        plot = self.ui.axes['ball']
+        ball = self.ui.axes['ball']
+        ball_predicted = self.ui.axes['ball_predicted']
         canvas = self.ui.plot_field.canvas
 
-        # if plot in canvas.ax.lines:
-        #     del canvas.ax.lines[canvas.ax.lines.index(plot)]
+        artist = self.ui.draw_circle(canvas, ball, \
+                        (msg.xhat,msg.yhat), color='r', size=0.05)
+        if artist is not None:
+            self.ui.axes['ball'] = artist
 
-        plot.set_xdata([msg.xhat])
-        plot.set_ydata([msg.yhat])
+        artist = self.ui.draw_circle(canvas, ball_predicted, \
+                        (msg.xhat_future,msg.yhat_future), color='g', size=0.02)
+        if artist is not None:
+            self.ui.axes['ball_predicted'] = artist
 
-        # circle = plt.Circle((msg.xhat,msg.yhat), 0.1, fc='r')
-        # plot.axes.add_patch(circle)
-        # circle.set_axes(canvas.ax)
 
-        # canvas.ax.draw_artist(canvas.ax.patch)
-        self.ui.fast_redraw(canvas, plot)
-        canvas.draw_idle()
+    # =========================================================================
+    # Qt Event Callbacks (buttons, etc)
+    # =========================================================================
 
-        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
+    def _btn_clear(self):
+        self.ui.plot_field.canvas.draw()

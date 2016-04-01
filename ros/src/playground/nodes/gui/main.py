@@ -22,10 +22,10 @@ class MyWindow(QtGui.QMainWindow):
 
         # Setup all the GUI and ROS elements for each Ally
         ally1 = Ally(self, ally=1)
-        # ally2 = Ally(self, ally=2)
+        ally2 = Ally(self, ally=2)
 
         # Connect signals
-        self.btnAlly1Clear.clicked.connect(lambda x: cb.OK(ally1))
+        # self.btnAlly1Clear.clicked.connect(lambda x: cb.OK(ally1))
 
 
 
@@ -37,3 +37,6 @@ if __name__ == '__main__':
     window = MyWindow()
     window.show()
     sys.exit(app.exec_())
+
+# from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
+# import ipdb; ipdb.set_trace()
