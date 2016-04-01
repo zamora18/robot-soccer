@@ -4,7 +4,7 @@ import rospy
 from geometry_msgs.msg import Pose2D, Twist
 from std_srvs.srv import Trigger
 from playground.msg import BallState, RobotState, PIDInfo
-from playground.srv import SetBool, SetBoolResponse
+from playground.srv import SetBool, SetBoolResponse, RoboClawRPC, RoboClawRPCResponse
 
 import numpy as np
 
@@ -172,7 +172,7 @@ class AllyUI(object):
             col1 = round(col1,4)
             col2 = round(col2,4)
             col3 = round(col3,4)
-            
+
         tbl.item(0,0).setText(str(col1))
         tbl.item(0,1).setText(str(col2))
         tbl.item(0,2).setText(str(col3))
@@ -317,6 +317,7 @@ class Ally(object):
         # Connect Qt Buttons
         self.ui.btn_clear.clicked.connect(self._btn_clear)
         self.ui.btn_kick.clicked.connect(self._btn_kick)
+        self.ui.btn_battery.clicked.connect(self._btn_battery)
 
     def _handle_my_state(self, msg):
         plot = self.ui.axes['position']
@@ -390,3 +391,11 @@ class Ally(object):
             kick_srv()
         except rospy.ServiceException, e:
             print "Kick service call failed: %s"%e
+
+    def _btn_battery(self):
+        try:
+            battery_srv = rospy.ServiceProxy('{}/battery'.format(self.ns), RoboClawRPC)
+            v = battery_srv().message
+            self.ui.btn_battery.setText('Battery: {}v'.format(v))
+        except rospy.ServiceException, e:
+            print "Battery service call failed: %s"%e
