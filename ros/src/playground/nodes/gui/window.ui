@@ -10,6 +10,12 @@
     <height>906</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Chicken McThuggets Command Center</string>
   </property>
@@ -192,21 +198,6 @@
       <string>Battery: 0.0v</string>
      </property>
     </widget>
-    <zorder>chkAlly1CTD</zorder>
-    <zorder>btnAlly1Clear</zorder>
-    <zorder>btnAlly1SetDesPos</zorder>
-    <zorder>btnAlly1StopMoving</zorder>
-    <zorder>btnAlly1StepResp</zorder>
-    <zorder>btnAlly1Kick</zorder>
-    <zorder>plotAlly1Field</zorder>
-    <zorder>plotAlly1Vel</zorder>
-    <zorder>tblAlly1EstPos</zorder>
-    <zorder>tblAlly1EstPos</zorder>
-    <zorder>tblAlly1PIDError</zorder>
-    <zorder>tblAlly1DesPos</zorder>
-    <zorder>tblAlly1Vel</zorder>
-    <zorder>btnAlly1Battery</zorder>
-    <zorder>groupAlly1_2</zorder>
    </widget>
    <widget class="QGroupBox" name="groupAlly1_2">
     <property name="enabled">

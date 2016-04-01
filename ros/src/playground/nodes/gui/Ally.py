@@ -347,8 +347,13 @@ class Ally(object):
 
         # Create a dictionary for last messages of different types
         self.last = {
-            'velocity': None
+            'velocity': None,
+            'position': None
         }
+
+        # Click to Drive positions (CTD)
+        self.CTD_x1 = self.CTD_y1 = None
+        self.CTD_x2 = self.CTD_y2 = None
 
         # Setup the UI for this ally
         self.ui = AllyUI(ui, ally=ally)
@@ -381,6 +386,11 @@ class Ally(object):
         self.ui.btn_set_des_pos.clicked.connect(self._btn_des_pos)
         self.ui.btn_stop_moving.clicked.connect(self._btn_stop_moving)
 
+        # Connect Plot Mouse events
+        self.ui.plot_field.canvas.mpl_connect('button_press_event', self._plot_field_mouse_down)
+        self.ui.plot_field.canvas.mpl_connect('motion_notify_event', self._plot_field_mouse_move)
+        self.ui.plot_field.canvas.mpl_connect('button_release_event', self._plot_field_mouse_up)
+
     # =========================================================================
     # ROS Event Callbacks (subscribers)
     # =========================================================================
@@ -405,6 +415,8 @@ class Ally(object):
 
         tbl = self.ui.tbl_est_pos
         self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
+
+        self.last['position'] = msg
 
     def _handle_opponent_state(self, msg):
         opponent = self.ui.axes['opponent']
@@ -460,7 +472,7 @@ class Ally(object):
 
 
     # =========================================================================
-    # Qt Event Callbacks (buttons, etc)
+    # Qt Event Callbacks (buttons, plots, etc)
     # =========================================================================
 
     def _btn_clear(self):
@@ -501,3 +513,43 @@ class Ally(object):
         msg.y = yhat
         msg.theta = thetahat
         self.pub_des_pos.publish(msg)
+
+    def _plot_field_mouse_down(self, event):
+        if self.ui.chk_click_to_drive.isChecked():
+
+            # Get the commanded click data for later
+            self.CTD_x1 = event.xdata
+            self.CTD_y1 = event.ydata
+
+    def _plot_field_mouse_move(self, event):
+        # No business being here if you didn't come through mouse_down
+        if self.CTD_x1 is None or self.CTD_y1 is None:
+            return
+
+        self.CTD_x2 = event.xdata
+        self.CTD_y2 = event.ydata
+
+    def _plot_field_mouse_up(self, event):
+        # No business being here if you didn't come through mouse_down
+        if self.CTD_x1 is None or self.CTD_y1 is None:
+            return
+
+        if self.CTD_x2 is not None and self.CTD_y2 is not None:
+            theta_c = np.arctan2(self.CTD_y2-self.CTD_y1, self.CTD_x2-self.CTD_x1)*180/np.pi
+
+            # Get ready for next time
+            self.CTD_x2 = None
+            self.CTD_y2 = None
+        else:
+            theta_c = self.last['position'].thetahat
+
+        # Send it off!
+        msg = Pose2D()
+        msg.x = self.CTD_x1
+        msg.y = self.CTD_y1
+        msg.theta = theta_c
+        self.pub_des_pos.publish(msg)
+
+        # Get ready for next time!
+        self.CTD_x1 = None
+        self.CTD_y1 = None

@@ -3,10 +3,8 @@ from PyQt4 import QtGui, uic, QtCore
 
 import matplotlib
 
-import roslib; #roslib.load_manifest('playground')
+import roslib; roslib.load_manifest('playground')
 import rospy
-
-import callbacks as cb
 
 from Ally import Ally
 
@@ -15,7 +13,7 @@ class MyWindow(QtGui.QMainWindow):
         super(MyWindow, self).__init__()
 
         # Load up the UI designed in QtCreator
-        uic.loadUi('main.ui', self)
+        uic.loadUi('window.ui', self)
 
         # Setup ROS so ally's can use it
         rospy.init_node('command_center', anonymous=True)
