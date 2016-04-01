@@ -292,7 +292,7 @@ class AllyUI(object):
             of the plot. Or figure out how to make `canvas.ax.redraw_in_frame()`
             play nicely.
         """
-        tolerance = 0.000001 # 1um
+        tolerance = 0.001 # 1mm
 
         # Enough has changed that we should plot
         plot = True
@@ -306,8 +306,9 @@ class AllyUI(object):
 
             if plot:
                 # Fill in old arrow
-                old = plt.Arrow(0,0,(old_endpoint[0]+0.5),(old_endpoint[1]+0.5), \
-                                    width=(width*100),fc='w',ec='w',fill=True)
+                dx = old_endpoint[0] + np.sign(old_endpoint[0])*0.5
+                dy = old_endpoint[1] + np.sign(old_endpoint[1])*0.5
+                old = plt.Arrow(0,0,dx,dy,width=(width*5),fc='w',ec='w',fill=True)
                 canvas.ax.add_artist(old)
                 self.fast_redraw(canvas,old)
                 canvas.ax.artists.remove(old)
@@ -452,7 +453,7 @@ class Ally(object):
 
     def _btn_clear(self):
         self.ui.plot_field.canvas.draw()
-        self.ui.plot_vel.canvas.draw()
+        # self.ui.plot_vel.canvas.draw() # this makes it too slow...
 
     def _btn_kick(self):
         try:
