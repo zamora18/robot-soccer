@@ -120,7 +120,7 @@ class AllyUI(object):
         canvas.fig.subplots_adjust(left=0.125, bottom=0.10, right=.95, top=.95)
 
         # Create an axis for the given velocity commands of ally
-        self.axes['velocity'] = canvas.ax.plot([0],[0], linewidth=0.4)[0]
+        self.axes['velocity'] = None #canvas.ax.plot([0],[0], linewidth=0.4)[0]
 
     def _init_tables(self):
         self._init_generic_table(self.tbl_est_pos, \
@@ -282,6 +282,50 @@ class AllyUI(object):
 
             return rect
 
+    def draw_arrow_from_origin(self, canvas, arrow, old_endpoint, endpoint, color='b', width=0.05):
+        """Draw Arrow from Origin
+
+            This doesn't do a great job of removing old velocity vectors.
+            But I'm too lazy right now.
+
+            A better solution may be to draw a square over most of the area
+            of the plot. Or figure out how to make `canvas.ax.redraw_in_frame()`
+            play nicely.
+        """
+        tolerance = 0.000001 # 1um
+
+        # Enough has changed that we should plot
+        plot = True
+
+        # Remove last arrow
+        if arrow is not None:           
+            # is the new corner much different than the old one?
+            if abs(endpoint[0]-old_endpoint[0]) < tolerance and \
+                    abs(endpoint[1]-old_endpoint[1]) < tolerance:
+                plot = False
+
+            if plot:
+                # Fill in old arrow
+                old = plt.Arrow(0,0,(old_endpoint[0]+0.5),(old_endpoint[1]+0.5), \
+                                    width=(width*100),fc='w',ec='w',fill=True)
+                canvas.ax.add_artist(old)
+                self.fast_redraw(canvas,old)
+                canvas.ax.artists.remove(old)
+
+                # arrow.remove()
+                canvas.ax.artists.remove(arrow)
+
+                # canvas.ax.draw_idle()
+
+        if plot:
+            # Create new arrow
+            arrow = plt.Arrow(0, 0, *endpoint, width=width,fc=color,ec=color,fill=False)
+
+            canvas.ax.add_artist(arrow)
+            self.fast_redraw(canvas, arrow)
+
+            return arrow
+
 
 class Ally(object):
     """docstring for Ally"""
@@ -292,6 +336,11 @@ class Ally(object):
             return False
 
         self.ally = ally
+
+        # Create a dictionary for last messages of different types
+        self.last = {
+            'velocity': None
+        }
 
         # Setup the UI for this ally
         self.ui = AllyUI(ui, ally=ally)
@@ -318,6 +367,10 @@ class Ally(object):
         self.ui.btn_clear.clicked.connect(self._btn_clear)
         self.ui.btn_kick.clicked.connect(self._btn_kick)
         self.ui.btn_battery.clicked.connect(self._btn_battery)
+
+    # =========================================================================
+    # ROS Event Callbacks (subscribers)
+    # =========================================================================
 
     def _handle_my_state(self, msg):
         plot = self.ui.axes['position']
@@ -370,6 +423,21 @@ class Ally(object):
         self.ui.update_table(tbl, msg.x, msg.y, msg.theta)
 
     def _handle_vel(self, msg):
+        velocity = self.ui.axes['velocity']
+        old = self.last['velocity']
+        canvas = self.ui.plot_vel.canvas
+
+        last_x = old.linear.x if old is not None else 0
+        last_y = old.linear.y if old is not None else 0
+
+        artist = self.ui.draw_arrow_from_origin(canvas, velocity, \
+                        (last_x, last_y), \
+                        (msg.linear.x,msg.linear.y), color='b', width=0.2)
+        if artist is not None:
+            self.ui.axes['velocity'] = artist
+
+        self.last['velocity'] = msg
+
         tbl = self.ui.tbl_vel
         self.ui.update_table(tbl, msg.linear.x, msg.linear.y, msg.angular.z)
 
@@ -384,6 +452,7 @@ class Ally(object):
 
     def _btn_clear(self):
         self.ui.plot_field.canvas.draw()
+        self.ui.plot_vel.canvas.draw()
 
     def _btn_kick(self):
         try:
