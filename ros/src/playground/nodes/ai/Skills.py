@@ -149,10 +149,10 @@ def avoid_own_goal(me, ball):
         if Utilities.robot_close_to_point(me, *desired_behind_setup):
             _own_goal_st = OwnGoalState.attack
     elif _own_goal_st == OwnGoalState.attack:
-        if distance_from_kicker_to_ball <= Utilities.kickable_distance:
+        if distance_from_kicker_to_ball <= Constants.kickable_distance:
             _own_goal_st = OwnGoalState.kick
     elif _own_goal_st == OwnGoalState.kick:
-        if distance_from_kicker_to_ball > Utilities.kickable_distance:
+        if distance_from_kicker_to_ball > Constant.kickable_distance:
             _own_goal_st = OwnGoalState.perp_setup
     else:
         _own_goal_st = OwnGoalState.perp_setup
