@@ -2,7 +2,7 @@ from PyQt4 import QtGui, QtCore
 
 import rospy
 from geometry_msgs.msg import Pose2D, Twist
-from std_msgs.msg import Bool
+from std_srvs.srv import Trigger
 from playground.msg import BallState, RobotState
 from playground.srv import SetBool, SetBoolResponse
 
@@ -290,6 +290,7 @@ class Ally(object):
 
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
+        self.ns = ns
         
         # Connect ROS things
         rospy.Subscriber('{}/ally{}_state'.format(ns,ally), \
@@ -301,6 +302,7 @@ class Ally(object):
 
         # Connect Qt Buttons
         self.ui.btn_clear.clicked.connect(self._btn_clear)
+        self.ui.btn_kick.clicked.connect(self._btn_kick)
 
     def _handle_my_state(self, msg):
         plot = self.ui.axes['position']
@@ -355,3 +357,10 @@ class Ally(object):
 
     def _btn_clear(self):
         self.ui.plot_field.canvas.draw()
+
+    def _btn_kick(self):
+        try:
+            kick_srv = rospy.ServiceProxy('{}/kick'.format(self.ns), Trigger)
+            kick_srv()
+        except rospy.ServiceException, e:
+            print "Kick service call failed: %s"%e
