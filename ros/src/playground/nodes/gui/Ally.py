@@ -177,6 +177,13 @@ class AllyUI(object):
         tbl.item(0,1).setText(str(col2))
         tbl.item(0,2).setText(str(col3))
 
+    def read_table(self, tbl):
+        col1 = float(tbl.item(0,0).text())
+        col2 = float(tbl.item(0,1).text())
+        col3 = float(tbl.item(0,2).text())
+
+        return (col1, col2, col3)
+
     def fast_redraw(self, canvas, plot):
         """Fast Redraw
         See: http://bastibe.de/2013-05-30-speeding-up-matplotlib.html
@@ -364,10 +371,15 @@ class Ally(object):
         rospy.Subscriber('{}/pidinfo'.format(ns), \
                             PIDInfo, self._handle_PID_error)
 
+        self.pub_des_pos = rospy.Publisher('{}/desired_position'.format(ns), \
+                            Pose2D, queue_size=10)
+
         # Connect Qt Buttons
         self.ui.btn_clear.clicked.connect(self._btn_clear)
         self.ui.btn_kick.clicked.connect(self._btn_kick)
         self.ui.btn_battery.clicked.connect(self._btn_battery)
+        self.ui.btn_set_des_pos.clicked.connect(self._btn_des_pos)
+        self.ui.btn_stop_moving.clicked.connect(self._btn_stop_moving)
 
     # =========================================================================
     # ROS Event Callbacks (subscribers)
@@ -469,3 +481,23 @@ class Ally(object):
             self.ui.btn_battery.setText('Battery: {}v'.format(v))
         except rospy.ServiceException, e:
             print "Battery service call failed: %s"%e
+
+    def _btn_des_pos(self):
+        tbl = self.ui.tbl_des_pos
+        (x_c, y_c, theta_c) = self.ui.read_table(tbl)
+
+        msg = Pose2D()
+        msg.x = x_c
+        msg.y = y_c
+        msg.theta = theta_c
+        self.pub_des_pos.publish(msg)
+
+    def _btn_stop_moving(self):
+        tbl = self.ui.tbl_est_pos
+        (xhat, yhat, thetahat) = self.ui.read_table(tbl)
+
+        msg = Pose2D()
+        msg.x = xhat
+        msg.y = yhat
+        msg.theta = thetahat
+        self.pub_des_pos.publish(msg)
