@@ -3,7 +3,7 @@ from PyQt4 import QtGui, QtCore
 import rospy
 from geometry_msgs.msg import Pose2D, Twist
 from std_srvs.srv import Trigger
-from playground.msg import BallState, RobotState
+from playground.msg import BallState, RobotState, PIDInfo
 from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
@@ -167,7 +167,15 @@ class AllyUI(object):
         # Don't allow column resizing
         tbl.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
 
-        # tbl.item(0,0).setText(str(5))
+    def update_table(self, tbl, col1, col2, col3, rounding=True):
+        if rounding:
+            col1 = round(col1,4)
+            col2 = round(col2,4)
+            col3 = round(col3,4)
+            
+        tbl.item(0,0).setText(str(col1))
+        tbl.item(0,1).setText(str(col2))
+        tbl.item(0,2).setText(str(col3))
 
     def fast_redraw(self, canvas, plot):
         """Fast Redraw
@@ -297,8 +305,14 @@ class Ally(object):
                             RobotState, self._handle_my_state)
         rospy.Subscriber('{}/opponent{}_state'.format(ns,ally), \
                             RobotState, self._handle_opponent_state)
-        rospy.Subscriber('{}/ball_state'.format(ns,ally), \
+        rospy.Subscriber('{}/ball_state'.format(ns), \
                             BallState, self._handle_ball_state)
+        rospy.Subscriber('{}/desired_position'.format(ns), \
+                            Pose2D, self._handle_des_pos)
+        rospy.Subscriber('{}/vel_cmds'.format(ns), \
+                            Twist, self._handle_vel)
+        rospy.Subscriber('{}/pidinfo'.format(ns), \
+                            PIDInfo, self._handle_PID_error)
 
         # Connect Qt Buttons
         self.ui.btn_clear.clicked.connect(self._btn_clear)
@@ -322,8 +336,8 @@ class Ally(object):
 
         self.ui.fast_redraw(canvas, plot)
 
-        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
+        tbl = self.ui.tbl_est_pos
+        self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
 
     def _handle_opponent_state(self, msg):
         opponent = self.ui.axes['opponent']
@@ -349,6 +363,18 @@ class Ally(object):
                         (msg.xhat_future,msg.yhat_future), color='g', size=0.02)
         if artist is not None:
             self.ui.axes['ball_predicted'] = artist
+
+    def _handle_des_pos(self, msg):
+        tbl = self.ui.tbl_des_pos
+        self.ui.update_table(tbl, msg.x, msg.y, msg.theta)
+
+    def _handle_vel(self, msg):
+        tbl = self.ui.tbl_vel
+        self.ui.update_table(tbl, msg.linear.x, msg.linear.y, msg.angular.z)
+
+    def _handle_PID_error(self, msg):
+        tbl = self.ui.tbl_PID_error
+        self.ui.update_table(tbl, msg.error.x, msg.error.y, msg.error.theta)
 
 
     # =========================================================================
