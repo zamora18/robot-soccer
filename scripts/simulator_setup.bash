@@ -1,12 +1,18 @@
 # Add this file to the bottom of your ~/.bashrc to include all of this goodness:
 # i.e.,     `source /path/to/repo/scripts/simulator.bash`
 
+# What is the package name of all your robot code?
+ROBOT_PKG='playground'
+
 # For DIR, see http://stackoverflow.com/a/246128
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PATH_TO_REPO="$DIR/.."
 
-# What is the package name of all your robot code?
-ROBOT_PKG='playground'
+# =============================================================================
+
+# My IP Address
+# See: http://stackoverflow.com/a/13322549
+MY_IP=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
 
 # Aliases
 alias ll='ls -lh --color'
@@ -17,6 +23,7 @@ alias ...='cd ../..'
 # ROS
 source /opt/ros/indigo/setup.bash
 export ROS_MASTER_URI=http://localhost:11311
+export ROS_IP="$MY_IP"
 source $PATH_TO_REPO/ros/devel/setup.bash
 
 function killsim() {
