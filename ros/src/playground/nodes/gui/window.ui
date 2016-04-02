@@ -199,7 +199,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupAlly1_2">
+   <widget class="QGroupBox" name="groupAlly2">
     <property name="enabled">
      <bool>true</bool>
     </property>

@@ -1,6 +1,8 @@
+import copy
+
 from PyQt4 import QtGui, QtCore
 
-import rospy
+import rospy, rostopic
 from geometry_msgs.msg import Pose2D, Twist
 from std_srvs.srv import Trigger
 from playground.msg import BallState, RobotState, PIDInfo
@@ -8,7 +10,8 @@ from playground.srv import SetBool, SetBoolResponse, RoboClawRPC, RoboClawRPCRes
 
 import numpy as np
 
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+from matplotlib import animation
 
 FIELD_LENGTH = 4
 FIELD_WIDTH = 3.2
@@ -23,6 +26,10 @@ class AllyUI(object):
 
         if ally is None:
             return False
+
+        # Group thing
+        self.groupbox = getattr(ui, 'groupAlly{}'.format(ally))
+        self._my_title = self.groupbox.title()
 
         # Plots
         self.plot_field = getattr(ui, 'plotAlly{}Field'.format(ally))
@@ -46,12 +53,15 @@ class AllyUI(object):
         self.chk_click_to_drive = getattr(ui, 'chkAlly{}CTD'.format(ally))
 
         # Plots and axes
-        self.axes = {
+        self.artists_field = {
             'position': None,
-            'velocity': None,
             'ball': None,
             'ball_predicted': None,
             'opponent': None
+        }
+
+        self.artists_vel = {
+            'velocity': None
         }
 
         # ---------------------------------------------------------------------
@@ -83,17 +93,29 @@ class AllyUI(object):
         # Try and get rid of as much of the margin/padding as possible
         canvas.fig.subplots_adjust(left=0.075, bottom=0.075, right=.95, top=.95)
 
-        # Create an axis for the current position (estimate) of the ally bot
-        self.axes['position'] = canvas.ax.plot([],[], linewidth=0.4)[0]
+        # Create an artist for the current position (estimate) of the ally bot
+        self.artists_field['position'] = canvas.ax.plot([],[], linewidth=0.6)[0]
 
-        # Create an axis for the current position (estimate) of the ball
-        self.axes['ball'] = None #canvas.ax.plot([],[],'ro')[0]
+        # Create an artist for the current position (estimate) of the ally bot
+        self.artists_field['desired'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1.3,ms=7)[0]
 
-        # Create an axis for the predicted position of the ball
-        self.axes['ball_predicted'] = None #canvas.ax.plot([],[])[0]
+        # Create an artist for the current position (estimate) of the ally bot
+        self.artists_field['position_vision'] = canvas.ax.plot([],[],'d',mfc='none',mec='b',mew=0.75,ms=4)[0]
 
-        # Create an axis for the current position (estimate) of the opponent
-        self.axes['opponent'] = None #canvas.ax.plot([],[])[0]
+        # Create an artist for the current position (estimate) of the ball
+        self.artists_field['ball'] = canvas.ax.plot([],[],'o',mfc='none',mec='r',mew=1.2,ms=7)[0]
+
+        # Create an artist for the predicted position of the ball
+        self.artists_field['ball_predicted'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1,ms=5)[0]
+
+        # Create an artist for the current position (estimate) of the opponent
+        self.artists_field['opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='c',mew=1,ms=7)[0]
+
+        # Create an artist for the current position (estimate) of the other opponent
+        self.artists_field['other_opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='k',mew=0.8,ms=6)[0]
+
+        # Create an artist for the current position (estimate) of my ally
+        self.artists_field['other_ally'] = canvas.ax.plot([],[],'d',mfc='none',mec='k',mew=0.8,ms=5)[0]
 
     def _init_vel(self):
         canvas = self.plot_vel.canvas
@@ -119,8 +141,8 @@ class AllyUI(object):
         # Try and get rid of as much of the margin/padding as possible
         canvas.fig.subplots_adjust(left=0.125, bottom=0.10, right=.95, top=.95)
 
-        # Create an axis for the given velocity commands of ally
-        self.axes['velocity'] = None #canvas.ax.plot([0],[0], linewidth=0.4)[0]
+        # Create an artist for the given velocity commands of ally
+        self.artists_vel['velocity'] = canvas.ax.plot([],[], linewidth=0.75)[0]
 
     def _init_tables(self):
         self._init_generic_table(self.tbl_est_pos, \
@@ -184,172 +206,37 @@ class AllyUI(object):
 
         return (col1, col2, col3)
 
-    def fast_redraw(self, canvas, plot):
-        """Fast Redraw
-        See: http://bastibe.de/2013-05-30-speeding-up-matplotlib.html
-        """
-        # For fast redrawing
-        try:
-            canvas.ax.draw_artist(plot)
-            canvas.update()
-            canvas.flush_events()
-        except:
-            pass
-
-    def draw_circle(self, canvas, circle, new_center, color='r', size=0.05):
-        """Draw Circle
-        """
-        tolerance = 0.001 # 1mm
-
-        # Enough has changed that we should plot
-        plot = True
-
-        # Remove last circle
-        if circle is not None:           
-            # is the new center much different than the old one?
-            if abs(new_center[0]-circle.center[0]) < tolerance and \
-                    abs(new_center[1]-circle.center[1]) < tolerance:
-                plot = False
-
-            if plot:
-                # Fill in old circle
-                old = plt.Circle(circle.center, (size+0.015), fc='w',ec='w',fill=True)
-                canvas.ax.add_artist(old)
-                self.fast_redraw(canvas,old)
-                canvas.ax.artists.remove(old)
-
-                # circle.remove()
-                canvas.ax.artists.remove(circle)
-
-                # canvas.ax.draw_idle()
-
-        if plot:
-            # Create new circle
-            circle = plt.Circle(new_center, size, fc=color, ec=color, fill=False)
-
-            canvas.ax.add_artist(circle)
-            self.fast_redraw(canvas, circle)
-
-            return circle
-
-        # plot.set_xdata([msg.xhat])
-        # plot.set_ydata([msg.yhat])
-
-        # circle = plt.Circle((msg.xhat,msg.yhat), 0.1, fc='r')
-        # plot.axes.add_patch(circle)
-        # circle.set_axes(canvas.ax)
-
-        # canvas.ax.draw_artist(canvas.ax.patch)
-        
-        # canvas.ax.add_artist(self.ui.axes['position'])
-        # canvas.ax.redraw_in_frame()
-        # ball.axes.draw_idle()
-        # canvas.ax.draw_artist(ball)
-        # canvas.update()
-        # canvas.flush_events()
-        
-
-        # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
-        # import ipdb; ipdb.set_trace()
-
-
-    def draw_diamond(self, canvas, rect, new_corner, color='r', size=0.05):
-        """Draw Diamond
-        """
-        tolerance = 0.001 # 1mm
-
-        # Enough has changed that we should plot
-        plot = True
-
-        # Remove last rect
-        if rect is not None:           
-            # is the new corner much different than the old one?
-            if abs(new_corner[0]-rect.xy[0]) < tolerance and \
-                    abs(new_corner[1]-rect.xy[1]) < tolerance:
-                plot = False
-
-            if plot:
-                # Fill in old rect
-                old = plt.Rectangle(rect.xy,(size+0.02),(size+0.02),angle=45.0,fc='w',ec='w',fill=True)
-                canvas.ax.add_artist(old)
-                self.fast_redraw(canvas,old)
-                canvas.ax.artists.remove(old)
-
-                # rect.remove()
-                canvas.ax.artists.remove(rect)
-
-                # canvas.ax.draw_idle()
-
-        if plot:
-            # Create new rect
-            rect = plt.Rectangle(new_corner, size, size,angle=45.0,fc=color,ec=color,fill=False)
-
-            canvas.ax.add_artist(rect)
-            self.fast_redraw(canvas, rect)
-
-            return rect
-
-    def draw_arrow_from_origin(self, canvas, arrow, old_endpoint, endpoint, color='b', width=0.05):
-        """Draw Arrow from Origin
-
-            This doesn't do a great job of removing old velocity vectors.
-            But I'm too lazy right now.
-
-            A better solution may be to draw a square over most of the area
-            of the plot. Or figure out how to make `canvas.ax.redraw_in_frame()`
-            play nicely.
-        """
-        tolerance = 0.001 # 1mm
-
-        # Enough has changed that we should plot
-        plot = True
-
-        # Remove last arrow
-        if arrow is not None:           
-            # is the new corner much different than the old one?
-            if abs(endpoint[0]-old_endpoint[0]) < tolerance and \
-                    abs(endpoint[1]-old_endpoint[1]) < tolerance:
-                plot = False
-
-            if plot:
-                # Fill in old arrow
-                dx = old_endpoint[0] + np.sign(old_endpoint[0])*0.5
-                dy = old_endpoint[1] + np.sign(old_endpoint[1])*0.5
-                old = plt.Arrow(0,0,dx,dy,width=(width*5),fc='w',ec='w',fill=True)
-                canvas.ax.add_artist(old)
-                self.fast_redraw(canvas,old)
-                canvas.ax.artists.remove(old)
-
-                # arrow.remove()
-                canvas.ax.artists.remove(arrow)
-
-                # canvas.ax.draw_idle()
-
-        if plot:
-            # Create new arrow
-            arrow = plt.Arrow(0, 0, *endpoint, width=width,fc=color,ec=color,fill=False)
-
-            canvas.ax.add_artist(arrow)
-            self.fast_redraw(canvas, arrow)
-
-            return arrow
+    def append_title(self, str=None):
+        if str is not None:
+            self.groupbox.setTitle('{} - {}'.format(self._my_title, str))
+        else:
+            self.groupbox.setTitle(self._my_title)
 
 
 class Ally(object):
     """docstring for Ally"""
-    def __init__(self, ui, ally=None):
+    def __init__(self, ui, ally=None, active=True):
         super(Ally, self).__init__()
 
         if ally is None:
-            return False
+            return
 
         self.ally = ally
 
-        # Create a dictionary for last messages of different types
-        self.last = {
+        # Create a dict so we now where we currently are
+        self.current = {
             'velocity': None,
-            'position': None
+            'my_state': None,
+            'opponent_state': None,
+            'ball_state': None,
+            'pidinfo': None,
+            'desired_position': None,
+            'other_opponent_state': None,
+            'other_ally_state': None
         }
+
+        # Create a dictionary for last messages of different types
+        self.last = copy.deepcopy(self.current)
 
         # Click to Drive positions (CTD)
         self.CTD_x1 = self.CTD_y1 = None
@@ -358,15 +245,27 @@ class Ally(object):
         # Setup the UI for this ally
         self.ui = AllyUI(ui, ally=ally)
 
+        # After we've set up the GUI, if this ally is not active just bail
+        if not active:
+            self.ui.append_title('Inactive')
+            return
+
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
         self.ns = ns
+
+        # If I am this ally, who is the other ally?
+        other_ally = 1 if ally == 2 else 2
         
         # Connect ROS things
         rospy.Subscriber('{}/ally{}_state'.format(ns,ally), \
                             RobotState, self._handle_my_state)
+        rospy.Subscriber('{}/ally{}_state'.format(ns,other_ally), \
+                            RobotState, self._handle_other_ally_state)
         rospy.Subscriber('{}/opponent{}_state'.format(ns,ally), \
                             RobotState, self._handle_opponent_state)
+        rospy.Subscriber('{}/opponent{}_state'.format(ns,other_ally), \
+                            RobotState, self._handle_other_opponent_state)
         rospy.Subscriber('{}/ball_state'.format(ns), \
                             BallState, self._handle_ball_state)
         rospy.Subscriber('{}/desired_position'.format(ns), \
@@ -391,93 +290,77 @@ class Ally(object):
         self.ui.plot_field.canvas.mpl_connect('motion_notify_event', self._plot_field_mouse_move)
         self.ui.plot_field.canvas.mpl_connect('button_release_event', self._plot_field_mouse_up)
 
+        # matplotlib create animation
+        # Look into using the same event_source for the two -- maybe this would help
+        # decrease overhead/latency? See matplotlib source code for more info
+        self.animation_field = animation.FuncAnimation(self.ui.plot_field.canvas.fig, \
+                            self._animate_field, init_func=self._animate_init_field, \
+                            frames=None, interval=8, blit=False, event_source=None)
+
+        self.animation_vel = animation.FuncAnimation(self.ui.plot_vel.canvas.fig, \
+                            self._animate_vel, init_func=self._animate_init_vel, \
+                            frames=None, interval=8, blit=False, event_source=None)
+
     # =========================================================================
     # ROS Event Callbacks (subscribers)
     # =========================================================================
 
     def _handle_my_state(self, msg):
-        plot = self.ui.axes['position']
-        canvas = self.ui.plot_field.canvas
-
-        xdata = plot.get_xdata()
-        ydata = plot.get_ydata()
-
-        xstart = [msg.xhat] if len(xdata) == 0 else [xdata[-1]]
-        ystart = [msg.yhat] if len(ydata) == 0 else [ydata[-1]]
-
-        xdata = np.concatenate( (xstart, [msg.xhat]) )
-        ydata = np.concatenate( (ystart, [msg.yhat]) )
-
-        plot.set_xdata(xdata)
-        plot.set_ydata(ydata)
-
-        self.ui.fast_redraw(canvas, plot)
-
-        tbl = self.ui.tbl_est_pos
-        self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
-
-        self.last['position'] = msg
+        # Save for later!
+        self.last['my_state'] = self.current['my_state']
+        self.current['my_state'] = msg
 
     def _handle_opponent_state(self, msg):
-        opponent = self.ui.axes['opponent']
-        canvas = self.ui.plot_field.canvas
+        # Save for later!
+        self.last['opponent_state'] = self.current['opponent_state']
+        self.current['opponent_state'] = msg
 
-        artist = self.ui.draw_circle(canvas, opponent, \
-                        (msg.xhat,msg.yhat), color='c', size=0.05)
-        if artist is not None:
-            self.ui.axes['opponent'] = artist
+    def _handle_other_opponent_state(self, msg):
+        # Save for later!
+        self.last['other_opponent_state'] = self.current['other_opponent_state']
+        self.current['other_opponent_state'] = msg
 
+    def _handle_other_ally_state(self, msg):
+        # Save for later!
+        self.last['other_ally_state'] = self.current['other_ally_state']
+        self.current['other_ally_state'] = msg
 
     def _handle_ball_state(self, msg):
-        ball = self.ui.axes['ball']
-        ball_predicted = self.ui.axes['ball_predicted']
-        canvas = self.ui.plot_field.canvas
-
-        artist = self.ui.draw_circle(canvas, ball, \
-                        (msg.xhat,msg.yhat), color='r', size=0.05)
-        if artist is not None:
-            self.ui.axes['ball'] = artist
-
-        artist = self.ui.draw_circle(canvas, ball_predicted, \
-                        (msg.xhat_future,msg.yhat_future), color='g', size=0.02)
-        if artist is not None:
-            self.ui.axes['ball_predicted'] = artist
+        # Save for later!
+        self.last['ball_state'] = self.current['ball_state']
+        self.current['ball_state'] = msg
 
     def _handle_des_pos(self, msg):
         tbl = self.ui.tbl_des_pos
         self.ui.update_table(tbl, msg.x, msg.y, msg.theta)
 
+        # Save for later!
+        self.last['desired_position'] = self.current['desired_position']
+        self.current['desired_position'] = msg
+
     def _handle_vel(self, msg):
-        velocity = self.ui.axes['velocity']
-        old = self.last['velocity']
-        canvas = self.ui.plot_vel.canvas
-
-        last_x = old.linear.x if old is not None else 0
-        last_y = old.linear.y if old is not None else 0
-
-        artist = self.ui.draw_arrow_from_origin(canvas, velocity, \
-                        (last_x, last_y), \
-                        (msg.linear.x,msg.linear.y), color='b', width=0.2)
-        if artist is not None:
-            self.ui.axes['velocity'] = artist
-
-        self.last['velocity'] = msg
-
         tbl = self.ui.tbl_vel
         self.ui.update_table(tbl, msg.linear.x, msg.linear.y, msg.angular.z)
+
+        # Save for later!
+        self.last['velocity'] = self.current['velocity']
+        self.current['velocity'] = msg
 
     def _handle_PID_error(self, msg):
         tbl = self.ui.tbl_PID_error
         self.ui.update_table(tbl, msg.error.x, msg.error.y, msg.error.theta)
 
+        # Save for later!
+        self.last['pidinfo'] = self.current['pidinfo']
+        self.current['pidinfo'] = msg
 
     # =========================================================================
     # Qt Event Callbacks (buttons, plots, etc)
     # =========================================================================
 
     def _btn_clear(self):
-        self.ui.plot_field.canvas.draw()
-        # self.ui.plot_vel.canvas.draw() # this makes it too slow...
+        self._animate_init_field()
+        # self._animate_init_vel() # There's no real need to clear this one
 
     def _btn_kick(self):
         try:
@@ -505,13 +388,10 @@ class Ally(object):
         self.pub_des_pos.publish(msg)
 
     def _btn_stop_moving(self):
-        tbl = self.ui.tbl_est_pos
-        (xhat, yhat, thetahat) = self.ui.read_table(tbl)
-
         msg = Pose2D()
-        msg.x = xhat
-        msg.y = yhat
-        msg.theta = thetahat
+        msg.x = self.current['my_state'].xhat
+        msg.y = self.current['my_state'].yhat
+        msg.theta = self.current['my_state'].thetahat
         self.pub_des_pos.publish(msg)
 
     def _plot_field_mouse_down(self, event):
@@ -541,7 +421,7 @@ class Ally(object):
             self.CTD_x2 = None
             self.CTD_y2 = None
         else:
-            theta_c = self.last['position'].thetahat
+            theta_c = self.current['my_state'].thetahat
 
         # Send it off!
         msg = Pose2D()
@@ -553,3 +433,146 @@ class Ally(object):
         # Get ready for next time!
         self.CTD_x1 = None
         self.CTD_y1 = None
+
+    # =========================================================================
+    # matplotlib animation functions
+    # =========================================================================
+
+    def _update_line(self, artist, x, y, append=True):
+        """Update Line
+        """
+        if append:
+            xdata = artist.get_xdata()
+            ydata = artist.get_ydata()
+
+            xdata.append(x)
+            ydata.append(y)
+        else:
+            xdata = [0, x]
+            ydata = [0, y]
+
+        artist.set_data(xdata, ydata)
+
+    def _update_point(self, artist, x, y):
+        """Update Point
+        """
+        artist.set_data(x, y)
+
+    def _animate_init_field(self):
+        for ax in self.ui.artists_field.itervalues():
+            ax.set_data([],[])
+
+        # Return the artists
+        return self.ui.artists_field.itervalues()
+
+    def _animate_field(self, i):
+        # Check if roscore is still running on master machine
+        try:
+            rostopic.get_topic_class('/rosout')
+        except rostopic.ROSTopicIOException as e:
+            self.ui.append_title('Unable to connect to roscore...')
+            return
+
+        # ---------------------------------------------------------------------
+        # -------------------------- Position ---------------------------------
+        # ---------------------------------------------------------------------
+        if self.current['my_state'] is not None:
+            x = self.current['my_state'].xhat
+            y = self.current['my_state'].yhat
+            vision_x = self.current['my_state'].vision_x
+            vision_y = self.current['my_state'].vision_y
+            correction = self.current['my_state'].correction
+        else:
+            x, y = 0, 0
+            vision_x, vision_y = 0, 0
+            correction = False
+
+        self._update_line(self.ui.artists_field['position'], x, y)
+
+        if correction:
+            self._update_point(self.ui.artists_field['position_vision'], vision_x, vision_y)
+
+        # ---------------------------------------------------------------------
+        # ----------------------- Desired Position ----------------------------
+        # ---------------------------------------------------------------------
+        if self.current['desired_position'] is not None:
+            x = self.current['desired_position'].x
+            y = self.current['desired_position'].y
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['desired'], x, y)
+
+        # ---------------------------------------------------------------------
+        # -------------------------- Opponent ---------------------------------
+        # ---------------------------------------------------------------------
+        if self.current['opponent_state'] is not None:
+            x = self.current['opponent_state'].xhat
+            y = self.current['opponent_state'].yhat
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['opponent'], x, y)
+
+        # ---------------------------------------------------------------------
+        # ------------------ Ball Current / Predicted -------------------------
+        # ---------------------------------------------------------------------
+        if self.current['ball_state'] is not None:
+            x = self.current['ball_state'].xhat
+            y = self.current['ball_state'].yhat
+            x_future = self.current['ball_state'].xhat_future
+            y_future = self.current['ball_state'].yhat_future
+        else:
+            x, y = 0, 0
+            x_future, y_future = 0, 0
+
+        self._update_point(self.ui.artists_field['ball'], x, y)
+        self._update_point(self.ui.artists_field['ball_predicted'], x_future, y_future)
+
+        # ---------------------------------------------------------------------
+        # ----------------------- Other Opponent ------------------------------
+        # ---------------------------------------------------------------------
+        if self.current['other_opponent_state'] is not None:
+            x = self.current['other_opponent_state'].xhat
+            y = self.current['other_opponent_state'].yhat
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['other_opponent'], x, y)
+
+        # ---------------------------------------------------------------------
+        # ------------------------- Other Ally --------------------------------
+        # ---------------------------------------------------------------------
+        if self.current['other_ally_state'] is not None:
+            x = self.current['other_ally_state'].xhat
+            y = self.current['other_ally_state'].yhat
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['other_ally'], x, y)
+
+
+        # Return the artists!
+        return self.ui.artists_field.itervalues()
+
+    def _animate_init_vel(self):
+        for ax in self.ui.artists_vel.itervalues():
+            ax.set_data([],[])
+
+        # Return the artists
+        return self.ui.artists_vel.itervalues()
+
+    def _animate_vel(self, i):
+        # ---------------------------------------------------------------------
+        # -------------------------- Velocity ---------------------------------
+        # ---------------------------------------------------------------------
+        if self.current['velocity'] is not None:
+            x = self.current['velocity'].linear.x
+            y = self.current['velocity'].linear.y
+        else:
+            x, y = 0, 0
+
+        self._update_line(self.ui.artists_vel['velocity'], x, y, append=False)
+
+        # Return the artists!
+        return self.ui.artists_vel.itervalues()
