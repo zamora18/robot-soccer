@@ -12,7 +12,7 @@ goal_box_width      = 0.660 # (26 in)
 goal_box_length     = 0.1143 # (4.5 in)
 goal_position_home  = [-field_length/2, 0] #this could change depending on camera
 goal_position_opp   = [-goal_position_home[0], 0]
-goal_score_threshold= 0.06
+goal_score_threshold= 0.05
 
 center_circle_radius= 0.25
 

@@ -16,7 +16,7 @@ _percent_time_opponents_in_our_half = 0
 _our_score                          = 0
 _opponent_score                     = 0
 _goal_check_counter                 = 0
-_goal_counter_max                   = 10 # Is this a good number?
+_GOAL_COUNTER_MAX                   = 30 # Is this a good number?
 
 # If we decide to go for a trick shot at the beginning
 _beginning_trick_shot = False
@@ -27,7 +27,7 @@ _beginning_trick_shot = False
 def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
-    global _goal_check_counter, _goal_counter_max
+    global _goal_check_counter, _GOAL_COUNTER_MAX
     # update_opponents_strategy_variables(opponent1, opponent2, ball)
     # Check to see if someone scored a goal
     
@@ -44,7 +44,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     else:
         (x,y,theta) = aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
         (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
-        return (x_c, y_c, theta)
+        return (x, y, theta) # TOOK OUT X_C, Y_C
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
@@ -152,17 +152,34 @@ def one_on_one(me, opponent1, ball):
         return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
 def check_for_goal(ball):
+    global _goal_check_counter, _GOAL_COUNTER_MAX
+
+    if abs(ball.xhat) >= Constants.field_length/2 + Constants.goal_score_threshold:
+        _goal_check_counter = _goal_check_counter + 1
+        if _goal_check_counter >= _GOAL_COUNTER_MAX:
+            _goal_check_counter = 0
+            return True 
+
+    return False
+
+
+
+
+def we_made_goal(ball):
     pass
+
+
+def update_goal():
 #     global
 #     if ball.xhat < (Constants.goal_position_home[0]+Constants.goal_score_threshold):
 #         _goal_check_counter = _goal_check_counter + 1
-#         if _goal_check_counter >= _goal_counter_max:
+#         if _goal_check_counter >= _GOAL_COUNTER_MAX:
 #             _opponent_score = _opponent_score + 1
 #             _goal_check_counter = 0
 #             goal = True
 #     elif ball.xhat > (Constants.goal_position_opp[0]+Constants.goal_score_threshold):
 #         _goal_check_counter = _goal_check_counter + 1
-#         if _goal_check_counter >= _goal_counter_max:
+#         if _goal_check_counter >= _GOAL_COUNTER_MAX:
 #             _our_score = _our_score + 1
 #             _goal_check_counter = 0
 #             goal = True
