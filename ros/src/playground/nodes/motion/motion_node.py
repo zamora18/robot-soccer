@@ -70,7 +70,7 @@ def main():
     pub = rospy.Publisher('encoder_estimates', EncoderEstimates, queue_size=10)
 
     # Services
-    rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
+    rospy.Service('battery', RoboClawRPC, _get_battery_voltage)
     rospy.Service('kick', Trigger, _kick)
 
     # So that we know the robot's theta
