@@ -5,6 +5,9 @@
 
     <!-- Soccer Gazebo Simulator -->
     <include file="$(find soccersim)/launch/soccer.launch">
+        <!-- You can save some CPU (~30%) by turning off the Gazebo GUI -->
+        <arg name="gazebo_gui" value="true" />
+
         <arg name="vision_home1" value="/vision_ally1_position" />
         <arg name="vision_home2" value="/vision_ally2_position" />
         <arg name="vision_away1" value="/vision_opponent1_position" />

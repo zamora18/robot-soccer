@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- declare arg to be passed in -->
+  <arg name="gazebo_gui" default="true" />
   <arg name="vision_home1" default="/vision/home1" />
   <arg name="vision_home2" default="/vision/home2" />
   <arg name="vision_away1" default="/vision/away1" />
@@ -30,6 +31,7 @@
   <!-- Soccer field world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find soccersim)/worlds/soccer_field.world"/>
+    <arg name="gui" value="$(arg gazebo_gui)"/>
   </include>
 
   <!-- Soccer robots -->
