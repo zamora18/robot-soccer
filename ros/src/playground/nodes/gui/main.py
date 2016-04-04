@@ -20,9 +20,17 @@ class MainWindow(QtGui.QMainWindow):
         # Setup ROS so ally's can use it
         rospy.init_node('command_center', anonymous=True)
 
+        # Is this a fast or slow computer? What should the plot
+        # update rate be? (in ms)
+        update_period = 250
+
+        # Figure out which ally is active
+        ally1_active = True
+        ally2_active = True
+
         # Setup all the GUI and ROS elements for each Ally
-        ally1 = Ally(self, ally=1, active=True)
-        ally2 = Ally(self, ally=2, active=True)
+        ally1 = Ally(self, ally=1, active=ally1_active, interval=update_period)
+        ally2 = Ally(self, ally=2, active=ally2_active, interval=update_period)
 
 if __name__ == '__main__':
     # Set up Qt Application Window

@@ -94,28 +94,28 @@ class AllyUI(object):
         canvas.fig.subplots_adjust(left=0.075, bottom=0.075, right=.95, top=.95)
 
         # Create an artist for the current position (estimate) of the ally bot
-        self.artists_field['position'] = canvas.ax.plot([],[], linewidth=0.6)[0]
+        self.artists_field['position'] = canvas.ax.plot([],[], linewidth=0.6, animated=False)[0]
 
         # Create an artist for the current position (estimate) of the ally bot
-        self.artists_field['desired'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1.3,ms=7)[0]
+        self.artists_field['desired'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1.3,ms=7,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the ally bot
-        self.artists_field['position_vision'] = canvas.ax.plot([],[],'d',mfc='none',mec='b',mew=0.75,ms=4)[0]
+        self.artists_field['position_vision'] = canvas.ax.plot([],[],'d',mfc='none',mec='b',mew=0.75,ms=4,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the ball
-        self.artists_field['ball'] = canvas.ax.plot([],[],'o',mfc='none',mec='r',mew=1.2,ms=7)[0]
+        self.artists_field['ball'] = canvas.ax.plot([],[],'o',mfc='none',mec='r',mew=1.2,ms=7,animated=False)[0]
 
         # Create an artist for the predicted position of the ball
-        self.artists_field['ball_predicted'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1,ms=5)[0]
+        self.artists_field['ball_predicted'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1,ms=5,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the opponent
-        self.artists_field['opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='c',mew=1,ms=7)[0]
+        self.artists_field['opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='c',mew=1,ms=7,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the other opponent
-        self.artists_field['other_opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='k',mew=0.8,ms=6)[0]
+        self.artists_field['other_opponent'] = canvas.ax.plot([],[],'*',mfc='none',mec='k',mew=0.8,ms=6,animated=False)[0]
 
         # Create an artist for the current position (estimate) of my ally
-        self.artists_field['other_ally'] = canvas.ax.plot([],[],'d',mfc='none',mec='k',mew=0.8,ms=5)[0]
+        self.artists_field['other_ally'] = canvas.ax.plot([],[],'d',mfc='none',mec='k',mew=0.8,ms=5,animated=False)[0]
 
     def _init_vel(self):
         canvas = self.plot_vel.canvas
@@ -215,7 +215,7 @@ class AllyUI(object):
 
 class Ally(object):
     """docstring for Ally"""
-    def __init__(self, ui, ally=None, active=True):
+    def __init__(self, ui, ally=None, active=True, interval=250):
         super(Ally, self).__init__()
 
         if ally is None:
@@ -293,19 +293,30 @@ class Ally(object):
         # matplotlib create animation
         # Look into using the same event_source for the two -- maybe this would help
         # decrease overhead/latency? See matplotlib source code for more info
+        ## Interval - I had interval=8ms and everything was smooth, but CPU was
+        ## at 130%. I changed it to 500ms and it went down to 30%! But the plotting
+        ## was severly discretized. A good in between was at 250ms (~60% CPU), but if
+        ## you're on a faster machine, you may want to increase interval to ~100ms
         self.animation_field = animation.FuncAnimation(self.ui.plot_field.canvas.fig, \
                             self._animate_field, init_func=self._animate_init_field, \
-                            frames=None, interval=8, blit=False, event_source=None)
+                            frames=None, interval=interval, blit=False, event_source=None)
 
-        self.animation_vel = animation.FuncAnimation(self.ui.plot_vel.canvas.fig, \
-                            self._animate_vel, init_func=self._animate_init_vel, \
-                            frames=None, interval=8, blit=False, event_source=None)
+        # self.animation_vel = animation.FuncAnimation(self.ui.plot_vel.canvas.fig, \
+        #                     self._animate_vel, init_func=self._animate_init_vel, \
+        #                     frames=None, interval=500, blit=False, event_source=None)
+
+        # I couldn't figure out blitting. When set to True, I could get
+        # CPU down to 20% from ~60%, but it left artifacts. It seems like
+        # a pretty good direction to go down, but I'm unsure if it will work.
 
     # =========================================================================
     # ROS Event Callbacks (subscribers)
     # =========================================================================
 
     def _handle_my_state(self, msg):
+        tbl = self.ui.tbl_est_pos
+        self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
+
         # Save for later!
         self.last['my_state'] = self.current['my_state']
         self.current['my_state'] = msg
@@ -551,6 +562,9 @@ class Ally(object):
 
         self._update_point(self.ui.artists_field['other_ally'], x, y)
 
+        ## When using `blit=True` and `animated=True`, this apparently needs
+        ## to be uncommented. I feel like there is a better way however...
+        # self.ui.plot_field.canvas.draw()
 
         # Return the artists!
         return self.ui.artists_field.itervalues()
