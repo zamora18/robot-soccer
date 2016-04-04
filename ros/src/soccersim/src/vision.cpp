@@ -34,13 +34,25 @@ Scalar green[]  = {Scalar(55,  128, 128), Scalar(65,  255, 255)};
 Scalar blue[]   = {Scalar(115, 128, 128), Scalar(125, 255, 255)};
 Scalar purple[] = {Scalar(145, 128, 128), Scalar(155, 255, 255)};
 
+// Keep track of who the user wants to move
+bool moveHome1;
+bool moveHome2;
+bool moveAway1;
+bool moveAway2;
+bool moveBall;
+
 // Handlers for vision position publishers
 ros::Publisher home1_pub;
 ros::Publisher home2_pub;
 ros::Publisher away1_pub;
 ros::Publisher away2_pub;
 ros::Publisher ball_pub;
-ros::Publisher ball_position_pub; // for publishing internally from the vision window
+// for publishing internally from the vision window
+ros::Publisher home1_position_pub;
+ros::Publisher home2_position_pub;
+ros::Publisher away1_position_pub;
+ros::Publisher away2_position_pub;
+ros::Publisher ball_position_pub;
 
 void thresholdImage(Mat& imgHSV, Mat& imgGray, Scalar color[])
 {
@@ -67,19 +79,26 @@ bool compareMomentAreas(Moments moment1, Moments moment2)
     return area1 < area2;
 }
 
-Point2d imageToWorldCoordinates(Point2d point_i, Size imageSize)
+Point2d imageToWorldCoordinates(Point2d point_i)
 {
-    Point2d centerOfField(CAMERA_WIDTH/2, CAMERA_HEIGHT/2);
+    // Define center of the field
+    // It may be better to draw a circle in the middle of the mesh
+    // that is identical to the actual field, and then use that
+    // to create a scale factor to do these calculations off of.
+    Point2d centerOfField(CAMERA_WIDTH / 2.0, CAMERA_HEIGHT / 2.0);
+
+    // Move origin to center
     Point2d center_w = (point_i - centerOfField);
 
+    // Scale to real world units (meters)
     // You have to split up the pixel to meter conversion
     // because it is a rect, not a square!
-    center_w.x *= (FIELD_WIDTH/FIELD_WIDTH_PIXELS);
-    center_w.y *= (FIELD_HEIGHT/FIELD_HEIGHT_PIXELS);
+    center_w.x *= (FIELD_WIDTH  / FIELD_WIDTH_PIXELS);
+    center_w.y *= (FIELD_HEIGHT / FIELD_HEIGHT_PIXELS);
 
-    // Reflect y
+    // mirror over y-axis
     center_w.y = -center_w.y;
-    
+
     return center_w;
 }
 
@@ -103,8 +122,8 @@ void getRobotPose(Mat& imgHsv, Scalar color[], geometry_msgs::Pose2D& robotPose)
     Moments mmLarge = mm[mm.size() - 1];
     Moments mmSmall = mm[mm.size() - 2];
 
-    Point2d centerLarge = imageToWorldCoordinates(getCenterOfMass(mmLarge), imgHsv.size());
-    Point2d centerSmall = imageToWorldCoordinates(getCenterOfMass(mmSmall), imgHsv.size());
+    Point2d centerLarge = imageToWorldCoordinates(getCenterOfMass(mmLarge));
+    Point2d centerSmall = imageToWorldCoordinates(getCenterOfMass(mmSmall));
 
     Point2d robotCenter = (centerLarge + centerSmall) * (1.0 / 2);
     Point2d diff = centerSmall - centerLarge;
@@ -130,7 +149,7 @@ void getBallPose(Mat& imgHsv, Scalar color[], geometry_msgs::Pose2D& ballPose)
         return;
 
     Moments mm = moments((Mat)contours[0]);
-    Point2d ballCenter = imageToWorldCoordinates(getCenterOfMass(mm), imgHsv.size());
+    Point2d ballCenter = imageToWorldCoordinates(getCenterOfMass(mm));
 
     ballPose.x = ballCenter.x;
     ballPose.y = ballCenter.y;
@@ -176,46 +195,121 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
-void sendBallMessage(int x, int y) {
-    // Expects x, y in pixels
+// void sendBallMessage(int x, int y) {
+//     // Expects x, y in pixels
 
-    // Convert pixels to meters for sending  simulated ball position from mouse clicks
-    float x_meters, y_meters;
+//     // Convert pixels to meters for sending  simulated ball position from mouse clicks
+//     float x_meters, y_meters;
 
-    // shift data by half the pixels so (0, 0) is in center
-    x_meters = x - (CAMERA_WIDTH/2.0);   
-    y_meters = y - (CAMERA_HEIGHT/2.0);
+//     // shift data by half the pixels so (0, 0) is in center
+//     x_meters = x - (CAMERA_WIDTH/2.0);   
+//     y_meters = y - (CAMERA_HEIGHT/2.0);
 
-    // Multiply by aspect-ratio scaling factor
-    x_meters = x_meters * (FIELD_WIDTH/FIELD_WIDTH_PIXELS);
-    y_meters = y_meters * (FIELD_HEIGHT/FIELD_HEIGHT_PIXELS);
+//     // Multiply by aspect-ratio scaling factor
+//     x_meters = x_meters * (FIELD_WIDTH/FIELD_WIDTH_PIXELS);
+//     y_meters = y_meters * (FIELD_HEIGHT/FIELD_HEIGHT_PIXELS);
 
-    // mirror y over y-axis
-    y_meters = -1*y_meters;
+//     // mirror y over y-axis
+//     y_meters = -1*y_meters;
 
-    // cout << "x: " << x_meters << ", y: " << y_meters << endl;
+//     // cout << "x: " << x_meters << ", y: " << y_meters << endl;
 
-    geometry_msgs::Vector3 msg;
-    msg.x = x_meters;
-    msg.y = y_meters;
-    msg.z = 0;
-    ball_position_pub.publish(msg);
-}
+//     geometry_msgs::Vector3 msg;
+//     msg.x = x_meters;
+//     msg.y = y_meters;
+//     msg.z = 0;
+//     ball_position_pub.publish(msg);
+// }
 
 void mouseCallback(int event, int x, int y, int flags, void* userdata) {
     static bool mouse_left_down = false;
+    bool send_msg = false;
 
+    // Ask the user which object to move, via keypress 1-5
+    updateWhoToMove();
+
+    // Allow mouse click and mosut drag to
+    // move the object (ball/robot) selected
+    // by the key press
     if (event == EVENT_LBUTTONDOWN) {
         mouse_left_down = true;
 
     } else if (event == EVENT_MOUSEMOVE) {
-        if (mouse_left_down) sendBallMessage(x, y);
+        if (mouse_left_down) send_msg = true;
 
     } else if (event == EVENT_LBUTTONUP) {
-        sendBallMessage(x, y);
+        send_msg = true;
         mouse_left_down = false;
     }
+
+    // If I should send a message...
+    if (send_msg) {
+
+        // Figure out the world coordinates to send
+        Point2d img(x, y);
+        Point2d world = imageToWorldCoordinates(img);
+
+        // Create the message to send
+        geometry_msgs::Vector3 msg;
+        msg.x = world.x;
+        msg.y = world.y;
+        msg.z = 0.01; // just above the floor
+     
+        if      (moveHome1)     home1_position_pub.publish(msg);
+        else if (moveHome2)     home2_position_pub.publish(msg);
+        else if (moveAway1)     away2_position_pub.publish(msg);
+        else if (moveAway2)     away2_position_pub.publish(msg);
+        else if (moveBall)      ball_position_pub.publish(msg);
+    }
     
+}
+
+void updateWhoToMove() {
+    // Wait 1ms for a keypress from user
+    int key = waitKey(1);
+    switch(key % 256) {
+        case '1':
+            moveHome1 = !moveHome1
+            moveHome2 = false;
+            moveAway1 = false;
+            moveAway2 = false;
+            moveBall = false;
+            break;
+        case '2':
+            moveHome1 = false;
+            moveHome2 = !moveHome2;
+            moveAway1 = false;
+            moveAway2 = false;
+            moveBall = false;
+            break;
+        case '3':
+            moveHome1 = false;
+            moveHome2 = false;
+            moveAway1 = !moveAway1;
+            moveAway2 = false;
+            moveBall = false;
+            break;
+        case '4':
+            moveHome1 = false;
+            moveHome2 = false;
+            moveAway1 = false;
+            moveAway2 = !moveAway2;
+            moveBall = false;
+            break;
+        case '5':
+            moveHome1 = false;
+            moveHome2 = false;
+            moveAway1 = false;
+            moveAway2 = false;
+            moveBall = !moveBall;
+            break;
+        default:
+            moveHome1 = false;
+            moveHome2 = false;
+            moveAway1 = false;
+            moveAway2 = false;
+            moveBall = false;
+    }
 }
 
 int main(int argc, char **argv)
@@ -227,8 +321,12 @@ int main(int argc, char **argv)
     namedWindow(GUI_NAME, CV_WINDOW_AUTOSIZE);
     setMouseCallback(GUI_NAME, mouseCallback, NULL);
 
-    // Create ball publisher
-    ball_position_pub = nh.advertise<geometry_msgs::Vector3>("/ball/command", 1);
+    // Create internal ball/bot position publishers
+    home1_position_pub = nh.advertise<geometry_msgs::Vector3>("/home1/forced_position", 1);
+    home2_position_pub = nh.advertise<geometry_msgs::Vector3>("/home2/forced_position", 1);
+    away1_position_pub = nh.advertise<geometry_msgs::Vector3>("/away1/forced_position", 1);
+    away2_position_pub = nh.advertise<geometry_msgs::Vector3>("/away2/forced_position", 1);
+    ball_position_pub = nh.advertise<geometry_msgs::Vector3>("/ball/forced_position", 1);
 
     // Subscribe to camera
     image_transport::ImageTransport it(nh);
