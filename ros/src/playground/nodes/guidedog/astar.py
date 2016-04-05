@@ -3,9 +3,10 @@ import numpy as np
 
 inf = 1e100
 closest_h_node = None
+original_graph = None
 
 class Graph:
-    def __init__(self, n, m):
+    def __init__(self, n, m, edge_value=10, diag_value=14):
         """inits the graph so you can setup the grid"""
 
         self.nodes = set()
@@ -13,6 +14,8 @@ class Graph:
         self.distances = {}
         self.n = n
         self.m = m
+        self.edge_distance = edge_value
+        self.diag_distance = diag_value
 
 
 
@@ -99,10 +102,10 @@ class Graph:
         closedict[current] = opendict[current];
         del opendict[current]
 
-        # print current
+        # print self.convert_node_to_coord(current)
 
         if current == end:
-            print 'found end'
+            print ('found end')
             return  self._find_path(closedict, end)
 
         adjacent = self.get_adjacent_nodes(current)
@@ -119,7 +122,7 @@ class Graph:
                         # if closest_h_node == None:
                         #     print None
                         closest_h_node = (n,h)
-                        print closest_h_node
+                        # print closest_h_node
 
                     f = (distance + g) + h
                     # if the node already exists in open
@@ -141,7 +144,7 @@ class Graph:
         # if all nodes were already visited, im trapped so just leave
         if (lowest_f_node == None):
             print 'blocked off'
-            print closest_h_node
+            # print closest_h_node
             return self._find_path(closedict, closest_h_node[0])
 
         # update g for the next call
@@ -161,8 +164,6 @@ class Graph:
 
         opendict = {start_node : (0, None)}
         closedict = {}
-
-        closest_h_node = None
 
         # RECURSIVE PATHFINDING AHHHHHH
         result = self._path(start_node, self.convert_coord_to_node(end), 0, opendict, closedict)
@@ -199,15 +200,26 @@ class Graph:
 
         current = self.convert_coord_to_node(center)
         self._add_obstacle(current, discrete_radius)
-        # print '\nSTART'
-        # testnode = 2
-        # adjacent = self.get_adjacent_nodes(testnode)
-        # for n in adjacent:
-        #     print str(testnode) + '->' + str(n) + ' = ' + str(self.distances[testnode, n])
-        #     print str(n) + '->' + str(testnode) + ' = ' + str(self.distances[n, testnode])
         
 
 
+    def _remove_obstacle(self, current, discrete_radius):
+        if discrete_radius < 0:
+            return
+        adjacent = self.get_adjacent_nodes(current)
+        for n in adjacent:
+            if n/self.n != current/self.n and n%self.n != current%self.n:
+                self.distances[(current, n)] = self.diag_distance
+                self.distances[(n, current)] = self.diag_distance
+            else:
+                self.distances[(current, n)] = self.edge_distance
+                self.distances[(n, current)] = self.edge_distance
+            self._remove_obstacle(n, discrete_radius-1)
+
+    def remove_obstacle(self, center, discrete_radius):
+
+        current = self.convert_coord_to_node(center)
+        self._remove_obstacle(current, discrete_radius)
 
 
 
@@ -219,7 +231,7 @@ def init_graph(length_field, width_field, distance_between_points=.01, edge_dist
     numofxpoints = int(np.floor(length_field/distance_between_points));
     numofypoints = int(np.floor(width_field/distance_between_points));
 
-    graph = Graph(numofxpoints, numofypoints)
+    graph = Graph(numofxpoints, numofypoints, edge_value=edge_distance, diag_value=diag_distance)
 
     for i in xrange(numofxpoints):
         for j in xrange(numofypoints):

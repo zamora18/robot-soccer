@@ -4,68 +4,75 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sys.path.append('../../ros/src/playground/nodes/guidedog/')
-import astar
+import pathplanning
 
-field_length = 3.68;
-field_height = 1.52;
-separation = 0.0100;
+field_length = 3.40;
+field_height = 2.33;
+separation = 0.067;
 
 def main():
+    i=0
+    for i in xrange(10):
+        pathplanning.init_graph(field_length, field_height, distance_between_points=separation)
 
-    graph = astar.init_graph(field_length, field_height, distance_between_points=separation)
 
+        obstacles = [(1,.30), (1,-.30), (-.25, -.25)]
 
-    obstacles = [ (4,4), (7,1)]
+        for obstacle in obstacles:
+            pathplanning.add_obstacle(obstacle)
 
-    for obstacle in obstacles:
-        graph.add_obstacle(obstacle, 1)
+        # How many points in x, y directions
+        Nx = field_length/separation;
+        Ny = field_height/separation;
 
-    # How many points in x, y directions
-    Nx = field_length/separation;
-    Ny = field_height/separation;
+        
 
-    
+        # x_max = (field_length/2);
+        # y_max = (field_height/2);
+        # x = np.linspace(-x_max, x_max, Nx);
+        # y = np.linspace(-y_max, y_max, Ny);
+        # X, Y = np.meshgrid(x, y);
 
-    # x_max = (field_length/2);
-    # y_max = (field_height/2);
-    # x = np.linspace(-x_max, x_max, Nx);
-    # y = np.linspace(-y_max, y_max, Ny);
-    # X, Y = np.meshgrid(x, y);
+        x = np.linspace(0, Nx-1, Nx)
+        y = np.linspace(-(Ny-1), 0, Ny)
+        X, Y = np.meshgrid(x, y)
 
-    x = np.linspace(0, Nx-1, Nx)
-    y = np.linspace(-(Ny-1), 0, Ny)
-    X, Y = np.meshgrid(x, y)
+        start = (-1.60,-1)
+        end = (1.60,1)
 
-    start = (23,2)
-    end = (360,150)
+        # Solve!
+        start_time = time.time()
+        path = pathplanning.get_path(start, end)
+        total_time = time.time() - start_time
 
-    # Solve!
-    start_time = time.time()
-    path = graph.path(start, end)
-    total_time = time.time() - start_time
+        start = pathplanning._convert_location_to_node(start)
+        end = pathplanning._convert_location_to_node(end)
 
-    
+        start = pathplanning._fix_node(start)
+        end = pathplanning._fix_node(end)
+        
 
-    x = []
-    y = []
+        x = []
+        y = []
 
-    prev_node = start
-    for node in path:
-        print("{} -> {}".format(prev_node, node))
-        x.append(node[0]) 
-        y.append(-node[1])
-        prev_node = node
+        prev_node = start
+        for node in path:
+            # print("{} -> {}".format(prev_node, node))
+            x.append(node[0]) 
+            y.append(-node[1])
+            prev_node = node
 
-    plt.plot(x, y, color='r', linestyle='--')
+        plt.plot(x, y, color='r', linestyle='--')
 
-    plt.scatter(X, Y)
+        plt.scatter(X, Y)
 
-    for obstacle in obstacles:
-        plt.scatter(obstacle[0], -obstacle[1], color='w', marker='x', s=20)
+        for obstacle in obstacles:
+            temp = pathplanning._convert_location_to_node(obstacle)
+            plt.scatter(temp[0], -temp[1], color='w', marker='x', s=20)
 
-    print total_time, "seconds."
+        print total_time, "seconds."
 
-    # plt.grid()
+        # plt.grid()
     plt.show()
     print("{}, {} = {}".format(Nx, Ny, Nx * Ny))
 
