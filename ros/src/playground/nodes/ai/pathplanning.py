@@ -92,14 +92,16 @@ def get_path(start, end):
 	start = _fix_node(start)
 	end = _fix_node(end)
 
-	print ("start = {}, end = {}".format(start, end))
+	# print ("start = {}, end = {}".format(start, end))
 
 	path = original_graph.path(start, end)
 
 	for obstacle in obstacles:
 		original_graph.remove_obstacle(obstacle[0],obstacle[1])
 
-	return path
+	world_path = map(_convert_node_to_location, path)
+
+	return world_path
 
 
 
