@@ -127,7 +127,6 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                     return Plays.stay_at_front_quarter_follow_ball(me, opponent1, opponent2, ball)
 
 
-
 def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
     global _offensive, _defensive, _neutral
     

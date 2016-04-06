@@ -20,8 +20,6 @@ _GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
 
 # For detecting goal 
 _is_goal_global = False
-# If we decide to go for a trick shot at the beginning
-_beginning_trick_shot = False
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
@@ -36,6 +34,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
 
     # Check to see if someone scored a goal
     check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
+    
     if _is_goal_global:
         if are_robots_in_reset_position(me, my_teammate):
             # Reset variables so that gameplay can continue
@@ -44,7 +43,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
         else:
             # Make sure the robots are going to the positions
             return reset_positions_after_goal(me)
-    else:
+    else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
         if (one_v_one):
@@ -108,7 +107,7 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
             return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
             return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:ally1
+        elif section == 4:
             return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
@@ -159,6 +158,11 @@ def one_on_one(me, opponent1, ball):
     else:
         return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
+
+
+
+
+
 def check_for_goal(ball):
     global _goal_check_counter, _GOAL_COUNTER_MAX, _is_goal_global
     # If someone just scored, then don't do anything
@@ -191,25 +195,6 @@ def update_score(ball):
     print "Score is now:\n\tUs: %d \n\tThem: %d", _our_score, _opponent_score
 
 
-
-
-
-def update_goal():
-    pass
-#     global
-#     if ball.xhat < (Constants.goal_position_home[0]+Constants.goal_score_threshold):
-#         _goal_check_counter = _goal_check_counter + 1
-#         if _goal_check_counter >= _GOAL_COUNTER_MAX:
-#             _opponent_score = _opponent_score + 1
-#             _goal_check_counter = 0
-#             goal = True
-#     elif ball.xhat > (Constants.goal_position_opp[0]+Constants.goal_score_threshold):
-#         _goal_check_counter = _goal_check_counter + 1
-#         if _goal_check_counter >= _GOAL_COUNTER_MAX:
-#             _our_score = _our_score + 1
-#             _goal_check_counter = 0
-#             goal = True
-
 def update_opponents_strategy_variables(opponent1, opponent2, ball):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     _averaging_factor = _averaging_factor + 1
@@ -234,6 +219,7 @@ def update_opponents_strategy_variables(opponent1, opponent2, ball):
     else:
         _percent_time_opponents_in_our_half = _percent_time_opponents_in_our_half/_averaging_factor
 
+
 def are_robots_in_reset_position(me, my_teammate):
     if my_teammate is None:
         return Utilities.robot_close_to_point(me, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2])
@@ -249,3 +235,6 @@ def reset_positions_after_goal(me):
         return (Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2])
     else:
         return (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
+
+
+

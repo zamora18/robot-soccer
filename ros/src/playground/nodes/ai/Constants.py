@@ -41,4 +41,4 @@ field_y_lim         = field_width/2 - robot_width*0.75
 own_goal_y_dist		= 2*robot_half_width + 0.10
 own_goal_x_dist		= 2*robot_half_width + 0.10
 
-
+not_stuck_dist		= 0.10

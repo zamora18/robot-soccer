@@ -20,6 +20,7 @@ class OwnGoalState:
 
 _clear_ball_st  = ClearBallState.setup
 _own_goal_st    = OwnGoalState.perp_setup
+_went_to_perp_first = False # This avoids the state machine starting in the 'behind_setup' and ruining the whole avoid own goal function
 
 
 ##########################################
@@ -133,7 +134,11 @@ def clear_ball_from_half(me, ball):
 # Skills mainly for "goalie" position:   #
 ##########################################
 def avoid_own_goal(me, ball):
-    global _own_goal_st
+    """
+    Robot will make a '2-point' approach, going first to a spot perpendicular to the ball, 
+    and then going directly behind the ball, which will avoid it hitting it straight back into the goal.
+    """
+    global _own_goal_st, _went_to_perp_first
     desired_perp_setup = Utilities.get_perpendicular_point_from_ball(me, ball)
     desired_behind_setup = Utilities.get_own_goal_dist_behind_ball(me, ball)
 
@@ -146,9 +151,14 @@ def avoid_own_goal(me, ball):
     if _own_goal_st == OwnGoalState.perp_setup:
         if Utilities.robot_close_to_point(me, *desired_perp_setup):
             _own_goal_st = OwnGoalState.behind_setup
+            _went_to_perp_first = True
     elif _own_goal_st == OwnGoalState.behind_setup:
-        if Utilities.robot_close_to_point(me, *desired_behind_setup):
-            _own_goal_st = OwnGoalState.attack
+        if _went_to_perp_first:
+            if Utilities.robot_close_to_point(me, *desired_behind_setup):
+                _own_goal_st = OwnGoalState.attack
+                _went_to_perp_first = False
+        else:
+            _own_goal_st = OwnGoalState.perp_setup
     elif _own_goal_st == OwnGoalState.attack:
         if distance_from_kicker_to_ball <= Constants.kickable_distance:
             _own_goal_st = OwnGoalState.kick

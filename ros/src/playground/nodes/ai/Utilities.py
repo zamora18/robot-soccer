@@ -3,6 +3,12 @@ import numpy as np
 
 import Constants
 
+_ally1_stuck_counter    = 0
+_ALLY1_STUCK_MAX        = 500
+_ally2_stuck_counter    = 0
+_ALLY2_STUCK_MAX        = 500
+_ally1_prev_pos         = (Constants.ally1_start_pos[0], Constants.ally1_start_pos[1])
+_ally2_prev_pos         = (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1])
 
 
 def get_front_of_robot(robot):
@@ -13,7 +19,11 @@ def get_front_of_robot(robot):
 
     return (x_pos, y_pos)
 
-
+#################################################################
+#################################################################
+####            FUNCTIONS COMPUTING CLOSEST OBJECTS          #### 
+#################################################################
+#################################################################
 def get_closest_opponent_to_ball(opponent1, opponent2, ball):
     if opponent2 is None:
         return opponent1
@@ -46,7 +56,6 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
     else:
         return rob2 
 
-
 def am_i_too_close_to_teammate(me, my_teammate):
     dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
     if dist_from_each_other < Constants.teammate_gap:
@@ -65,7 +74,11 @@ def is_opp_too_close_to_kicker(me, opp1, opp2, ball):
         return False    
 
 
-
+#################################################################
+#################################################################
+####       FUNCTIONS FOR DETECTING OPPONENTS' STRATEGY       #### 
+#################################################################
+#################################################################
 def are_both_opponents_attacking_goal(opponent1, opponent2, ball):
     pass
 
@@ -77,6 +90,12 @@ def is_in_our_half(obj):
 
 def has_possession():
     pass
+
+#################################################################
+#################################################################
+####            FUNCTIONS DEALING WITH THE BALL              #### 
+#################################################################
+#################################################################
 
 def is_ball_behind_robot(robot, ball):
     if (robot.xhat > ball.xhat):
@@ -104,6 +123,12 @@ def is_ball_close_to_edges(ball):
     else:
         return False
 
+
+#################################################################
+#################################################################
+####       FUNCTIONS FOR AVOIDING SCORING ON OURSELVES       #### 
+#################################################################
+#################################################################
 def get_perpendicular_point_from_ball(me, ball):
     x_c = ball.xhat_future
     if me.yhat > ball.yhat:
@@ -119,6 +144,12 @@ def get_own_goal_dist_behind_ball(me, ball):
     theta_c = 0
     return (x_c, y_c, theta_c)
 
+
+#################################################################
+#################################################################
+####       FUNCTIONS FOR FINDING DISTANCES AND ANGLES        #### 
+#################################################################
+#################################################################
 def get_sides_of_triangle(x1,x2,y1,y2):
     (a,b,c,theta) = find_triangle(x1,x2,y1,y2)
     return (a,b)
@@ -147,6 +178,75 @@ def find_triangle(x1,y1,x2,y2):
     theta = np.arctan2(b,a)
 
     return (a,b,c,theta)
+
+def rad_to_deg(rad):
+    deg = rad*180/np.pi
+    if deg < 0:
+        return deg+360
+    else:
+        return deg
+
+def deg_to_rad(deg):
+    return deg*np.pi/180
+
+
+
+#################################################################
+#################################################################
+####       FUNCTIONS TO DETECT IF OBJECTS OR POS ARE CLOSE   #### 
+#################################################################
+#################################################################
+
+def robot_close_to_point(robot, point_x, point_y, theta):
+    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
+                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
+
+def close(a, b, tolerance=0.010):
+    """
+    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
+    """
+
+    # Demand vals to be lists
+    a = _demand_list(a)
+    b = _demand_list(b)
+
+    return all(abs(np.subtract(a, b)) <= tolerance)
+
+def _demand_list(a):
+    """
+    Make a non-iterable or a tuple into a list
+    """
+    if not isinstance(a, Iterable):
+        a = [a]
+
+    elif type(a) is tuple:
+        a = list(a)
+
+    return a
+
+#################################################################
+#################################################################
+####                MISCELLANEOUS FUNCTIONS                  #### 
+#################################################################
+#################################################################
+
+def get_field_section(x_pos):
+        #Field is divided into 4 sections. 2 back half, 2 front half.
+        home_back_fourth     = -Constants.fourth_field_length 
+        home_front_fourth    = Constants.half_field
+        away_back_fourth     = Constants.fourth_field_length
+        away_front_fourth    = 2*Constants.fourth_field_length
+
+        if x_pos < Constants.half_field:
+            if x_pos < home_back_fourth:
+                return 1
+            else:
+                return 2
+        else: 
+            if x_pos < away_back_fourth:
+                return 3
+            else:
+                return 4
 
 
 
@@ -178,58 +278,35 @@ def limit_xy_passing(x,y):
     return (x,y)
 
 
-
-def rad_to_deg(rad):
-    deg = rad*180/np.pi
-    if deg < 0:
-        return deg+360
-    else:
-        return deg
-
-def deg_to_rad(deg):
-    return deg*np.pi/180
-
-def robot_close_to_point(robot, point_x, point_y, theta):
-    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
-                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
-
-def close(a, b, tolerance=0.010):
-    """
-    Usage: bool = _close([1, 2], [1.1, 2.3], tolerance=0.4) # true
-    """
-
-    # Demand vals to be lists
-    a = _demand_list(a)
-    b = _demand_list(b)
-
-    return all(abs(np.subtract(a, b)) <= tolerance)
-
-def _demand_list(a):
-    """
-    Make a non-iterable or a tuple into a list
-    """
-    if not isinstance(a, Iterable):
-        a = [a]
-
-    elif type(a) is tuple:
-        a = list(a)
-
-    return a
-
-def get_field_section(x_pos):
-        #Field is divided into 4 sections. 2 back half, 2 front half.
-        home_back_fourth     = -Constants.fourth_field_length 
-        home_front_fourth    = Constants.half_field
-        away_back_fourth     = Constants.fourth_field_length
-        away_front_fourth    = 2*Constants.fourth_field_length
-
-        if x_pos < Constants.half_field:
-            if x_pos < home_back_fourth:
-                return 1
+def i_am_stuck(me):
+    global _ally1_stuck_counter, _ALLY1_STUCK_MAX
+    global _ally2_stuck_counter, _ALLY2_STUCK_MAX 
+    global _ally1_prev_pos, _ally2_prev_pos 
+    
+    if me.ally1:
+        if _ally1_stuck_counter >= _ALLY1_STUCK_MAX: #Counter expired, so reset counter and return True
+            _ally1_stuck_counter = 0
+            _ally1_prev_pos = (me.xhat, me.yhat)
+            return True
+        else: # Keep checking to see if the robot is stuck
+            dist_from_prev_pos = get_distance_between_points(me.xhat, me.yhat, _ally1_prev_pos[0], _ally1_prev_pos[1])
+            if dist_from_prev_pos <= Constants.not_stuck_dist:
+                _ally1_stuck_counter = _ally1_stuck_counter + 1
+                _ally1_prev_pos = (me.xhat, me.yhat)
             else:
-                return 2
-        else: 
-            if x_pos < away_back_fourth:
-                return 3
+                _ally1_stuck_counter = 0
+            return False
+    else: # I am ally2
+        if _ally2_stuck_counter >= _ALLY2_STUCK_MAX: #Counter expired, so reset counter and return True
+            _ally2_stuck_counter = 0
+            _ally2_prev_pos = (me.xhat, me.yhat)
+            return True
+        else: # Keep checking to see if the robot is stuck
+            dist_from_prev_pos = get_distance_between_points(me.xhat, me.yhat, _ally2_prev_pos[0], _ally2_prev_pos[1])
+            if dist_from_prev_pos <= Constants.not_stuck_dist:
+                _ally2_stuck_counter = _ally2_stuck_counter + 1
+                _ally2_prev_pos = (me.xhat, me.yhat)
             else:
-                return 4
+                _ally2_stuck_counter = 0
+            return False
+
