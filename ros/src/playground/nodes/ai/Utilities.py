@@ -10,6 +10,8 @@ _ALLY2_STUCK_MAX        = 500
 _ally1_prev_pos         = (Constants.ally1_start_pos[0], Constants.ally1_start_pos[1])
 _ally2_prev_pos         = (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1])
 
+_stuck                  = False
+
 
 def get_front_of_robot(robot):
     ### thetahat is in degrees, so we should change from degree to radians?? ----------
@@ -278,10 +280,12 @@ def limit_xy_passing(x,y):
     return (x,y)
 
 
+# Update this. It won't work because it will only return true for one second....
 def i_am_stuck(me):
     global _ally1_stuck_counter, _ALLY1_STUCK_MAX
     global _ally2_stuck_counter, _ALLY2_STUCK_MAX 
     global _ally1_prev_pos, _ally2_prev_pos 
+    global _stuck
     
     if me.ally1:
         if _ally1_stuck_counter >= _ALLY1_STUCK_MAX: #Counter expired, so reset counter and return True
