@@ -104,7 +104,7 @@ def main():
 
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
 
-    rospy.Subscriber('game_state', GameState, _handle_game_state)
+    rospy.Subscriber('/game_state', GameState, _handle_game_state)
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
