@@ -23,7 +23,7 @@ _steal_ball_state   = ShootState.setup
 _wait_steal_timer   = 0
 _WAIT_STEAL_MAX     = 20
 _ball_stuck_timer   = 0
-_BALL_STUCK_MAX     = 350
+_BALL_STUCK_MAX     = 300
 
 _offensive  = 0
 _defensive  = 1
@@ -68,7 +68,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     if _shoot_state == ShootState.setup:
         _ball_stuck_timer = _ball_stuck_timer + 1
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if Utilities.robot_close_to_point(me, *desired_setup_position) or Utilities.is_ball_close_to_edges(ball) or _ball_stuck_timer >= _BALL_STUCK_MAX:
+        if Utilities.robot_close_to_point(me, *desired_setup_position) or _ball_stuck_timer >= _BALL_STUCK_MAX: #or Utilities.is_ball_close_to_edges(ball)
             if not Utilities.is_ball_behind_robot(me, ball): 
                 _ball_stuck_timer = 0
                 _shoot_state = ShootState.attack
@@ -100,10 +100,9 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     elif  _shoot_state == ShootState.attack:
         return Skills.attack_ball(me, ball)
 
-    # GGGGGOOOOOOOOOOOAAAAAAAAAALLLLLLLLLLLL!!!!!!!!!!!!!!!!!!
     elif _shoot_state == ShootState.shoot:
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
-            print "KICKING"
+            # print "KICKING"
             Skills.kick()
         else:
             print "Opponent too close and could damage our kicker"
@@ -126,8 +125,10 @@ def shoot_off_the_wall(me, ball):
 
     y_tweak_value = 8.0/10.0 # Ideally, we should aim for goal pos mirrored above/below us, but it won't be perfect so this should handle that
     if ball.yhat > 0:
+        # will calculate kicking off of the "closest" wall, which is the top wall
         theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, Constants.field_length/2, Constants.field_width*y_tweak_value-ball.yhat)
     else:
+        # will calculate kicking off of the bottom wall.
         theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, Constants.field_length/2, -Constants.field_width*y_tweak_value+ball.yhat)
     theta_c = Utilities.rad_to_deg(theta_c)
 
@@ -233,7 +234,7 @@ def stay_open_for_pass(me, my_teammate, ball):
     Teammate(me) stays a 0.5 meters ahead of the ball and follows 'my_teammate' towards the goal
     'me' maintains a distance away from 'my_teammate' and normally should be 
     """
-    print "staying open for pass......."
+    # print "staying open for pass......."
     if (ball.yhat > 0): 
         r_l_toggle = -1 
     else: 
