@@ -46,6 +46,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
                 # Reset variables so that gameplay can continue
                 _is_goal_global = False # this will allow the gameplay to restart again.
         return reset_positions_after_goal(me)
+
     else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
@@ -200,7 +201,7 @@ def update_score(ball):
         print "NOOOO, They scored =("
         _opponent_score = _opponent_score + 1 
 
-    print "Score is now:\n\tUs: %d \n\tThem: %d", _our_score, _opponent_score
+    print("Score is now:\n\tUs: {} \n\tThem: {}".format(_our_score, _opponent_score))
 
 
 def update_opponents_strategy_variables(opponent1, opponent2, ball):

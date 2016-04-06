@@ -28,13 +28,13 @@ _was_goal = False
 
 def _handle_robot_state(msg, which_robot):
     # Update the given robot's current and future positions
-    if which_robot == 'me':
+    if which_robot == 'me' and _me is not None:
         _me.update_state(msg)
-    elif which_robot == 'ally':
+    elif which_robot == 'ally' and _ally is not None:
         _ally.update_state(msg)
-    elif which_robot == 'opp1':
+    elif which_robot == 'opp1' and _opp1 is not None:
         _opp1.update_state(msg)
-    elif which_robot == 'opp2':
+    elif which_robot == 'opp2' and _opp2 is not None:
         _opp2.update_state(msg)
 
 def _handle_ball_state(msg):
@@ -50,8 +50,11 @@ def _handle_goal(msg):
     _was_goal = msg.data
 
 def _handle_game_state(msg):
-    global _game_state
+    global _game_state, _ally
     _game_state = msg
+
+    if not _game_state.two_v_two:
+         _ally = None
 
 def _set_path_planning(req):
     global _pathplanning_enabled
