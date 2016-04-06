@@ -31,6 +31,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     global _our_score, _opponent_score
     global _is_goal_global
     update_opponents_strategy_variables(opponent1, opponent2, ball)
+    
     # one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
 
     # Check to see if someone scored a goal
@@ -107,7 +108,7 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
             return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
             return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:
+        elif section == 4:ally1
             return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
@@ -141,13 +142,11 @@ def passive_aggressive(me, my_teammate, opponent1, opponent2, ball): #AKA, mild 
 
 
 def one_on_one(me, opponent1, ball):
-    global _beginning_trick_shot
     my_teammate = None
     opponent2 = None
     section = Utilities.get_field_section(ball.xhat)
 
-    # if not _beginning_trick_shot:
-    #     _beginning_trick_shot = True
+    # if not Plays.beginning_trick_shot_done():
     #     return Plays.shoot_off_the_wall(me, ball)
     if   section == 1:
         return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
@@ -236,10 +235,13 @@ def update_opponents_strategy_variables(opponent1, opponent2, ball):
         _percent_time_opponents_in_our_half = _percent_time_opponents_in_our_half/_averaging_factor
 
 def are_robots_in_reset_position(me, my_teammate):
-    if me.ally1:
-        return Utilities.robot_close_to_point(me, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2]) and Utilities.robot_close_to_point(my_teammate, Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
+    if my_teammate is None:
+        return Utilities.robot_close_to_point(me, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2])
     else:
-        return Utilities.robot_close_to_point(my_teammate, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2]) and Utilities.robot_close_to_point(me, Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
+        if me.ally1:
+            return Utilities.robot_close_to_point(me, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2]) and Utilities.robot_close_to_point(my_teammate, Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
+        else:
+            return Utilities.robot_close_to_point(my_teammate, Constants.ally1_start_pos[0], Constants.ally1_start_pos[1], Constants.ally1_start_pos[2]) and Utilities.robot_close_to_point(me, Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
 
 
 def reset_positions_after_goal(me):
