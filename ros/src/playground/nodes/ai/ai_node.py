@@ -6,7 +6,7 @@ import rospy
 from geometry_msgs.msg import Pose2D
 from std_msgs.msg import Bool
 
-from playground.msg import BallState, RobotState
+from playground.msg import BallState, RobotState, GameState
 from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
@@ -23,6 +23,7 @@ _ball = None
 
 _ai_enabled = True
 _pathplanning_enabled = False
+_game_state = None
 _was_goal = False
 
 
@@ -49,6 +50,10 @@ def _handle_goal(msg):
     global _was_goal
     _was_goal = msg.data
 
+def _handle_game_state(msg):
+    global _game_state
+    _game_state = msg
+
 def _set_ai(req):
     global _ai_enabled
     _ai_enabled = req.data
@@ -58,7 +63,6 @@ def _set_path_planning(req):
     global _pathplanning_enabled
     _pathplanning_enabled = req.data
     return SetBoolResponse(_pathplanning_enabled, "")
-
 
 def _create_robots():
     """Create Robots
@@ -99,6 +103,8 @@ def main():
     rospy.Subscriber('opponent2_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp2'))
 
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
+
+    rospy.Subscriber('game_state', GameState, _handle_game_state)
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
@@ -110,7 +116,13 @@ def main():
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal)
+        # Figure out game state stuff
+        if _game_state == None:
+            one_v_one = False # Default to two_v_two
+        else:
+            one_v_one = not _game_state.two_v_two
+
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal, one_v_one=one_v_one)
 
         if _pathplanning_enabled:
             (x_c_safe, y_c_safe) = Path.plan(x_c, y_c, _me, _ally, _opp1, _opp2)
