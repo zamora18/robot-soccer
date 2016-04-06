@@ -22,6 +22,7 @@ _opp2 = None
 _ball = None
 
 _ai_enabled = True
+_pathplanning_enabled = True
 _was_goal = False
 
 
@@ -53,6 +54,11 @@ def _set_ai(req):
     _ai_enabled = req.data
     return SetBoolResponse(_ai_enabled, "")
 
+def _set_path_planning(req):
+    global _pathplanning_enabled
+    _pathplanning_enabled = req.data
+    return SetBoolResponse(_pathplanning_enabled, "")
+
 
 def _create_robots():
     """Create Robots
@@ -83,6 +89,9 @@ def main():
     global _ball
     _ball = Ball()
 
+    # Initialize our path planning world
+    Path.initialize_world()
+
     # Subscribe to Robot States
     rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
     rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
@@ -94,6 +103,7 @@ def main():
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
     rospy.Service('set_ai', SetBool, _set_ai)
+    rospy.Service('set_path_planning', SetBool, _set_path_planning)
 
     global _was_goal
 
@@ -101,11 +111,18 @@ def main():
     while not rospy.is_shutdown():
 
         (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal)
+
+        if _pathplanning_enabled:
+            (x_c_safe, y_c_safe) = Path.plan(x_c, y_c, _me, _ally, _opp1, _opp2)
+            theta_c_safe = theta_c
+        else:
+            (x_c_safe, y_c_safe, theta_c_safe) = (x_c, y_c, theta_c)
+
         if _ai_enabled:
             msg = Pose2D()
-            msg.x = x_c
-            msg.y = y_c
-            msg.theta = theta_c
+            msg.x = x_c_safe
+            msg.y = y_c_safe
+            msg.theta = theta_c_safe
             pub.publish(msg)
 
         _was_goal = False

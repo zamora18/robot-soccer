@@ -1,8 +1,5 @@
 class Robot(object):
     """docstring for Robot"""
-    BIG_MAC = 0
-    HAPPY_MEAL = 1
-    OPPONENT = 2
     def __init__(self, ally1=False, ally2=False):
         super(Robot, self).__init__()
         self.ally1 = ally1
@@ -14,7 +11,6 @@ class Robot(object):
         self.yhat_future = 0
         self.thetahat_future = 0
 
-
     def update_state(self, msg):
         self.xhat = msg.xhat
         self.yhat = msg.yhat
@@ -23,6 +19,8 @@ class Robot(object):
         self.yhat_future = msg.yhat_future
         self.thetahat_future = msg.thetahat_future
 
+    def get_2d_location(self):
+        return (self.xhat, self.yhat)
 
 class Ball(object):
     """docstring for Ball"""
@@ -38,3 +36,6 @@ class Ball(object):
         self.yhat = msg.yhat
         self.xhat_future = msg.xhat_future
         self.yhat_future = msg.yhat_future
+
+    def get_2d_location(self):
+        return (self.xhat, self.yhat)
