@@ -152,9 +152,9 @@ def one_on_one(me, opponent1, ball):
     if Utilities.i_am_stuck(me):
         return Skills.get_unstuck(me)
     else:
-        if not Plays.beginning_trick_shot_done():
-            return Plays.shoot_off_the_wall(me, ball)
-        elif   section == 1:
+        # if not Plays.beginning_trick_shot_done():
+        #     return Plays.shoot_off_the_wall(me, ball)
+        if   section == 1:
             return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
         elif section == 2:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball, True)
