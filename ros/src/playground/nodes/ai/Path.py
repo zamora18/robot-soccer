@@ -20,4 +20,4 @@ def plan(x_c, y_c, _me, _ally, _opp1, _opp2):
     # Plan that path! Returns a list of tuples
     path = get_path(start, end)
 
-    return path[0]
+    return path[2]

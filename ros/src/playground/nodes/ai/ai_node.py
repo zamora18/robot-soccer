@@ -11,7 +11,7 @@ from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
 
-import Strategy
+import Strategy, Path
 from GameObjects import Ball, Robot
 
 _me = None
