@@ -15,11 +15,16 @@ _percent_time_ball_in_our_half      = 0
 _percent_time_opponents_in_our_half = 0
 _our_score                          = 0
 _opponent_score                     = 0
-_goal_check_counter                 = 0
-_GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
 
 # For detecting goal 
 _is_goal_global = False
+_goal_check_counter                 = 0
+_GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
+
+_resume_game_counter                = 0
+_RESUME_GAME_MAX                    = 500 # (5 seconds)
+
+
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
@@ -37,8 +42,9 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     
     if _is_goal_global:
         if are_robots_in_reset_position(me, my_teammate):
-            # Reset variables so that gameplay can continue
-            _is_goal_global = False # this will allow the gameplay to restart again.
+            if done_waiting_for_resume_game():
+                # Reset variables so that gameplay can continue
+                _is_goal_global = False # this will allow the gameplay to restart again.
             return reset_positions_after_goal(me)
         else:
             # Make sure the robots are going to the positions
@@ -161,7 +167,9 @@ def one_on_one(me, opponent1, ball):
 
 
 
-
+################################
+###     Helper Functions     ###
+################################
 
 def check_for_goal(ball):
     global _goal_check_counter, _GOAL_COUNTER_MAX, _is_goal_global
@@ -236,5 +244,15 @@ def reset_positions_after_goal(me):
     else:
         return (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1], Constants.ally2_start_pos[2])
 
+
+def done_waiting_for_resume_game():
+    global _resume_game_counter, _RESUME_GAME_MAX
+
+    _resume_game_counter = _resume_game_counter + 1
+    if _resume_game_counter >= _RESUME_GAME_MAX:
+        _resume_game_counter = 0
+        return True
+
+    return False
 
 
