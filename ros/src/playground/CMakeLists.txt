@@ -56,7 +56,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  coords.msg
+  GameState.msg
   EncoderEstimates.msg
   QPulses.msg
   WorldVelocities.msg
