@@ -21,7 +21,6 @@ _opp2 = None
 
 _ball = None
 
-_ai_enabled = True
 _pathplanning_enabled = False
 _game_state = None
 _was_goal = False
@@ -53,11 +52,6 @@ def _handle_goal(msg):
 def _handle_game_state(msg):
     global _game_state
     _game_state = msg
-
-def _set_ai(req):
-    global _ai_enabled
-    _ai_enabled = req.data
-    return SetBoolResponse(_ai_enabled, "")
 
 def _set_path_planning(req):
     global _pathplanning_enabled
@@ -108,7 +102,6 @@ def main():
     rospy.Subscriber('goal', Bool, _handle_goal)
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
 
-    rospy.Service('set_ai', SetBool, _set_ai)
     rospy.Service('set_path_planning', SetBool, _set_path_planning)
 
     global _was_goal
@@ -119,8 +112,10 @@ def main():
         # Figure out game state stuff
         if _game_state == None:
             one_v_one = False # Default to two_v_two
+            play_game = False
         else:
             one_v_one = not _game_state.two_v_two
+            play_game = _game_state.play
 
         (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal, one_v_one=one_v_one)
 
@@ -130,7 +125,7 @@ def main():
         else:
             (x_c_safe, y_c_safe, theta_c_safe) = (x_c, y_c, theta_c)
 
-        if _ai_enabled:
+        if play_game:
             msg = Pose2D()
             msg.x = x_c_safe
             msg.y = y_c_safe
