@@ -15,11 +15,12 @@ def main():
     for i in xrange(10):
         pathplanning.init_graph(field_length, field_height, distance_between_points=separation)
 
+        if (i < 5):
+            obstacles = [(1,.30), (1,-.30), (-.25, -.25)]
+        else:
+            obstacles = [(-1,-.30), (-1,.30), (.25, .25)]
 
-        obstacles = [(1,.30), (1,-.30), (-.25, -.25)]
 
-        for obstacle in obstacles:
-            pathplanning.add_obstacle(obstacle)
 
         # How many points in x, y directions
         Nx = field_length/separation;
@@ -42,7 +43,12 @@ def main():
 
         # Solve!
         start_time = time.time()
+
+        for obstacle in obstacles:
+            pathplanning.add_obstacle(obstacle)
+
         path = pathplanning.get_path(start, end)
+
         total_time = time.time() - start_time
 
         start = pathplanning._convert_location_to_node(start)
@@ -57,7 +63,7 @@ def main():
 
         prev_node = start
         for node in path:
-            # print("{} -> {}".format(prev_node, node))
+            # print("{} -> {}".format(pathplanning._convert_node_to_location(prev_node), pathplanning._convert_node_to_location(node)))  
             x.append(node[0]) 
             y.append(-node[1])
             prev_node = node

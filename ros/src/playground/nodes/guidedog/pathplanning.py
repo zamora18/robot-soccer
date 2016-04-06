@@ -28,10 +28,18 @@ def init_graph(length_field, width_field, distance_between_points=.05, edge_dist
 	# print (modified_graph)
 
 def _convert_location_to_node(location):
-	global distance_between_discrete_points
+	global distance_between_discrete_points, field_width, field_length
 
 	x = int((location[0] + field_length/2.0)/distance_between_discrete_points)
 	y = int((location[1] + field_width/2.0)/distance_between_discrete_points)
+
+	return (x,y)
+
+def _convert_node_to_location(node):
+	global distance_between_discrete_points, field_width, field_length
+
+	x = round((node[0]*distance_between_discrete_points) - field_length/2, 3)
+	y = round((node[1]*distance_between_discrete_points) - field_width/2, 3)
 
 	return (x,y)
 
