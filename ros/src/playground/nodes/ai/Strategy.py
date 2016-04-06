@@ -16,7 +16,7 @@ _percent_time_opponents_in_our_half = 0
 _our_score                          = 0
 _opponent_score                     = 0
 _goal_check_counter                 = 0
-_GOAL_COUNTER_MAX                   = 3 # Is this a good number?
+_GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
 
 # For detecting goal 
 _is_goal_global = False

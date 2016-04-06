@@ -22,7 +22,7 @@ _opp2 = None
 _ball = None
 
 _ai_enabled = True
-_pathplanning_enabled = True
+_pathplanning_enabled = False
 _was_goal = False
 
 

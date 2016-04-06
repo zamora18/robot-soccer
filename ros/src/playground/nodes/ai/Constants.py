@@ -12,7 +12,7 @@ goal_box_width      = 0.616 # (24.25 in)
 goal_box_length     = 0.127 # (5.0 in)
 goal_position_home  = [-field_length/2, 0] #this could change depending on camera
 goal_position_opp   = [-goal_position_home[0], 0]
-goal_score_threshold= 0.00 # THIS SHOULD BE BIGGER IN REAL LIFE. IN THE SIMULATOR IT IS STUPID
+goal_score_threshold= 0.05 # .05 IN REAL LIFE, 0.00 IN SIMULATOR
 
 center_circle_radius= 0.25
 
