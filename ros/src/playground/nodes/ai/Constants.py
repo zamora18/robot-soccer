@@ -12,7 +12,7 @@ goal_box_width      = 0.616 # (24.25 in)
 goal_box_length     = 0.127 # (5.0 in)
 goal_position_home  = [-field_length/2, 0] #this could change depending on camera
 goal_position_opp   = [-goal_position_home[0], 0]
-goal_score_threshold= 0.05 # .05 IN REAL LIFE, 0.00 IN SIMULATOR
+goal_score_threshold= 0.01 # .02 IN REAL LIFE?, 0.00 IN SIMULATOR
 
 center_circle_radius= 0.25
 
@@ -38,7 +38,7 @@ open_for_pass_y_dist                = robot_width*4.5
 field_x_lim         = field_length/2 - robot_width*0.75
 field_y_lim         = field_width/2 - robot_width*0.75
 
-own_goal_y_dist		= 2*robot_half_width + 0.10
-own_goal_x_dist		= 2*robot_half_width + 0.10
+own_goal_y_dist		= robot_width
+own_goal_x_dist		= robot_width + 0.10
 
 not_stuck_dist		= 0.10

@@ -35,7 +35,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     global _is_goal_global
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
-    # one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
+    one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
 
     # Check to see if someone scored a goal
     check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
@@ -45,10 +45,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
             if done_waiting_for_resume_game():
                 # Reset variables so that gameplay can continue
                 _is_goal_global = False # this will allow the gameplay to restart again.
-            return reset_positions_after_goal(me)
-        else:
-            # Make sure the robots are going to the positions
-            return reset_positions_after_goal(me)
+        return reset_positions_after_goal(me)
     else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
@@ -151,25 +148,28 @@ def one_on_one(me, opponent1, ball):
     opponent2 = None
     section = Utilities.get_field_section(ball.xhat)
 
-    # if not Plays.beginning_trick_shot_done():
-    #     return Plays.shoot_off_the_wall(me, ball)
-    if   section == 1:
-        return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 2:
-        return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 3:
-        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
-    elif section == 4:
-        return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
+    if Utilities.i_am_stuck(me):
+        return Skills.get_unstuck(me)
     else:
-        return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
+        if not Plays.beginning_trick_shot_done():
+            return Plays.shoot_off_the_wall(me, ball)
+        elif   section == 1:
+            return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
+        elif section == 2:
+            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball, True)
+        elif section == 3:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
+        elif section == 4:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball, True)
+        else:
+            return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
 
 
 
-################################
-###     Helper Functions     ###
-################################
+################################################################
+###                     Helper Functions                     ###
+################################################################
 
 def check_for_goal(ball):
     global _goal_check_counter, _GOAL_COUNTER_MAX, _is_goal_global

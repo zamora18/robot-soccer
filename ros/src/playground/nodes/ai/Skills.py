@@ -23,6 +23,19 @@ _own_goal_st    = OwnGoalState.perp_setup
 _went_to_perp_first = False # This avoids the state machine starting in the 'behind_setup' and ruining the whole avoid own goal function
 
 
+#################################################
+# General Skills potentially used by everyone:  #
+#################################################
+def get_unstuck(me):
+    dist_to_retreat = 0.20
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, 0, 0) #move a little towards the center of the field.
+    x_c = dist_to_retreat*np.cos(theta)
+    y_c = dist_to_retreat*np.sin(theta)
+    theta = Utilities.rad_to_deg(theta)
+    return (x_c, y_c, theta)
+
+
+
 ##########################################
 # Skills mainly for "attacker" position: #
 ##########################################
