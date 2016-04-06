@@ -9,7 +9,7 @@
 #include <pthread.h>
 
 #include <ros/ros.h>
-#include "playground/coords.h"
+#include "playground/GameState.h"
 
 #define ESC 1048603
 #define a_KEY 1048673
@@ -48,6 +48,8 @@ bool showAlly2Thresh = false;
 bool showOpp1Thresh = false;
 bool showOpp2Thresh = false;
 bool showBallThresh = false;
+bool playgame = false;
+bool twovtwo;
 
 double scalingfactor;
 Point2d center;
@@ -110,9 +112,24 @@ int main(int argc, char *argv[])
 	cout << "How many Opponents? : ";
 	cin >> oppnumplayers;
 
+	playgame = false;
+	if (allynumplayers == 1)
+		twovtwo = false;
+	else
+		twovtwo = true;
+
 	if(!initColors())
 		exit(-1);
 	
+	ros::Publisher pubstart = n.advertise<playground::GameState>("game_state", 1, true);
+
+	playground::GameState gamestatemsginit;
+
+	gamestatemsginit.play = playgame;
+	gamestatemsginit.two_v_two = twovtwo;
+
+	pubstart.publish(gamestatemsginit);
+
 	ros::Publisher pubball = n.advertise<geometry_msgs::Pose2D>("vision_ball_position", 5);
 
 	away = false;
@@ -131,9 +148,11 @@ int main(int argc, char *argv[])
 
 	namedWindow("BallControl", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	namedWindow("Ally1Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-	namedWindow("Ally2Control", CV_WINDOW_AUTOSIZE);
+	if (allynumplayers > 1)
+		namedWindow("Ally2Control", CV_WINDOW_AUTOSIZE);
 	namedWindow("Opp1Control", CV_WINDOW_AUTOSIZE);
-	namedWindow("Opp2Control", CV_WINDOW_AUTOSIZE);
+	if (oppnumplayers > 1)
+		namedWindow("Opp2Control", CV_WINDOW_AUTOSIZE);
 
 
 
@@ -171,6 +190,20 @@ int main(int argc, char *argv[])
 	Robot opp2 = Robot();
 	opp2.setNodeIdent("opponent2");
 	opp2.setMask(OPPONENT2_THREAD_MASK);
+
+	ros::Publisher temppub;
+	if (twovtwo && oppnumplayers < 2)
+	{
+		// cout << "sending msg for 2v1" << endl;
+		temppub = n.advertise<geometry_msgs::Pose2D>("vision_opponent2_position", 1, true);
+
+		geometry_msgs::Pose2D robot1pos;
+		robot1pos.x = 10;
+		robot1pos.y = 10;
+		robot1pos.theta = 0;
+		temppub.publish(robot1pos);
+
+	}	
 
 
 	VisionObject ball = VisionObject();
@@ -383,7 +416,10 @@ int main(int argc, char *argv[])
 		ss << "(" << ball.getLocation().x << "," << ball.getLocation().y << ")";
 		putText(imgOriginal, ss.str(), video.fieldToImageTransform(ball.getLocation()), 1, FONT_HERSHEY_PLAIN, Scalar(0,0,255));
 
-
+		if (!playgame)
+			circle(imgOriginal, Point2d(5,5), 10, Scalar(0,0,255));
+		else
+			circle(imgOriginal, Point2d(5,5), 10, Scalar(0,255,0));
 
 
 		//cout << "line drawn" << endl;
@@ -473,6 +509,19 @@ int main(int argc, char *argv[])
 			showBallThresh = false;
 
 		}
+		else if(keypress % 256 == ' ' || keypress == ' ')
+		{
+			playgame = !playgame;
+
+			// send data
+			playground::GameState gamestatemsg;
+
+			gamestatemsg.play = playgame;
+			gamestatemsg.two_v_two = twovtwo;
+
+			pubstart.publish(gamestatemsg);
+
+		}
 		else if(keypress >= 0)
 		{
 			cout << keypress << endl;
@@ -488,6 +537,7 @@ int main(int argc, char *argv[])
 
 		ballpos.x = ball.getLocation().x;
 		ballpos.y = ball.getLocation().y;
+
 
 		
 		pubball.publish(ballpos);
@@ -519,7 +569,7 @@ void* trackRobot(void* robotobject)
 	ImageProcessor video = ImageProcessor(scalingfactor, center);
 	ros::NodeHandle n;
 	stringstream ss;
-	cout << "there should be something = " << robot->getNodeIdent() << endl;
+	// cout << "there should be something = " << robot->getNodeIdent() << endl;
 	//ss << "vision_" << robot->getNodeIdent() << "_position";
 	ros::Publisher pubrobot = n.advertise<geometry_msgs::Pose2D>("vision_" + robot->getNodeIdent() + "_position", 5);
 	int c = 0;
