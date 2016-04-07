@@ -1,4 +1,4 @@
-from rcv3 import roboclaw as r
+import importlib
 from functools import partial
 
 MOTOR_COUNT = 3
@@ -9,6 +9,8 @@ _SPEED_MIN = 0
 M1 = 0
 M2 = 1
 M3 = 2
+
+r = None
 
 _RC = [
 		{ 'addr': 0x80, 'motor': 'M1' }, # M1
@@ -122,7 +124,14 @@ def kill():
 		Speed(motor_id, 0)
 
 
-def init(set_PID=True, m1qpps=None, m2qpps=None, m3qpps=None):
+def init(set_PID=True, m1qpps=None, m2qpps=None, m3qpps=None, use_rcv3=True):
+	global r
+
+	# Select the appropriate roboclaw library to use
+	mod = 'rcv3' if use_rcv3 else 'rcv5'
+	r = importlib.import_module("{}.roboclaw".format(mod))
+	# Use to be: from rcv3 import roboclaw as r
+
 	try:
 		r.Open('/dev/ttySAC0', 38400)
 	except:
