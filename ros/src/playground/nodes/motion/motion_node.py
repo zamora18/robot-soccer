@@ -60,8 +60,11 @@ def main():
     m2 = rospy.get_param('M2QPPS', None)
     m3 = rospy.get_param('M3QPPS', None)
 
+    # Does this robot use v3 or v5 RoboClaws?
+    use_rcv3 = rospy.get_param('use_rcv3', True)
+
     # init wheelbase
-    wheelbase.init(m1qpps=m1, m2qpps=m2, m3qpps=m3)
+    wheelbase.init(m1qpps=m1, m2qpps=m2, m3qpps=m3, use_rcv3=use_rcv3)
 
     # Register a shutdown hook to kill motion
     rospy.on_shutdown(_shutdown_hook)
