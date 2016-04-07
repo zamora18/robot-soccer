@@ -36,7 +36,6 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
     one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
-
     # Check to see if someone scored a goal
     check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
     
@@ -51,6 +50,8 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
         if (one_v_one):
+            print "one_v_one should be happening"
+
             (x,y,theta) = one_on_one(me, opponent1, ball)
             (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
             return (x, y, theta) # TOOK OUT X_C, Y_C
