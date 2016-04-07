@@ -9,7 +9,7 @@ from collections import Iterable
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
-from playground.msg import coords
+from playground.msg import RobotState
 
 import numpy as np
 
@@ -37,11 +37,14 @@ def _handle_opponent_position(msg):
     # Grab and save the opponent's current location
     _opponent = (msg.x, msg.y, msg.theta)
 
-def _handle_ally_position(msg):
+def _handle_my_position(msg):
     global _ally
 
+    if _robot_desired is None:
+        return
+
     # Grab and save the ally's current location
-    _ally = (msg.x, msg.y, msg.theta)
+    _ally = (msg.xhat, msg.yhat, msg.thetahat)
 
     if _ally is not None:
         robot = (_ally[0], _ally[1])
@@ -57,7 +60,7 @@ def _handle_ally_position(msg):
     if _robot_desired is not None:
         desired = (_robot_desired[0], _robot_desired[1], _robot_desired[2])
     else:
-        desired = (msg.x, msg.y, msg.theta)
+        desired = (msg.xhat, msg.yhat, msg.thetahat)
 
     _edge_padding = (0.20, 0.15)
 
@@ -172,8 +175,8 @@ def main():
     _pub = rospy.Publisher('desired_position_safe', Pose2D, queue_size=10)
 
     rospy.Subscriber('desired_position', Pose2D, _handle_raw_desired_position)
-    rospy.Subscriber('vision_opponent_position', Pose2D, _handle_opponent_position)
-    rospy.Subscriber('vision_ally_position', Pose2D, _handle_ally_position)
+    rospy.Subscriber('my_state', RobotState, _handle_my_position)
+    # rospy.Subscriber('vision_ally_position', Pose2D, _handle_ally_position)
 
     _go_rogue = rospy.get_param('go_rogue', 'false')
 

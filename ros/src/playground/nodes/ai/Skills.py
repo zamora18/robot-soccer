@@ -7,60 +7,36 @@ from std_srvs.srv import Trigger
 import Utilities
 import Constants
 
+class ClearBallState:
+    setup   = 0
+    clear  = 1
+    kick   = 2
 
-_distance_behind_ball_for_kick      = Constants.robot_width + .03 # this is for the jersey being off center
-_distance_behind_ball_for_dribbling = Constants.robot_width/2 + .05
-_distance_from_goal_for_arc_defense = Constants.goal_box_width + Constants.robot_width *2
-_distance_behind_ball_approach      = .3
+class OwnGoalState:
+    perp_setup      = 0
+    behind_setup    = 1
+    attack          = 2
+    kick            = 3
+
+_clear_ball_st  = ClearBallState.setup
+_own_goal_st    = OwnGoalState.perp_setup
+_went_to_perp_first = False # This avoids the state machine starting in the 'behind_setup' and ruining the whole avoid own goal function
 
 
+##########################################
+# Skills mainly for "attacker" position: #
+##########################################
 def kick():
     """Kick
 
     Send a service call to kick the ball.
     """
     try:
-        kick_srv = rospy.ServiceProxy('/kick', Trigger)
+        kick_srv = rospy.ServiceProxy('kick', Trigger)
         kick_srv()
+        # print "kicking?"
     except rospy.ServiceException, e:
         print "Kick service call failed: %s"%e
-
-def dribble_forward(robot, ball):
-    x_c = robot['xhat']+Constants.dribble_distance*cos(robot['thetahat'])
-    y_c = robot['yhat']+Constants.dribble_distance*sin(robot['thetahat'])
-    theta_c = robot['thetahat']
-    return (x_c, y_c, theta_c)
-
-
-def dribble_to_point(robot, ball):
-    pass
-
-
-def dribble_along_line(robot, ball):
-    pass
-
-
-
-
-def stay_between_points_at_distance(x1, y1, x2, y2, distance):
-    """
-    Distance should be between 0 and 1, scaled from the first point
-    example follow ball 2/3 distance between goal and ball
-    """
-    theta = Utilities.get_angle_between_points(x1,y1,x2,y2)
-    c = Utilities.get_distance_between_points(x1,y1,x2,y2)
-    cprime = c*(1-distance)
-
-    # aprime is the length of the simalar triangle with hypotenuse cprime
-    aprime = cprime*np.cos(theta)
-    # bprime is the height of the simalar triangle with hypotenuse cprime
-    bprime = cprime*np.sin(theta)
-
-    x_desired = x2 - aprime
-    y_desired = y2 - bprime
-    theta = Utilities.rad_to_deg(theta)
-
-    return (x_desired, y_desired, theta)
 
 
 def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
@@ -70,61 +46,141 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
     distance from center is for shooting in corners, 1 will put it in the "top" corner
     while -1 will put it in the bottom of the goal and 0 is exact center"""
 
-    y2 = distance_from_center_of_goal * Constants.goal_box_width/2
-    x2 = Constants.goal_position_opp[0]
+    target_y = distance_from_center_of_goal * Constants.goal_box_width/2
+    target_x = Constants.goal_position_opp[0]
+    return go_behind_ball_facing_target(ball, Constants.distance_behind_ball_for_kick, target_x, target_y)
 
-    theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], x2,y2)
-    cprime = _distance_behind_ball_for_kick
 
-    # aprime is the length of the simalar triangle with hypotenuse cprime
-    aprime = cprime*np.cos(theta)
-    # bprime is the height of the simalar triangle with hypotenuse cprime
-    bprime = cprime*np.sin(theta)
+def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_y):
+    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y)
+    hypotenuse = Constants.robot_half_width + des_distance_from_ball
+    x_c = ball.xhat - hypotenuse*np.cos(theta)
+    y_c = ball.yhat - hypotenuse*np.sin(theta)
+    theta = Utilities.rad_to_deg(theta)
+    return (x_c, y_c, theta)
 
-    x_c = ball['xhat'] - aprime
-    y_c = ball['yhat'] - bprime
-    theta_c = Utilities.rad_to_deg(theta)
 
-    return (x_c, y_c, theta_c)
+def attack_ball_with_kick(me, ball):
+    dist_to_ball = Utilities.get_distance_between_points(me.xhat, me.yhat, ball.xhat, ball.yhat)
+    # if dist_to_ball <= Constants.kickable_distance:
+        # kick() # Removed this so that it doesn't kick so often in real life
+
+    return attack_ball(me, ball)
+
 
 def attack_ball(robot, ball):
     """
     Simply pushes the ball along the "vector" from robot to ball
     """
-    theta = Utilities.get_angle_between_points(robot['xhat'], robot['yhat'], ball['xhat'], ball['yhat'])
-    x_c = ball['xhat'] + Constants.kick_dist*np.cos(theta)  		#*np.pi/180 <-- took this out of theta
-    y_c = ball['yhat'] + Constants.kick_dist*np.sin(theta) 		#*np.pi/180 <-- took this out of theta
+    theta = Utilities.get_angle_between_points(robot.xhat, robot.yhat, ball.xhat, ball.yhat)
+    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)
+    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)
     theta = Utilities.rad_to_deg(theta)
     
     return (x_c, y_c, theta)
 
 
-def defend_goal_in_arc(ball):
-    c = Utilities.get_distance_between_points(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'])
-    distance = _distance_from_goal_for_arc_defense/c
+##########################################
+# Skills mainly for "defender" position: #
+##########################################
 
-    return stay_between_points_at_distance(Constants.goal_position_home[0], Constants.goal_position_home[1], ball['xhat_future'], ball['yhat_future'], distance)
-
-# def dribble_ball_towards_point(robot, opponent, ball, point_x, point_y):
-    # if _close([robot['xhat'], robot['yhat']], [ball['xhat'], ball['yhat']], 0.1) 
-
-
-def go_behind_ball_facing_target(robot, opponent, ball, des_dist, target_x, target_y):
-    theta = Utilities.get_angle_between_points(ball['xhat'], ball['yhat'], target_x, target_y)
-    
-    hypotenuse = Constants.robot_half_width + des_dist
-    x_c = ball['xhat'] - hypotenuse*np.cos(theta)
-    y_c = ball['yhat'] - hypotenuse*np.sin(theta)
-    theta = Utilities.rad_to_deg(theta)
-    return (x_c, y_c, theta)
-
-def push_ball_des_distance (robot, ball, distance):
-    hypotenuse = distance
-    theta_c = robot['thetahat']
-    x_c = ball['xhat'] + hypotenuse*np.cos(theta_c)
-    y_c = ball['yhat'] + hypotenuse*np.sin(theta_c)
-
+def give_my_teammate_some_space(me, my_teammate):
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
+    x_c = my_teammate.xhat - (Constants.teammate_gap+0.05)*np.cos(theta)
+    y_c = my_teammate.yhat - (Constants.teammate_gap+0.05)*np.cos(theta)
+    theta_c = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta_c)
 
+def clear_ball_from_half(me, ball):
+    global _clear_ball_st
+    center_of_goal = 0
+    desired_setup = set_up_kick_facing_goal(ball, center_of_goal)
 
+    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
+    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
+
+    #########################
+    ### transition states ###
+    #########################
+    if _clear_ball_st == ClearBallState.setup:
+        if Utilities.robot_close_to_point(me, *desired_setup):
+            _clear_ball_st = ClearBallState.clear
+    elif _clear_ball_st == ClearBallState.clear:
+        if distance_from_kicker_to_ball <= Constants.kickable_distance:
+            _clear_ball_st = ClearBallState.kick
+    elif _clear_ball_st == ClearBallState.kick:
+        if distance_from_kicker_to_ball > Constants.kickable_distance:
+            _clear_ball_st = ClearBallState.setup
+    else:
+        _clear_ball_st = ClearBallState.setup
+
+
+    ###############################
+    ### Moore Outputs in states ###
+    ###############################
+    if _clear_ball_st == ClearBallState.setup:
+        return desired_setup
+    elif _clear_ball_st == ClearBallState.clear:
+        return attack_ball_with_kick(me, ball)
+    elif _clear_ball_st == ClearBallState.kick:
+        kick()
+        return attack_ball_with_kick(me, ball)
+    else:
+        return (desired_setup)
+
+
+
+##########################################
+# Skills mainly for "goalie" position:   #
+##########################################
+def avoid_own_goal(me, ball):
+    """
+    Robot will make a '2-point' approach, going first to a spot perpendicular to the ball, 
+    and then going directly behind the ball, which will avoid it hitting it straight back into the goal.
+    """
+    global _own_goal_st, _went_to_perp_first
+    desired_perp_setup = Utilities.get_perpendicular_point_from_ball(me, ball)
+    desired_behind_setup = Utilities.get_own_goal_dist_behind_ball(me, ball)
+
+    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
+    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
+
+    #########################
+    ### transition states ###
+    #########################
+    if _own_goal_st == OwnGoalState.perp_setup:
+        if Utilities.robot_close_to_point(me, *desired_perp_setup):
+            _own_goal_st = OwnGoalState.behind_setup
+            _went_to_perp_first = True
+    elif _own_goal_st == OwnGoalState.behind_setup:
+        if _went_to_perp_first:
+            if Utilities.robot_close_to_point(me, *desired_behind_setup):
+                _own_goal_st = OwnGoalState.attack
+                _went_to_perp_first = False
+        else:
+            _own_goal_st = OwnGoalState.perp_setup
+    elif _own_goal_st == OwnGoalState.attack:
+        if distance_from_kicker_to_ball <= Constants.kickable_distance:
+            _own_goal_st = OwnGoalState.kick
+    elif _own_goal_st == OwnGoalState.kick:
+        if distance_from_kicker_to_ball > Constants.kickable_distance:
+            _own_goal_st = OwnGoalState.perp_setup
+    else:
+        _own_goal_st = OwnGoalState.perp_setup
+
+
+    ###############################
+    ### Moore Outputs in states ###
+    ###############################
+    if _own_goal_st == OwnGoalState.perp_setup:
+        return desired_perp_setup
+    elif _own_goal_st == OwnGoalState.behind_setup:
+        return desired_behind_setup
+    elif _own_goal_st == OwnGoalState.attack:
+        return attack_ball_with_kick(me, ball)
+    elif _own_goal_st == OwnGoalState.kick:
+        kick()
+        return attack_ball_with_kick(me, ball)
+    else:
+        return (desired_perp_setup)
 

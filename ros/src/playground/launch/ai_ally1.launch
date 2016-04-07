@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <group ns="/ally1">
+
+        <arg name="me" value="ally1" />
+        <arg name="ally" value="ally2" />
+
+        <node name="ai" pkg="playground" type="ai_node.py" output="screen">
+       		<remap from="my_state" to="$(arg me)_state" />
+        	<remap from="ally_state" to="$(arg ally)_state" />
+    	</node>
+
+        <!-- launch-prefix="xterm -e" -->
+
+    </group>
+</launch>

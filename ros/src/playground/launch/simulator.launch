@@ -5,21 +5,23 @@
 
     <!-- Soccer Gazebo Simulator -->
     <include file="$(find soccersim)/launch/soccer.launch">
-        <arg name="vision_home1" value="/vision_ally_position" />
-        <!-- <arg name="vision_home2" value="/vision_ally_position" /> -->
-        <arg name="vision_away1" value="/vision_opponent_position" />
-        <!-- <arg name="vision_away2" value="/vision_ally_position" /> -->
+        <!-- You can save some CPU (~30%) by turning off the Gazebo GUI -->
+        <arg name="gazebo_gui" value="false" />
+
+        <arg name="vision_home1" value="/vision_ally1_position" />
+        <arg name="vision_home2" value="/vision_ally2_position" />
+        <arg name="vision_away1" value="/vision_opponent1_position" />
+        <arg name="vision_away2" value="/vision_opponent2_position" />
         <arg name="vision_ball" value="/vision_ball_position" />
+
+        <arg name="vel_cmd_home1" value="/ally1/vel_cmds" />
+        <arg name="vel_cmd_home2" value="/ally2/vel_cmds" />
+        <arg name="vel_cmd_away1" value="/opponent1/vel_cmds" />
+        <arg name="vel_cmd_away2" value="/opponent2/vel_cmds" />
+
+        <arg name="kick_home1" value="/ally1/kick" />
+        <arg name="kick_home2" value="/ally2/kick" />
+        <arg name="kick_away1" value="/opponent1/kick" />
+        <arg name="kick_away2" value="/opponent2/kick" />
     </include>
-
-    <!-- Hardware agnostic code (Code that runs on ODROID, except motion) -->
-    <!-- <node name="odometry" pkg="playground" type="odometry_node.py" /> -->
-    <node name="controller" pkg="playground" type="controller_node.py">
-        <remap from="desired_position" to="desired_position_safe" />
-        <remap from="vel_cmds" to="/home1/command" />
-    </node>
-    <node name="ball_estimator" pkg="playground" type="ball_estimator_node.py" />
-    <node name="hack" pkg="playground" type="hack_node.py" />
-    <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen" />
-
 </launch>

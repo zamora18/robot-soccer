@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- declare arg to be passed in -->
+    <arg name="me" default="ally1" />
+    <arg name="ally" default="ally2" />
+    
+    <!-- Hardware agnostic code -->
+    <include file="$(find playground)/launch/hw_agnostic.launch">
+    	<arg name="me" value="$(arg me)" />
+    	<arg name="ally" value="$(arg ally)" />
+    </include>
+
+    <!-- Hardware Dependent -->
+    <node name="motion" pkg="playground" type="motion_node.py" output="screen">
+        <remap from="robot_state" to="$(arg me)_state" />
+    </node>
+</launch>

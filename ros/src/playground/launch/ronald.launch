@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<node name="vision" pkg="playground" type="vision" />
-</launch>

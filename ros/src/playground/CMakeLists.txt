@@ -56,7 +56,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  coords.msg
+  GameState.msg
   EncoderEstimates.msg
   QPulses.msg
   WorldVelocities.msg
@@ -69,6 +69,7 @@ add_message_files(
 add_service_files(
   FILES
   RoboClawRPC.srv
+  SetBool.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -204,14 +205,6 @@ include_directories(
 # catkin_add_nosetests(test)
 
 include_directories(include ${catkin_INCLUDE_DIRS}, include/playground)
-
-add_executable(talker src/talker.cpp)
-target_link_libraries(talker ${catkin_LIBRARIES})
-add_dependencies(talker beginner_tutorials_generate_messages_cpp)
-
-add_executable(listener src/listener.cpp)
-target_link_libraries(listener ${catkin_LIBRARIES})
-add_dependencies(listener beginner_tutorials_generate_messages_cpp)
 
 add_executable(vision src/main.cpp src/robot.cpp src/visionobject.cpp src/imageprocessor.cpp)
 target_link_libraries(vision ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

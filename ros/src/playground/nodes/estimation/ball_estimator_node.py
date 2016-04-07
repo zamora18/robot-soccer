@@ -46,7 +46,7 @@ def main():
     rospy.init_node('ball_estimator', anonymous=False)
 
     # Sub/Pub
-    rospy.Subscriber('vision_ball_position', Pose2D, _handle_vision_ball_position)
+    rospy.Subscriber('vision_position', Pose2D, _handle_vision_ball_position)
     pub = rospy.Publisher('ball_state', BallState, queue_size=10)
     global _goal_pub
     _goal_pub = rospy.Publisher('goal', Bool, queue_size=10)

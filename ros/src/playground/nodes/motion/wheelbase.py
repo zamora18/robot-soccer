@@ -122,7 +122,7 @@ def kill():
 		Speed(motor_id, 0)
 
 
-def init(set_PID=True):
+def init(set_PID=True, m1qpps=None, m2qpps=None, m3qpps=None):
 	try:
 		r.Open('/dev/ttySAC0', 38400)
 	except:
@@ -131,12 +131,14 @@ def init(set_PID=True):
 
 
 	if set_PID:
-		# M1QPPS = 198970 #380268 #180000 #12764
-		# M2QPPS = 170489 #302420 #241547 #12764
-		# M3QPPS = 171568 #411356 #180000 #12764
+		m1qpps = m1qpps if m1qpps is not None else QPPS.M1
+		m2qpps = m2qpps if m2qpps is not None else QPPS.M2
+		m3qpps = m3qpps if m3qpps is not None else QPPS.M3
+
+		print("QPPS: {}, {}, {}".format(m1qpps, m2qpps, m3qpps))
 
 		# PID stuff here?
-		SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M1)
-		SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M2)
-		SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, QPPS.M3)
+		SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m1qpps)
+		SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m2qpps)
+		SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m3qpps)
 		# SetVelocityPID(2, 0.0152587890625,   0.6103515625,       0.249481201171875, M3QPPS)

@@ -20,6 +20,9 @@ class VisionObject
 		string nodeIdent;
 
 
+
+
+
 	public:
 		VisionObject();
 		VisionObject(Point2d loc);
@@ -42,6 +45,7 @@ class VisionObject
 
 		void setThreadStart(bool start);
 		bool getThreadStart();
+		bool initColor(string color, int* LowH, int* LowS, int* LowV, int* HighH, int* HighS, int* HighV);
 		
 };
 

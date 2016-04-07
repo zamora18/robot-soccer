@@ -183,8 +183,8 @@ bool ImageProcessor::initializeRobot(Robot *robot, Mat img, Point2d boxloc)
 
 	robot->setOrientation(angle);
 
-	p1.x += boxloc.x;
-	p1.y += boxloc.y;
+	p1.x = (p1.x + p2.x)/2;
+	p1.y = (p1.y + p2.y)/2;
 
 	robot->setLocation(imageToFieldTransform(p1));
 
@@ -263,17 +263,17 @@ Vec3f ImageProcessor::findCenterCircle(Mat img)
 		HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, img.rows/8);
 	}
 
-	for( size_t i = 0; i < circles.size(); i++ )
-	{
-		 Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-		 int radius = cvRound(circles[i][2]);
-		 // circle center
-		 circle( imgclone, center, 3, Scalar(0,255,0), -1, 8, 0 );
-		 // circle outline
-		 circle( imgclone, center, radius, Scalar(0,0,255), 3, 8, 0 );
-	}
+	// for( size_t i = 0; i < circles.size(); i++ )
+	// {
+	// 	 Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+	// 	 int radius = cvRound(circles[i][2]);
+	// 	 // circle center
+	// 	 circle( imgclone, center, 3, Scalar(0,255,0), -1, 8, 0 );
+	// 	 // circle outline
+	// 	 circle( imgclone, center, radius, Scalar(0,0,255), 3, 8, 0 );
+	// }
 
-	imshow("circles!", imgclone);
+	// imshow("circles!", imgclone);
 
 	return circles[0];
 

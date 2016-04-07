@@ -42,21 +42,39 @@ def _kick(req):
 
 # -----------------------------------------------------------------------------
 
+def _shutdown_hook():
+  print "Killing Robot"
+  motion.kill()
+
+# -----------------------------------------------------------------------------
+
 def main():
     rospy.init_node('motion', anonymous=False)
+
+    if rospy.get_param('/simulation_mode', False):
+        print "[motion] Bye!"
+        return
+
+    # Get this robot's motor's QPPS from rosparam
+    m1 = rospy.get_param('M1QPPS', None)
+    m2 = rospy.get_param('M2QPPS', None)
+    m3 = rospy.get_param('M3QPPS', None)
+
+    # init wheelbase
+    wheelbase.init(m1qpps=m1, m2qpps=m2, m3qpps=m3)
+
+    # Register a shutdown hook to kill motion
+    rospy.on_shutdown(_shutdown_hook)
 
     rospy.Subscriber('vel_cmds', Twist, _handle_velocity_command)
     pub = rospy.Publisher('encoder_estimates', EncoderEstimates, queue_size=10)
 
     # Services
-    rospy.Service('/motion/main_battery', RoboClawRPC, _get_battery_voltage)
-    rospy.Service('/kick', Trigger, _kick)
+    rospy.Service('battery', RoboClawRPC, _get_battery_voltage)
+    rospy.Service('kick', Trigger, _kick)
 
     # So that we know the robot's theta
     rospy.Subscriber('robot_state', RobotState, _handle_theta)
-
-    # init wheelbase
-    wheelbase.init()
 
     rospy.spin()
     return
