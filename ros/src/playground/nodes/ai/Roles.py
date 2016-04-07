@@ -83,7 +83,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
     middle_of_goal = 0
 
     if strategy == _offensive:
-        goal_target = 0.80
+        goal_target = 0.20
     elif strategy == _defensive:
         goal_target = 0.20
     else:
