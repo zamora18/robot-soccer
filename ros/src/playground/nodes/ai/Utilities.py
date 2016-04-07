@@ -134,9 +134,9 @@ def is_ball_close_to_edges(ball):
 def get_perpendicular_point_from_ball(me, ball):
     x_c = ball.xhat_future
     if me.yhat > ball.yhat:
-        y_c = ball.yhat + Constants.own_goal_y_dist
+        y_c = ball.yhat - Constants.own_goal_y_dist # CHANGED THE SIGN OF SUBTRACTIN FROM ADDING, TO SEE IF IT WOULD FIX IT!
     else:
-        y_c = ball.yhat - Constants.own_goal_y_dist
+        y_c = ball.yhat + Constants.own_goal_y_dist
     theta_c = 0
     return (x_c, y_c, theta_c)
 
@@ -200,7 +200,7 @@ def deg_to_rad(deg):
 #################################################################
 
 def robot_close_to_point(robot, point_x, point_y, theta):
-    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
+    return close(point_x, robot.xhat, tolerance = .07) and close(point_y, robot.yhat, tolerance=.07) \
                 and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
 
 def close(a, b, tolerance=0.010):

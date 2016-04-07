@@ -22,6 +22,7 @@ _clear_ball_st  = ClearBallState.setup
 _own_goal_st    = OwnGoalState.perp_setup
 _went_to_perp_first = False # This avoids the state machine starting in the 'behind_setup' and ruining the whole avoid own goal function
 
+_kick_num = 0
 
 #################################################
 # General Skills potentially used by everyone:  #
@@ -40,6 +41,7 @@ def get_unstuck(me):
 # Skills mainly for "attacker" position: #
 ##########################################
 def kick():
+    global _kick_num
     """Kick
 
     Send a service call to kick the ball.
@@ -47,7 +49,8 @@ def kick():
     try:
         kick_srv = rospy.ServiceProxy('kick', Trigger)
         kick_srv()
-        # print "kicking?"
+        _kick_num = _kick_num + 1
+        print ("Kicking. Kick number: {}" .format(_kick_num))
     except rospy.ServiceException, e:
         print "Kick service call failed: %s"%e
 
@@ -65,32 +68,34 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
 
 
 def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_y):
-    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y)
+    theta = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, target_x, target_y)
     hypotenuse = Constants.robot_half_width + des_distance_from_ball
-    x_c = ball.xhat - hypotenuse*np.cos(theta)
-    y_c = ball.yhat - hypotenuse*np.sin(theta)
+    x_c = ball.xhat_future - hypotenuse*np.cos(theta)
+    y_c = ball.yhat_future - hypotenuse*np.sin(theta)
     theta = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta)
 
 
-def attack_ball_with_kick(me, ball):
-    dist_to_ball = Utilities.get_distance_between_points(me.xhat, me.yhat, ball.xhat, ball.yhat)
-    # if dist_to_ball <= Constants.kickable_distance:
-        # kick() # Removed this so that it doesn't kick so often in real life
 
-    return attack_ball(me, ball)
+def attack_ball_towards_goal(me, ball, goal_y):
+    return attack_ball_towards_point(me, ball, Constants.goal_position_opp[0], goal_y)
 
 
-def attack_ball(robot, ball):
+def attack_ball(me, ball):
     """
     Simply pushes the ball along the "vector" from robot to ball
     """
-    theta = Utilities.get_angle_between_points(robot.xhat, robot.yhat, ball.xhat, ball.yhat)
-    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)
-    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)
-    theta = Utilities.rad_to_deg(theta)
-    
-    return (x_c, y_c, theta)
+    return attack_ball_towards_point(me, ball, ball.xhat_future, ball.yhat_future)
+
+
+def attack_ball_towards_point(me, ball, point_x, point_y):
+    theta_c = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, point_x, point_y)
+    x_c = ball.xhat_future + Constants.kick_dist*np.cos(theta_c)
+    y_c = ball.yhat_future + Constants.kick_dist*np.sin(theta_c)
+    theta_c = Utilities.rad_to_deg(theta_c)
+
+    return(x_c, y_c, theta_c) 
+
 
 
 ##########################################
@@ -134,10 +139,10 @@ def clear_ball_from_half(me, ball):
     if _clear_ball_st == ClearBallState.setup:
         return desired_setup
     elif _clear_ball_st == ClearBallState.clear:
-        return attack_ball_with_kick(me, ball)
+        return attack_ball(me, ball)
     elif _clear_ball_st == ClearBallState.kick:
         kick()
-        return attack_ball_with_kick(me, ball)
+        return attack_ball(me, ball)
     else:
         return (desired_setup)
 
@@ -190,10 +195,10 @@ def avoid_own_goal(me, ball):
     elif _own_goal_st == OwnGoalState.behind_setup:
         return desired_behind_setup
     elif _own_goal_st == OwnGoalState.attack:
-        return attack_ball_with_kick(me, ball)
+        return attack_ball(me, ball)
     elif _own_goal_st == OwnGoalState.kick:
         kick()
-        return attack_ball_with_kick(me, ball)
+        return attack_ball(me, ball)
     else:
         return (desired_perp_setup)
 

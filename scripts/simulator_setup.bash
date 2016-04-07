@@ -90,6 +90,9 @@ function sim_go() {
 
     # Remove env var for next run
     unset SIM_ROBOTS
+
+    # Simulate the "space bar" being pressed
+    rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}"
 }
 
 function sim_stop() {

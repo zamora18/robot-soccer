@@ -10,9 +10,9 @@ robot_half_width    = robot_width/2
 
 goal_box_width      = 0.616 # (24.25 in)
 goal_box_length     = 0.127 # (5.0 in)
-goal_position_home  = [-field_length/2, 0] #this could change depending on camera
+goal_position_home  = [-field_length/2, 0]
 goal_position_opp   = [-goal_position_home[0], 0]
-goal_score_threshold= 0.01 # .02 IN REAL LIFE?, 0.00 IN SIMULATOR
+goal_score_threshold= 0.03 # .03 IN REAL LIFE?, 0.00 IN SIMULATOR
 
 center_circle_radius= 0.25
 
@@ -23,7 +23,7 @@ goalie_x_pos        = goal_position_home[0] + goal_box_length + robot_half_width
 goalie_radius       = goal_box_width/2
 
 dribble_distance    = robot_half_width + .05
-kickable_distance   = 0.05
+kickable_distance   = 0.04
 steal_ball_dist     = robot_half_width + 0.15
 
 ally1_start_pos     = [-0.50, 0, 0]
@@ -31,7 +31,7 @@ ally2_start_pos     = [goal_position_home[0]+goalie_radius, 0, 0]
 
 teammate_gap        = robot_width + 0.20
 
-distance_behind_ball_for_kick       = robot_width
+distance_behind_ball_for_kick       = robot_half_width # Used to be robot_width
 distance_behind_ball_for_dribble    = robot_half_width + 0.05
 open_for_pass_y_dist                = robot_width*4.5
 

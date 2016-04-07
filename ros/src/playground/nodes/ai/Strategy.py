@@ -19,16 +19,40 @@ _opponent_score                     = 0
 # For detecting goal 
 _is_goal_global = False
 _goal_check_counter                 = 0
-_GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
+_GOAL_COUNTER_MAX                   = 2 # 10 for real life, 2 for simulator
 
 _resume_game_counter                = 0
 _RESUME_GAME_MAX                    = 500 # (5 seconds)
+
+"""
+THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:
+    - Strategy.py:      _GOAL_COUNTER_MAX
+    - Constants.py:     goal_score_threshold
+
+"""
+ 
+"""
+Notes of things I have changed that may need to be changed back:
+    (April 7th)
+    - Changed Constants.distance_behind_ball_for_kick = robot_half_width so the approach is better. With kicker, approach can be smaller
+    - Changed Constants.kickable_distance = 0.4 from 0.5
+    - Utilities.robot_close_to_point() Changed tolerances from 0.1 to 0.7
+
+    Changed these to use BALL FUTURE POSITIONS:
+    - Skills.py:        go_behind_ball_facing_target()
+    -                   attack_ball()
+    -                   attack_ball_towards_goal()
+    - 
+
+Things I'm currently/need to work on:
+    - Using future positions of ball for attack/shooting
+    - Collision avoidance with our own robots. Fix am_i_too_close_to_teammate to have robot future positions.
+"""
 
 
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
-
 def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
@@ -50,8 +74,6 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
         if (one_v_one):
-            print "one_v_one should be happening"
-
             (x,y,theta) = one_on_one(me, opponent1, ball)
             (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
             return (x, y, theta) # TOOK OUT X_C, Y_C
@@ -149,7 +171,7 @@ def one_on_one(me, opponent1, ball):
     my_teammate = None
     opponent2 = None
     section = Utilities.get_field_section(ball.xhat)
-
+    # print ("section = {}" .format(section))
     # if Utilities.i_am_stuck(me):
     #     return Skills.get_unstuck(me)
     # else:
@@ -185,8 +207,6 @@ def check_for_goal(ball):
             # Update counter
             _goal_check_counter = _goal_check_counter + 1
             if _goal_check_counter >= _GOAL_COUNTER_MAX:
-                print "GOAAAALLLL"
-                # GOOOOOAAAAAAALLLLLLL! (hopefully it's our goal)
                 _goal_check_counter = 0
                 _is_goal_global = True
                 # Update the score here, so it only does it once
