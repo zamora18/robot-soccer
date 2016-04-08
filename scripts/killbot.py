@@ -1,5 +1,10 @@
 #!/usr/bin/env python
+import sys, os
+import importlib
 
+r = None
+
+# if os.environ['USE_RCV3']
 import rcv3.roboclaw as r
 
 r.Open('/dev/ttySAC0', 38400)
