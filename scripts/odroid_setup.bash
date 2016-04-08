@@ -28,8 +28,8 @@ source "$PATH_TO_REPO/scripts/parse_yaml.sh"
 eval $(parse_yaml "$PATH_TO_REPO/ros/src/$ROBOT_PKG/param/$ROBOT.yaml" "robot_config_")
 
 # Tell the world about using rcv3 or rcv5
-$robot_config_use_rcv3="$(echo "$robot_config_use_rcv3" | tr '[:upper:]' '[:lower:]')"
-if [[ $robot_config_use_rcv3 == *"true"* ]]
+robot_config_use_rcv3="$(echo "$robot_config_use_rcv3" | tr '[:upper:]' '[:lower:]')"
+if [[ "$robot_config_use_rcv3" == *"true"* ]]
 then
     export USE_RCV3=true;
 else

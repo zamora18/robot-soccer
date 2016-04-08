@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+import os, importlib
 
 # Choose the right roboclaw library
 r = None
-if os.environ['USE_RCV3'] == 'false':
+if os.environ['USE_RCV3'] == 'true':
     r = importlib.import_module('rcv3.roboclaw')
 else:
     r = importlib.import_module('rcv5.roboclaw')
