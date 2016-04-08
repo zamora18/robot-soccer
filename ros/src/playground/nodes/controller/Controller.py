@@ -2,9 +2,9 @@ import numpy as np
 
 from controllers import PID
 
-PID_x = PID(1, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_y = PID(1, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_theta = PID(1, 0, 0, 180, 0.05, integrator_limit=0.05)
+PID_x = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
+PID_y = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
+PID_theta = PID(1.5, 0, 0, 180, 0.05, integrator_limit=0.05)
 
 _set_point = (0, 0, 0)
 
