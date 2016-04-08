@@ -130,3 +130,7 @@ function sim_stop() {
 function ronald() {
     export ROS_MASTER_URI=http://ronald:11311
 }
+
+function simulator() {
+    export ROS_MASTER_URI=http://localhost:11311
+}

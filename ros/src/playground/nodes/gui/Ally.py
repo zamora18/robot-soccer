@@ -13,6 +13,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
+import StepResponse
+
 FIELD_LENGTH = 4
 FIELD_WIDTH = 3.2
 MAX_X_VEL = 2
@@ -250,6 +252,9 @@ class Ally(object):
             self.ui.append_title('Inactive')
             return
 
+        # Placeholders for child windows
+        self._step_resp = None
+
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
         self.ns = ns
@@ -284,6 +289,7 @@ class Ally(object):
         self.ui.btn_battery.clicked.connect(self._btn_battery)
         self.ui.btn_set_des_pos.clicked.connect(self._btn_des_pos)
         self.ui.btn_stop_moving.clicked.connect(self._btn_stop_moving)
+        self.ui.btn_step_resp.clicked.connect(self._btn_step_resp)
 
         # Connect Plot Mouse events
         self.ui.plot_field.canvas.mpl_connect('button_press_event', self._plot_field_mouse_down)
@@ -372,6 +378,11 @@ class Ally(object):
     def _btn_clear(self):
         self._animate_init_field()
         # self._animate_init_vel() # There's no real need to clear this one
+
+    def _btn_step_resp(self):
+        if self._step_resp is None:
+            self._step_resp = StepResponse.Dialog()
+        self._step_resp.show()
 
     def _btn_kick(self):
         try:
