@@ -140,9 +140,11 @@ class Graph:
                     # searches for the lowest f value among the adjacent nodes considered
                     if lowest_f_node == None or f < lowest_f_node[0]:
                         lowest_f_node = (f, n, distance)
+                else:
+                    print ("TO INIFINITY AND AWAY!")
 
         # if all nodes were already visited, im trapped so just leave
-        if (lowest_f_node == None and closest_h_node != None):
+        if (lowest_f_node == None):
             print 'blocked off'
             print closest_h_node
             return self._find_path(closedict, closest_h_node[0])
