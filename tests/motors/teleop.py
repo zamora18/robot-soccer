@@ -274,7 +274,7 @@ def main():
     _ctrl_timer = RepeatedTimer(_ctrl_timer_period, _handle_ctrl_timer)
     _ctrl_timer.start()
 
-    w.init()
+    w.init(use_rcv3=False)
     print 'Started.'
 
 

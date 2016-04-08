@@ -133,7 +133,7 @@ def init(set_PID=True, m1qpps=None, m2qpps=None, m3qpps=None, use_rcv3=True):
 	# Use to be: from rcv3 import roboclaw as r
 
 	try:
-		r.Open('/dev/ttySAC0', 38400)
+		r.Open('/dev/ttySAC0', 38400, verifyChecksum=False)
 	except:
 		global _SERIAL_ERR
 		_SERIAL_ERR = True
