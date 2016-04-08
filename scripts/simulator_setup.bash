@@ -40,6 +40,11 @@ function killsim() {
     # kill `ps aux | grep python | grep ros | awk '{ print $2;}'`
 }
 
+# Simulate the "space bar" being pressed on the vision code
+function vision_spacebar() {
+    rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}";
+}
+
 # Simulation Scripts (The user can put in bg with &)
 function simulator_1v1() {
     # Set up localhost as my master
@@ -97,8 +102,7 @@ function sim_go() {
     # Remove env var for next run
     unset SIM_ROBOTS
 
-    # Simulate the "space bar" being pressed
-    rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}"
+    vision_spacebar;
 }
 
 function sim_stop() {
