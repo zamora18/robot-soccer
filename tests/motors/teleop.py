@@ -1,5 +1,4 @@
-import time
-import sys
+import sys, os, time
 
 import numpy as np
 
@@ -274,7 +273,9 @@ def main():
     _ctrl_timer = RepeatedTimer(_ctrl_timer_period, _handle_ctrl_timer)
     _ctrl_timer.start()
 
-    w.init(use_rcv3=False)
+
+    use_rcv3 = os.environ['USE_RCV3'] == 'true'
+    w.init(use_rcv3=use_rcv3)
     print 'Started.'
 
 

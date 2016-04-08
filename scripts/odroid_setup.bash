@@ -22,14 +22,14 @@ PATH_TO_REPO="$DIR/.."
 MY_IP=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
 
 # include parse_yaml function
-source parse_yaml.sh
+source "$PATH_TO_REPO/scripts/parse_yaml.sh"
 
 # read Robot YAML file to get configuration settings (whether or not to use rcv3 or rcv5)
 eval $(parse_yaml "$PATH_TO_REPO/ros/src/$ROBOT_PKG/param/$ROBOT.yaml" "robot_config_")
 
 # Tell the world about using rcv3 or rcv5
-$robot_config_use_rcv3="$(echo "$robot_config_use_rcv3" | tr '[:upper:]' '[:lower:]')"
-if [[ $robot_config_use_rcv3 == *"true"* ]]
+robot_config_use_rcv3="$(echo "$robot_config_use_rcv3" | tr '[:upper:]' '[:lower:]')"
+if [[ "$robot_config_use_rcv3" == *"true"* ]]
 then
     export USE_RCV3=true;
 else
