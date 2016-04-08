@@ -1,4 +1,4 @@
-import time, math
+import time, math, os
 
 import numpy as np
 
@@ -57,8 +57,11 @@ def calibrate(speed=48,sleep_time=2,set_PID=True):
     speedM3Forward  = 0
     speedM3Backward = 0
 
+    # Should I use rcv3 or rcv5?
+    use_rcv3 = os.environ['USE_RCV3'] == 'true'
+
     # Initialize wheelbase with PID
-    w.init(set_PID=False)
+    w.init(use_rcv3=use_rcv3, set_PID=False)
     global wheelbase_configured
     wheelbase_configured = True
 
