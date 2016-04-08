@@ -147,7 +147,7 @@ def init(set_PID=True, m1qpps=None, m2qpps=None, m3qpps=None, use_rcv3=True):
 		print("QPPS: {}, {}, {}".format(m1qpps, m2qpps, m3qpps))
 
 		# PID stuff here?
-		SetVelocityPID(0, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m1qpps)
-		SetVelocityPID(1, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m2qpps)
-		SetVelocityPID(2, 3.991973876953125, 1.9959869384765625, 5.969512939453125, m3qpps)
+		SetVelocityPID(0, 1.0, .5, .25, m1qpps)
+		SetVelocityPID(1, 1.0, .5, .25, m2qpps)
+		SetVelocityPID(2, 1.0, .5, .25, m3qpps)
 		# SetVelocityPID(2, 0.0152587890625,   0.6103515625,       0.249481201171875, M3QPPS)
