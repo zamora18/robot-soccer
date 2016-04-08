@@ -20,7 +20,7 @@ _ally = None
 _opp1 = None
 _opp2 = None
 
-_x_c = 0
+_x_c = -.5
 _y_c = 0
 _theta_c = 0
 
