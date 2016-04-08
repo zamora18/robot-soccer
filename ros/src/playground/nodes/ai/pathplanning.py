@@ -52,8 +52,6 @@ def add_obstacle(location, radius=.2):
 	# print discrete_radius
 
 	node = _convert_location_to_node(location)
-	if original_graph == None:
-		# print None
 
 	if node[0] > original_graph.n or node[0] < 0 or node[1] < 0 or node[1] > original_graph.m:
 		print ("{} was not a valid point".format(node))
