@@ -22,7 +22,7 @@ using namespace cv;
 // Mouse click parameters, empirically found
 // The smaller the number, the more positive the error
 // (i.e., it will be above the mouse in +y region)
-#define FIELD_WIDTH_PIXELS      605.0
+#define FIELD_WIDTH_PIXELS      595.0
 #define FIELD_HEIGHT_PIXELS     405.0
 #define CAMERA_WIDTH            640.0
 #define CAMERA_HEIGHT           480.0
