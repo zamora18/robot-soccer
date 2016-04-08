@@ -32,15 +32,15 @@
     </node> -->
     <node name="guidedog" pkg="playground" type="guidedog_node.py" output="screen">
         <remap from="my_state" to="$(arg me)_state" />
-        <remap from="desired_position_safe" to="desired_position_guidedog" />
+        <!-- <remap from="desired_position_safe" to="desired_position_guidedog" /> -->
     </node>
-    <node name="path_planner" pkg="playground" type="path_planning_node.py" output="screen">
+ <!--    <node name="path_planner" pkg="playground" type="path_planning_node.py" output="screen">
         <remap from="desired_position" to="desired_position_guidedog" />
         <remap from="desired_position_safe" to="desired_position_really_safe" />
-    </node>
+    </node> -->
     <node name="controller" pkg="playground" type="controller_node.py" output="screen">
         <remap from="robot_state" to="$(arg me)_state" />
-        <remap from="desired_position" to="desired_position_really_safe" />
+        <remap from="desired_position" to="desired_position_safe" />
         <!-- For simulation, remap the output -->
         <remap from="vel_cmds" to="$(arg vel_cmds_remap)" />
     </node>
