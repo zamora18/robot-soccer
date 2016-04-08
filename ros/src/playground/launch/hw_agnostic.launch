@@ -34,8 +34,8 @@
         <remap from="my_state" to="$(arg me)_state" />
     </node>
     <node name="path_planner" pkg="playground" type="path_planning_node.py" output="screen">
-        <remap from="desired_position" to="desired_position_safe" />
         <remap from="desired_position_safe" to="desired_position_really_safe" />
+        <remap from="desired_position" to="desired_position_safe" />
     </node>
     <node name="controller" pkg="playground" type="controller_node.py" output="screen">
         <remap from="robot_state" to="$(arg me)_state" />
