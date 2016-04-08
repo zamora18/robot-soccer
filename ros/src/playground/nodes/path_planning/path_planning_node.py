@@ -91,7 +91,7 @@ def main():
             (x_c_safe, y_c_safe) = Path.plan(_x_c, _y_c, _me, _ally, _opp1, _opp2)
             theta_c_safe = _theta_c
         else:
-            (x_c_safe, y_c_safe, theta_c_safe) = (_x_c, y_c, _theta_c)
+            (x_c_safe, y_c_safe, theta_c_safe) = (_x_c, _y_c, _theta_c)
 
         msg = Pose2D()
         msg.x = x_c_safe
