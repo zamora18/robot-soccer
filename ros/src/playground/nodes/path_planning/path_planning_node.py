@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys
+import sys, os
 
 import roslib; roslib.load_manifest('playground')
 import rospy
@@ -11,8 +11,7 @@ from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
 
-
-sys.path.append('../ai/')
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ai/'))
 import Path
 from GameObjects import Ball, Robot
 
