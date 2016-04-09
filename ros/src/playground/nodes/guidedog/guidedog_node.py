@@ -84,12 +84,12 @@ def _handle_my_position(msg):
         # find the closest robot
 
         # Pass points to avoid
-        (x_c, y_c) = avoidance.avoid(robot, desired, opponent)
+        (x_c, y_c) = avoidance.avoid(robot, desired[0:2], opponent)
 
         c = Pose2D()
         c.x = x_c
         c.y = y_c
-        c.theta = theta_c
+        c.theta = desired[2]
         _pub.publish(c)
         return
 
