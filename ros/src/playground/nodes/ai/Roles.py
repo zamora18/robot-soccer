@@ -145,13 +145,12 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             dist_to_maintain = 0.55
         else:
             dist_to_maintain = 0.00
-    print "Inside defender"
+
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
             else: #ally2 or 1v1
-                print "\tCalling clear ball"
                 return Skills.clear_ball_from_half(me, ball)
         else: # I am in charge of stealing the ball
             if Utilities.is_ball_behind_robot(me, ball):

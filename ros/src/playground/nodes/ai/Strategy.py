@@ -47,7 +47,10 @@ Notes of things I have changed that may need to be changed back:
     - Skills.py:        go_behind_ball_facing_target()
                         attack_ball()
                         attack_ball_towards_goal()
+
     - Plays.py          line 66
+                        steal_ball_from_opponent() # lines 201-203 were using future positions of the ball 
+
     - Utilities.py      get_perpendicular_point_from_ball()
                         get_own_goal_dist_behind_ball()
 
@@ -69,7 +72,7 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     global _is_goal_global
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
-    one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
+    one_v_one = False # FOR SIMULATOR I NEED TO UNCOMMENT THIS
     # Check to see if someone scored a goal
     check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
 
@@ -99,6 +102,7 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
 
     if me.ally1:
+        print "\t\t ALLY ONE"
         # if not Plays.beginning_trick_shot_done():
         #     return Plays.shoot_off_the_wall(me, ball)
         if section == 1:
@@ -112,6 +116,7 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
+        print "\t\t\t ALLY TWO"
         if   section == 1:
             return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:

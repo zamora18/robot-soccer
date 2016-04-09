@@ -109,6 +109,7 @@ def give_my_teammate_some_space(me, my_teammate):
     theta_c = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta_c)
 
+
 def clear_ball_from_half(me, ball):
     global _clear_ball_st
     center_of_goal = 0
@@ -116,6 +117,8 @@ def clear_ball_from_half(me, ball):
 
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
+
+
 
     #########################
     ### transition states ###
@@ -126,6 +129,8 @@ def clear_ball_from_half(me, ball):
     elif _clear_ball_st == ClearBallState.clear:
         if distance_from_kicker_to_ball <= Constants.kickable_distance:
             _clear_ball_st = ClearBallState.kick
+        elif distance_from_kicker_to_ball > Constants.distance_behind_ball_for_kick:
+            _clear_ball_st = ClearBallState.setup
     elif _clear_ball_st == ClearBallState.kick:
         if distance_from_kicker_to_ball > Constants.kickable_distance:
             _clear_ball_st = ClearBallState.setup
