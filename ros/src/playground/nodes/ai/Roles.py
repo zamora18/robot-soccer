@@ -93,7 +93,7 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
-            elif me.ally1 or one_v_one:
+            if me.ally1 or one_v_one:
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target, opponent1, opponent2)
                 else: 
@@ -145,15 +145,13 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             dist_to_maintain = 0.55
         else:
             dist_to_maintain = 0.00
-
+    print "Inside defender"
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
-            # elif me.ally1 and not one_v_one:
-            #     print "trying to shoot off the wall"
-            #     return Plays.shoot_off_the_wall(me, ball)
             else: #ally2 or 1v1
+                print "\tCalling clear ball"
                 return Skills.clear_ball_from_half(me, ball)
         else: # I am in charge of stealing the ball
             if Utilities.is_ball_behind_robot(me, ball):
@@ -161,7 +159,8 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             else:
                 closest_opp = Utilities.get_closest_opponent_to_ball(opponent1, opponent2, ball)
                 return Plays.steal_ball_from_opponent(me, closest_opp, ball)
-    else: #My teammate is closer to the ball
+    ## My teammate is closer to the ball
+    else: 
         if Utilities.am_i_too_close_to_teammate(me, my_teammate):
             return Skills.give_my_teammate_some_space(me, my_teammate)
         else:
@@ -181,7 +180,7 @@ def goalie(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fals
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
     if (distance_from_kicker_to_ball <=  Constants.kickable_distance and not Utilities.is_ball_behind_robot(me, ball)):
-        print "KICKING BALL AWAY"
+        print "GOALIE KICKING BALL AWAY"
         Skills.kick()
 
     if Utilities.is_ball_behind_robot(me, ball):
