@@ -13,6 +13,8 @@ from playground.msg import RobotState
 
 import numpy as np
 
+import avoidance
+
 _robot_width        = 0.1841 # (7.25 in)
 _robot_half_width   = _robot_width/2
 _field_length       = 3.68 # (12ft)
@@ -75,6 +77,21 @@ def _handle_my_position(msg):
     desired_msg.x = desired[0]
     desired_msg.y = desired[1]
     desired_msg.theta = desired[2]
+
+    # Hack go rogue. Fix this later, it's messy
+    if _go_rogue:
+
+        # find the closest robot
+
+        # Pass points to avoid
+        (x_c, y_c) = avoidance.avoid(robot, desired, opponent)
+
+        c = Pose2D()
+        c.x = x_c
+        c.y = y_c
+        c.theta = theta_c
+        _pub.publish(c)
+        return
 
     if _go_rogue:
         # Publish through un-guidedog'ed and bail
