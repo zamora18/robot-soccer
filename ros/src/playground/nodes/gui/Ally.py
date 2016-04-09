@@ -105,8 +105,11 @@ class AllyUI(object):
         # Create an artist for the current position (estimate) of the ally bot
         self.artists_field['position'] = canvas.ax.plot([],[], linewidth=0.6, animated=False)[0]
 
-        # Create an artist for the current position (estimate) of the ally bot
+        # Create an artist for the desired position (unsafe) of the ally bot
         self.artists_field['desired'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1.3,ms=7,animated=False)[0]
+
+        # Create an artist for the desired position (safe) of the ally bot
+        self.artists_field['desired_safe'] = canvas.ax.plot([],[],'2',mfc='none',mec='m',mew=1.3,ms=6,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the ally bot
         self.artists_field['position_vision'] = canvas.ax.plot([],[],'d',mfc='none',mec='b',mew=0.75,ms=4,animated=False)[0]
@@ -250,6 +253,7 @@ class Ally(object):
             'ball_state': None,
             'pidinfo': None,
             'desired_position': None,
+            'desired_position_safe': None,
             'other_opponent_state': None,
             'other_ally_state': None
         }
@@ -292,6 +296,8 @@ class Ally(object):
                             BallState, self._handle_ball_state)
         rospy.Subscriber('{}/desired_position'.format(ns), \
                             Pose2D, self._handle_des_pos)
+        rospy.Subscriber('{}/desired_position_safe'.format(ns), \
+                            Pose2D, self._handle_des_pos_safe)
         rospy.Subscriber('{}/vel_cmds'.format(ns), \
                             Twist, self._handle_vel)
         rospy.Subscriber('{}/pidinfo'.format(ns), \
@@ -379,6 +385,11 @@ class Ally(object):
         # Save for later!
         self.last['desired_position'] = self.current['desired_position']
         self.current['desired_position'] = msg
+
+    def _handle_des_pos_safe(self, msg):
+        # Save for later!
+        self.last['desired_position_safe'] = self.current['desired_position_safe']
+        self.current['desired_position_safe'] = msg
 
     def _handle_vel(self, msg):
         tbl = self.ui.tbl_vel
@@ -553,6 +564,17 @@ class Ally(object):
             x, y = 0, 0
 
         self._update_point(self.ui.artists_field['desired'], x, y)
+
+        # ---------------------------------------------------------------------
+        # -------------------- Desired Position Safe --------------------------
+        # ---------------------------------------------------------------------
+        if self.current['desired_position_safe'] is not None:
+            x = self.current['desired_position_safe'].x
+            y = self.current['desired_position_safe'].y
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['desired_safe'], x, y)
 
         # ---------------------------------------------------------------------
         # -------------------------- Opponent ---------------------------------
