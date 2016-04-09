@@ -1,9 +1,7 @@
 import sys, os
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ai/'))
 import Utilities
 import Constants
-
 import numpy as np
 
 
@@ -13,7 +11,7 @@ distancetoworryabout = Constants.robot_width * 2
 
 def get_perpendicular_point(robot, dest, opp):
     
-    mid = midpoint(robot,dest)
+    
 
     x1 = float(robot[0])
     y1 = float(robot[1])
@@ -22,7 +20,9 @@ def get_perpendicular_point(robot, dest, opp):
     x3 = float(opp[0])
     y3 = float(opp[1])
 
-    radius = Utilities.get_distance_between_points(x1,y1,x2,y2)
+    mid = midpoint((x1,y1),(x2,y2))
+
+    radius = Utilities.get_distance_between_points(x1,y1,x2,y2)/2
     distancetothird = Utilities.get_distance_between_points(mid[0], mid[1], x3,y3)
 
     if distancetothird > radius:
@@ -94,15 +94,16 @@ def above_or_below(robot, dest, opp):
 def avoid(me, dest, opp):
     """
     """
-
+    avoid.printint = -1
     
     perp_point = get_perpendicular_point(me, dest, opp)
 
     if perp_point is None:
+        print 'outside cirlce'
         return dest
 
     if do_i_need_to_avoid(opp, perp_point):
-
+        print 'INSIDE CIRCLE'
         # not sure what to do right now
         go_above = above_or_below(me, dest, opp)
         # eventually do this
