@@ -37,7 +37,7 @@ def _handle_opponent_position(msg):
     global _opponent
 
     # Grab and save the opponent's current location
-    _opponent = (msg.x, msg.y, msg.theta)
+    _opponent = (msg.xhat, msg.yhat, msg.thetahat)
 
 def _handle_my_position(msg):
     global _ally
