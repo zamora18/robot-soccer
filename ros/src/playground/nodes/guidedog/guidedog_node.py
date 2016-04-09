@@ -100,9 +100,9 @@ def _handle_my_position(msg):
         rob_1_dist = Utilities.get_distance_between_points(opponent1[0], opponent1[1], robot[0], robot[1])
         rob_2_dist = Utilities.get_distance_between_points(opponent2[0], opponent2[1], robot[0], robot[1])
         if (rob_1_dist < rob_2_dist):
-            thing = rob1
+            thing = opponent1
         else:
-            thing = rob2 
+            thing = opponent2 
 
 
         # Pass points to avoid
