@@ -39,7 +39,14 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+
+    # Run the app
+    app.exec_()
+
+    # Manually send ROS the shutdown signal so it cleans up nicely
+    rospy.signal_shutdown("User closed the GUI")
+    
+    sys.exit(0)
 
 # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
 # import ipdb; ipdb.set_trace()
