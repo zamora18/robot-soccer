@@ -195,6 +195,11 @@ def main():
     rospy.Subscriber('my_state', RobotState, _handle_my_position)
     # rospy.Subscriber('vision_ally_position', Pose2D, _handle_ally_position)
 
+    # rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
+    # rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
+    rospy.Subscriber('opponent1_state', RobotState, _handle_opponent_position)
+    # rospy.Subscriber('opponent2_state', RobotState, _handle_opponent_position)
+
     _go_rogue = rospy.get_param('go_rogue', 'false')
 
     # spin() simply keeps python from exiting until this node is stopped

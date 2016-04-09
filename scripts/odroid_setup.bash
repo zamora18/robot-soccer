@@ -77,5 +77,5 @@ function ally1() {
 
 function ally2() {
 	roslaunch "$ROBOT_PKG" ally2.launch &
-	roslaunch "$ROBOT_PKG" ai_ally.launch &
+	roslaunch "$ROBOT_PKG" ai_ally2.launch &
 }
