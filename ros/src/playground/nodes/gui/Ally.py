@@ -13,6 +13,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
+import StepResponse
+
 FIELD_LENGTH = 4
 FIELD_WIDTH = 3.2
 MAX_X_VEL = 2
@@ -26,6 +28,13 @@ class AllyUI(object):
 
         if ally is None:
             return False
+
+        if ally == 1:
+            self.tbl_ball_pos = ui.tblBallPosition
+            self.tbl_ball_future = ui.tblBallFuture
+        else:
+            self.tbl_ball_pos = None
+            self.tbl_ball_future = None
 
         # Group thing
         self.groupbox = getattr(ui, 'groupAlly{}'.format(ally))
@@ -157,6 +166,14 @@ class AllyUI(object):
         self._init_generic_table(self.tbl_des_pos, editable=True, \
                                 header_labels=['xhat_c', 'yhat_c', 'thetahat_c'])
 
+        if self.tbl_ball_pos is not None:
+            self._init_generic_table(self.tbl_ball_pos, \
+                                    header_labels=['xhat', 'yhat'], cols=2, col_width=97)
+
+        if self.tbl_ball_future is not None:
+            self._init_generic_table(self.tbl_ball_future, \
+                                    header_labels=['xhat_future', 'yhat_future'], cols=2, col_width=97)
+
     def _init_generic_table(self, tbl, header_labels=None, rows=1, cols=3, row_height=25, col_width=65, editable=False):
         tbl.setRowCount(rows)
         tbl.setRowHeight(0, row_height)
@@ -189,15 +206,17 @@ class AllyUI(object):
         # Don't allow column resizing
         tbl.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
 
-    def update_table(self, tbl, col1, col2, col3, rounding=True):
+    def update_table(self, tbl, col1, col2, col3=None, rounding=True):
         if rounding:
             col1 = round(col1,4)
             col2 = round(col2,4)
-            col3 = round(col3,4)
+            if col3 is not None:
+                col3 = round(col3,4)
 
         tbl.item(0,0).setText(str(col1))
         tbl.item(0,1).setText(str(col2))
-        tbl.item(0,2).setText(str(col3))
+        if col3 is not None:
+            tbl.item(0,2).setText(str(col3))
 
     def read_table(self, tbl):
         col1 = float(tbl.item(0,0).text())
@@ -250,6 +269,9 @@ class Ally(object):
             self.ui.append_title('Inactive')
             return
 
+        # Placeholders for child windows
+        self._step_resp = None
+
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
         self.ns = ns
@@ -284,6 +306,7 @@ class Ally(object):
         self.ui.btn_battery.clicked.connect(self._btn_battery)
         self.ui.btn_set_des_pos.clicked.connect(self._btn_des_pos)
         self.ui.btn_stop_moving.clicked.connect(self._btn_stop_moving)
+        self.ui.btn_step_resp.clicked.connect(self._btn_step_resp)
 
         # Connect Plot Mouse events
         self.ui.plot_field.canvas.mpl_connect('button_press_event', self._plot_field_mouse_down)
@@ -337,6 +360,14 @@ class Ally(object):
         self.current['other_ally_state'] = msg
 
     def _handle_ball_state(self, msg):
+        if self.ui.tbl_ball_pos is not None:
+            tbl = self.ui.tbl_ball_pos
+            self.ui.update_table(tbl, msg.xhat, msg.yhat)
+
+        if self.ui.tbl_ball_future is not None:
+            tbl = self.ui.tbl_ball_future
+            self.ui.update_table(tbl, msg.xhat_future, msg.yhat_future)
+
         # Save for later!
         self.last['ball_state'] = self.current['ball_state']
         self.current['ball_state'] = msg
@@ -365,6 +396,10 @@ class Ally(object):
         self.last['pidinfo'] = self.current['pidinfo']
         self.current['pidinfo'] = msg
 
+        # if step_resp is active, add to the plot
+        if self._step_resp is not None and self._step_resp.isVisible():
+            self._step_resp.add_sample(msg)
+
     # =========================================================================
     # Qt Event Callbacks (buttons, plots, etc)
     # =========================================================================
@@ -372,6 +407,11 @@ class Ally(object):
     def _btn_clear(self):
         self._animate_init_field()
         # self._animate_init_vel() # There's no real need to clear this one
+
+    def _btn_step_resp(self):
+        if self._step_resp is None:
+            self._step_resp = StepResponse.Dialog(self.ally)
+        self._step_resp.show()
 
     def _btn_kick(self):
         try:

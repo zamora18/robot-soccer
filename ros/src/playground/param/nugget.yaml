@@ -1,4 +1,17 @@
 M1QPPS: 242637
 M2QPPS: 170626
 M3QPPS: 196557
+gains:
+  x:
+    P: 1.5
+    I: 0
+    D: 0
+  y:
+    P: 1.5
+    I: 0
+    D: 0
+  theta:
+    P: 1.5
+    I: 0
+    D: 0
 use_rcv3: false # Nugget has v5 roboclaws

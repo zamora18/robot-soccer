@@ -14,16 +14,16 @@
 using namespace std;
 using namespace cv;
 
-#define FIELD_WIDTH     3.6576  // in meters
-#define FIELD_HEIGHT    2.6289 
+#define FIELD_WIDTH     3.40  // in meters
+#define FIELD_HEIGHT    2.38 
 #define ROBOT_RADIUS    0.10
 #define GUI_NAME        "Soccer Overhead Camera"
 
 // Mouse click parameters, empirically found
 // The smaller the number, the more positive the error
 // (i.e., it will be above the mouse in +y region)
-#define FIELD_WIDTH_PIXELS      605.0
-#define FIELD_HEIGHT_PIXELS     405.0
+#define FIELD_WIDTH_PIXELS      540.0 // measured from threshold of goal to goal
+#define FIELD_HEIGHT_PIXELS     378.0 // measured from inside of wall to wall
 #define CAMERA_WIDTH            640.0
 #define CAMERA_HEIGHT           480.0
 
@@ -69,9 +69,17 @@ bool compareMomentAreas(Moments moment1, Moments moment2)
 
 Point2d imageToWorldCoordinates(Point2d point_i, Size imageSize)
 {
-    Point2d centerOfField(imageSize.width / 2, imageSize.height / 2);
-    Point2d center_w = (point_i - centerOfField) * (1.0 / imageSize.width * FIELD_WIDTH);
+    Point2d centerOfField(CAMERA_WIDTH/2, CAMERA_HEIGHT/2);
+    Point2d center_w = (point_i - centerOfField);
+
+    // You have to split up the pixel to meter conversion
+    // because it is a rect, not a square!
+    center_w.x *= (FIELD_WIDTH/FIELD_WIDTH_PIXELS);
+    center_w.y *= (FIELD_HEIGHT/FIELD_HEIGHT_PIXELS);
+
+    // Reflect y
     center_w.y = -center_w.y;
+    
     return center_w;
 }
 

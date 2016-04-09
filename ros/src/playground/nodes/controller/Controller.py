@@ -2,9 +2,9 @@ import numpy as np
 
 from controllers import PID
 
-PID_x = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_y = PID(1.5, 0, 0, 2, 0.05, integrator_limit=0.05)
-PID_theta = PID(1.5, 0, 0, 180, 0.05, integrator_limit=0.05)
+PID_x = None
+PID_y = None
+PID_theta = None
 
 _set_point = (0, 0, 0)
 
@@ -17,8 +17,26 @@ _theta_loops = 1 # so every 2 loops do theta controller
 
 velocities = (0, 0, 0)
 
-def init():
-    pass
+def init(gains=None):
+    global PID_x, PID_y, PID_theta
+
+    xP = gains['x']['P'] if gains is not None else 2.5
+    xI = gains['x']['I'] if gains is not None else 0
+    xD = gains['x']['D'] if gains is not None else 0
+
+    yP = gains['y']['P'] if gains is not None else 2.5
+    yI = gains['y']['I'] if gains is not None else 0
+    yD = gains['y']['D'] if gains is not None else 0
+
+    thetaP = gains['theta']['P'] if gains is not None else 2.5
+    thetaI = gains['theta']['I'] if gains is not None else 0
+    thetaD = gains['theta']['D'] if gains is not None else 0
+
+    PID_x = PID(xP, xI, xD, 2, 0.05, integrator_limit=0.05)
+    PID_y = PID(yP, yI, yD, 2, 0.05, integrator_limit=0.05)
+    PID_theta = PID(thetaP, thetaI, thetaD, 180, 0.05, integrator_limit=0.05)
+
+    print "Initializing controller with gains: {}".format(str(gains))
 
 def set_commanded_position(x, y, theta):
     """Set Commanded Position
@@ -49,6 +67,10 @@ def update(time_since_last_update, xhat, yhat, thetahat):
 
     if _arrived:
         # Don't even try
+        return (0, 0, 0)
+
+    if PID_x is None or PID_y is None or PID_theta is None:
+        # Controller hasn't been properly initialized
         return (0, 0, 0)
 
     # We've had another motion loop!
