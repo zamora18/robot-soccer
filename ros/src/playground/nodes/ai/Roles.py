@@ -120,11 +120,8 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
             if me.ally1:
                 return Plays.stay_open_for_pass(me, my_teammate, ball)
             else: # I am ally2 
-                field_section = Utilities.get_field_section(ball.xhat) 
-                if field_section == 3:
-                    return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
-                else:
-                    return Plays.stay_at_front_quarter_follow_ball(me, opponent1, opponent2, ball)
+                return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
+
 
 
 def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=False):
