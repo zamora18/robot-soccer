@@ -102,7 +102,6 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
 
     if me.ally1:
-        print "\t\t ALLY ONE"
         # if not Plays.beginning_trick_shot_done():
         #     return Plays.shoot_off_the_wall(me, ball)
         if section == 1:
@@ -116,7 +115,6 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
-        print "\t\t\t ALLY TWO"
         if   section == 1:
             return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
