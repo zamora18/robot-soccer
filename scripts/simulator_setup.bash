@@ -22,7 +22,7 @@ alias ...='cd ../..'
 
 # ROS
 source /opt/ros/indigo/setup.bash
-export ROS_MASTER_URI=http://ronald:11311
+export ROS_MASTER_URI=http://localhost:11311
 export ROS_IP="$MY_IP"
 source $PATH_TO_REPO/ros/devel/setup.bash
 
@@ -133,4 +133,14 @@ function ronald() {
 
 function simulator() {
     export ROS_MASTER_URI=http://localhost:11311
+}
+
+function command_center() {
+    ronald;
+    rosrun "$ROBOT_PKG" gui.py
+}
+
+function sim_command_center() {
+    simulator;
+    rosrun "$ROBOT_PKG" gui.py
 }
