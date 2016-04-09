@@ -390,6 +390,26 @@
     <property name="title">
      <string>Ball State</string>
     </property>
+    <widget class="QTableWidget" name="tblBallPosition">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>20</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tblBallFuture">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>20</y>
+       <width>197</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
