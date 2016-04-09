@@ -48,7 +48,7 @@ function vision_spacebar() {
 # Simulation Scripts (The user can put in bg with &)
 function simulator_1v1() {
     # Set up localhost as my master
-    export ROS_MASTER_URI=http://localhost:11311
+    master_sim;
 
     # To launch the simulation environment in the background, with ally1
     # ready to go (delete home2 and away2 robots)
@@ -61,7 +61,7 @@ function simulator_1v1() {
 
 function simulator_2v2() {
     # Set up localhost as my master
-    export ROS_MASTER_URI=http://localhost:11311
+    master_sim;
 
     # To launch the simulation environment in the background,
     # with ally1 and ally2 ready to go.
@@ -127,20 +127,20 @@ function sim_stop() {
     unset LAST_SIM_ROBOTS
 }
 
-function ronald() {
+function master_ronald() {
     export ROS_MASTER_URI=http://ronald:11311
 }
 
-function simulator() {
+function master_sim() {
     export ROS_MASTER_URI=http://localhost:11311
 }
 
 function command_center() {
-    ronald;
+    master_ronald;
     rosrun "$ROBOT_PKG" gui.py
 }
 
 function sim_command_center() {
-    simulator;
+    master_sim;
     rosrun "$ROBOT_PKG" gui.py
 }
