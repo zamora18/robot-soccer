@@ -55,8 +55,11 @@ function simulator_1v1() {
     roslaunch "$ROBOT_PKG" simulator.launch &
     sleep 6 # Otherwise there is a race condition
 
-    roslaunch "$ROBOT_PKG" ally1.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally1.launch &
     export SIM_ROBOTS=1
+    # Prepend roslaunch ... ally1.launch with `ROBOT="fry"` so that, for that
+    # single command, everything will be run as that robot. That way, you can
+    # load in the yaml file for a specific robot in the simulator
 }
 
 function simulator_2v2() {
@@ -67,9 +70,9 @@ function simulator_2v2() {
     # with ally1 and ally2 ready to go.
     roslaunch "$ROBOT_PKG" simulator.launch &
     sleep 6 # Otherwise there is a race condition
-    roslaunch "$ROBOT_PKG" ally1.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally1.launch &
     sleep 2
-    roslaunch "$ROBOT_PKG" ally2.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally2.launch &
     export SIM_ROBOTS=2
 }
 
