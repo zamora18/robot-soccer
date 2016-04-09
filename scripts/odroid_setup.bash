@@ -69,3 +69,13 @@ function killbot() {
 #echo 200 > /sys/class/gpio/export
 #echo out > /sys/class/gpio/gpio200/direction
 #echo 0 > /sys/class/gpio/gpio200/value
+
+function ally1() {
+	roslaunch "$ROBOT_PKG" ally1 &
+	roslaunch "$ROBOT_PKG" ai_ally1 &
+}
+
+function ally2() {
+	roslaunch "$ROBOT_PKG" ally2 &
+	roslaunch "$ROBOT_PKG" ai_ally2 &
+}
