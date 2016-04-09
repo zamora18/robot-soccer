@@ -68,10 +68,10 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
 
 
 def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_y):
-    theta = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, target_x, target_y)
+    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y)
     hypotenuse = Constants.robot_half_width + des_distance_from_ball
-    x_c = ball.xhat_future - hypotenuse*np.cos(theta)
-    y_c = ball.yhat_future - hypotenuse*np.sin(theta)
+    x_c = ball.xhat - hypotenuse*np.cos(theta)
+    y_c = ball.yhat - hypotenuse*np.sin(theta)
     theta = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta)
 
@@ -85,13 +85,13 @@ def attack_ball(me, ball):
     """
     Simply pushes the ball along the "vector" from robot to ball
     """
-    return attack_ball_towards_point(me, ball, ball.xhat_future, ball.yhat_future)
+    return attack_ball_towards_point(me, ball, ball.xhat, ball.yhat)
 
 
 def attack_ball_towards_point(me, ball, point_x, point_y):
-    theta_c = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, point_x, point_y)
-    x_c = ball.xhat_future + Constants.kick_dist*np.cos(theta_c)
-    y_c = ball.yhat_future + Constants.kick_dist*np.sin(theta_c)
+    theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, point_x, point_y)
+    x_c = ball.xhat + Constants.kick_dist*np.cos(theta_c)
+    y_c = ball.yhat + Constants.kick_dist*np.sin(theta_c)
     theta_c = Utilities.rad_to_deg(theta_c)
 
     return(x_c, y_c, theta_c) 
@@ -153,52 +153,10 @@ def clear_ball_from_half(me, ball):
 ##########################################
 def avoid_own_goal(me, ball):
     """
-    Robot will make a '2-point' approach, going first to a spot perpendicular to the ball, 
-    and then going directly behind the ball, which will avoid it hitting it straight back into the goal.
+    Robot will go to a point perpendicular away from the ball, so that it doesn't hit it into our goal.
     """
-    global _own_goal_st, _went_to_perp_first
+
     desired_perp_setup = Utilities.get_perpendicular_point_from_ball(me, ball)
-    desired_behind_setup = Utilities.get_own_goal_dist_behind_ball(me, ball)
 
-    (x_pos, y_pos) = Utilities.get_front_of_robot(me)
-    distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
-
-    #########################
-    ### transition states ###
-    #########################
-    if _own_goal_st == OwnGoalState.perp_setup:
-        if Utilities.robot_close_to_point(me, *desired_perp_setup):
-            _own_goal_st = OwnGoalState.behind_setup
-            _went_to_perp_first = True
-    elif _own_goal_st == OwnGoalState.behind_setup:
-        if _went_to_perp_first:
-            if Utilities.robot_close_to_point(me, *desired_behind_setup):
-                _own_goal_st = OwnGoalState.attack
-                _went_to_perp_first = False
-        else:
-            _own_goal_st = OwnGoalState.perp_setup
-    elif _own_goal_st == OwnGoalState.attack:
-        if distance_from_kicker_to_ball <= Constants.kickable_distance:
-            _own_goal_st = OwnGoalState.kick
-    elif _own_goal_st == OwnGoalState.kick:
-        if distance_from_kicker_to_ball > Constants.kickable_distance:
-            _own_goal_st = OwnGoalState.perp_setup
-    else:
-        _own_goal_st = OwnGoalState.perp_setup
-
-
-    ###############################
-    ### Moore Outputs in states ###
-    ###############################
-    if _own_goal_st == OwnGoalState.perp_setup:
-        return desired_perp_setup
-    elif _own_goal_st == OwnGoalState.behind_setup:
-        return desired_behind_setup
-    elif _own_goal_st == OwnGoalState.attack:
-        return attack_ball(me, ball)
-    elif _own_goal_st == OwnGoalState.kick:
-        kick()
-        return attack_ball(me, ball)
-    else:
-        return (desired_perp_setup)
+    return desired_perp_setup # THIS IS FREAKIN RIDICULOUS
 

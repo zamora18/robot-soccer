@@ -55,9 +55,6 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     global _shoot_state
     global _ball_stuck_timer, _BALL_STUCK_MAX
 
-    print ("Ball   xhat: {}\nBall_x future: {}" .format(ball.xhat, ball.xhat_future))
-    print ("\t\tBall   yhat: {}\n\t\tBall_y future: {}" .format(ball.yhat, ball.yhat_future))
-
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
     desired_setup_position = Skills.set_up_kick_facing_goal(ball, distance_from_center)#!!!!!!should we try and do future? So it predicts
@@ -72,10 +69,8 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
         _ball_stuck_timer = _ball_stuck_timer + 1
         # print "ShootState = Setup"
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
-        if Utilities.robot_close_to_point(me, *desired_setup_position) or _ball_stuck_timer >= _BALL_STUCK_MAX:
-            # print "\tIs close to enough to the desired point." 
+        if Utilities.robot_close_to_point(me, *desired_setup_position): 
             if not Utilities.is_ball_behind_robot(me, ball): 
-                _ball_stuck_timer = 0
                 _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
@@ -101,13 +96,20 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     ###############################
     # go to the desired setup location
     if(_shoot_state == ShootState.setup):
-        return desired_setup_position
+        # print "Setup"
+        if _ball_stuck_timer >= _BALL_STUCK_MAX:
+            _ball_stuck_timer = 0
+            return Skills.attack_ball(me, ball)
+        else:
+            return desired_setup_position
 
     # attack the ball
     elif  _shoot_state == ShootState.attack:
+        # print "Attack"
         return Skills.attack_ball_towards_goal(me, ball, distance_from_center)
 
     elif _shoot_state == ShootState.shoot:
+        # print "Shooting"
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
             # print "KICKING"
             Skills.kick()
@@ -241,7 +243,6 @@ def stay_open_for_pass(me, my_teammate, ball):
     Teammate(me) stays a 0.5 meters ahead of the ball and follows 'my_teammate' towards the goal
     'me' maintains a distance away from 'my_teammate' and normally should be 
     """
-    # print "staying open for pass......."
     if (ball.yhat > 0): 
         r_l_toggle = -1 
     else: 

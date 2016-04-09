@@ -31,22 +31,32 @@ THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:
 
 """
  
+
+
 """
 Notes of things I have changed that may need to be changed back:
     (April 7th)
-    - Changed Constants.distance_behind_ball_for_kick = robot_half_width so the approach is better. With kicker, approach can be smaller
-    - Changed Constants.kickable_distance = 0.4 from 0.5
-    - Utilities.robot_close_to_point() Changed tolerances from 0.1 to 0.7
+    - Constants.py:     distance_behind_ball_for_kick = robot_half_width so the approach is better. With kicker, approach can be smaller
+    -                   kickable_distance = 0.4 from 0.5
+    -                   kick_dist --> SHOULD I make this smaller, so the error after kick is less?                   
+
+    - Utilities.py      robot_close_to_point() Changed tolerances from 0.10 to 0.07 
+
 
     Changed these to use BALL FUTURE POSITIONS:
     - Skills.py:        go_behind_ball_facing_target()
-    -                   attack_ball()
-    -                   attack_ball_towards_goal()
-    - 
+                        attack_ball()
+                        attack_ball_towards_goal()
+    - Plays.py          line 66
+    - Utilities.py      get_perpendicular_point_from_ball()
+                        get_own_goal_dist_behind_ball()
+
+
 
 Things I'm currently/need to work on:
     - Using future positions of ball for attack/shooting
     - Collision avoidance with our own robots. Fix am_i_too_close_to_teammate to have robot future positions.
+    - Take that survey for this dumb class
 """
 
 
@@ -62,7 +72,8 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one
     one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
     # Check to see if someone scored a goal
     check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
-    
+
+
     if _is_goal_global:
         if are_robots_in_reset_position(me, my_teammate):
             if done_waiting_for_resume_game():

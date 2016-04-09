@@ -132,17 +132,21 @@ def is_ball_close_to_edges(ball):
 #################################################################
 #################################################################
 def get_perpendicular_point_from_ball(me, ball):
-    x_c = ball.xhat_future
+    x_c = ball.xhat - 0.15
+    direction_toggle = 1 # This will switch the side the robot will approach if the ball is too close to a wall.
+    if (abs(ball.yhat) > Constants.field_width/2 - Constants.robot_width*0.60): # A little more than half width
+        direction_toggle = -1
+
     if me.yhat > ball.yhat:
-        y_c = ball.yhat - Constants.own_goal_y_dist # CHANGED THE SIGN OF SUBTRACTIN FROM ADDING, TO SEE IF IT WOULD FIX IT!
+        y_c = ball.yhat + Constants.own_goal_y_dist*direction_toggle # CHANGED THE SIGN OF SUBTRACTIN FROM ADDING, TO SEE IF IT WOULD FIX IT!
     else:
-        y_c = ball.yhat + Constants.own_goal_y_dist
+        y_c = ball.yhat - Constants.own_goal_y_dist*direction_toggle
     theta_c = 0
     return (x_c, y_c, theta_c)
 
 def get_own_goal_dist_behind_ball(me, ball):
-    x_c = ball.xhat_future - Constants.own_goal_x_dist
-    y_c = ball.yhat_future
+    x_c = ball.xhat - Constants.own_goal_x_dist
+    y_c = ball.yhat
     theta_c = 0
     return (x_c, y_c, theta_c)
 
