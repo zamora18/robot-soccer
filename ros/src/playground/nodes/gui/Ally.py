@@ -371,6 +371,10 @@ class Ally(object):
         self.last['pidinfo'] = self.current['pidinfo']
         self.current['pidinfo'] = msg
 
+        # if step_resp is active, add to the plot
+        if self._step_resp is not None and self._step_resp.isVisible():
+            self._step_resp.add_sample(msg)
+
     # =========================================================================
     # Qt Event Callbacks (buttons, plots, etc)
     # =========================================================================
