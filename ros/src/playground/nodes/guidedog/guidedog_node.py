@@ -24,7 +24,8 @@ _robot_half_width   = _robot_width/2
 _field_length       = 3.68 # (12ft)
 _field_width        = 2.62 # (8.58 ft)
 
-_opponent = None
+_opponent1 = None
+_opponent2 = None
 _ally = None
 _robot_desired = None
 
