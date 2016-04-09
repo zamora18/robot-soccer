@@ -91,7 +91,7 @@ def _handle_my_position(msg):
     if _go_rogue:
 
         # find the closest robot
-        thing = Utilities._get_closest_robot_to_point(opponent1, opponent2, robot[0], robot[1]):
+        thing = Utilities._get_closest_robot_to_point(opponent1, opponent2, robot[0], robot[1])
 
         # Pass points to avoid
         (x_c, y_c) = avoidance.avoid(robot, desired[0:2], thing)
