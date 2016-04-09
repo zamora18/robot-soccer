@@ -67,14 +67,12 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     #########################
     if _shoot_state == ShootState.setup:
         _ball_stuck_timer = _ball_stuck_timer + 1
-        # print "ShootState = Setup"
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
         if Utilities.robot_close_to_point(me, *desired_setup_position): 
             if not Utilities.is_ball_behind_robot(me, ball): 
                 _shoot_state = ShootState.attack
 
     elif _shoot_state == ShootState.attack:
-        # print "\t\tShootState = attack"
         # if the ball is behind the robot, go back to set up
         if (Utilities.is_ball_behind_robot(me, ball) or distance_from_kicker_to_ball >= Constants.robot_width):
             _shoot_state = ShootState.setup
@@ -83,7 +81,6 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
-        # print "\t\t\tShootState = attack"
         # If the ball is still close to the kicker, we need to kick until it is far away.
         if distance_from_kicker_to_ball > Constants.kickable_distance:
             _shoot_state = ShootState.setup 
@@ -105,13 +102,10 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 
     # attack the ball
     elif  _shoot_state == ShootState.attack:
-        # print "Attack"
         return Skills.attack_ball_towards_goal(me, ball, distance_from_center)
 
     elif _shoot_state == ShootState.shoot:
-        # print "Shooting"
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
-            # print "KICKING"
             Skills.kick()
         else:
             print "Opponent too close and could damage our kicker"

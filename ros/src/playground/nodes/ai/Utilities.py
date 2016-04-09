@@ -14,7 +14,6 @@ _stuck                  = False
 
 
 def get_front_of_robot(robot):
-    ### thetahat is in degrees, so we should change from degree to radians?? ----------
     theta = deg_to_rad(robot.thetahat)
     x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
     y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
