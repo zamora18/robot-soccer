@@ -33,11 +33,14 @@ def _handle_raw_desired_position(msg):
 
     _robot_desired = (msg.x, msg.y, msg.theta)
 
-def _handle_opponent_position(msg):
-    global _opponent
+def _handle_opponent_position(opp, msg):
+    global _opponent1, _opponent2
 
     # Grab and save the opponent's current location
-    _opponent = (msg.xhat, msg.yhat, msg.thetahat)
+    if opp == 1:
+        _opponent1 = (msg.xhat, msg.yhat, msg.thetahat)
+    else:
+        _opponent2 = (msg.xhat, msg.yhat, msg.thetahat)
 
 def _handle_my_position(msg):
     global _ally
@@ -53,11 +56,17 @@ def _handle_my_position(msg):
     else:
         robot = (0, 0)
 
-    if _opponent is not None:
-        opponent = (_opponent[0], _opponent[1])
+    if _opponent1 is not None:
+        opponent1 = (_opponent1[0], _opponent1[1])
     else:
         # don't ever be close to this
-        opponent = (100, 100)
+        opponent1 = (100, 100)
+
+    if _opponent2 is not None:
+        opponent2 = (_opponent2[0], _opponent2[1])
+    else:
+        # don't ever be close to this
+        opponent2 = (100, 100)
 
     if _robot_desired is not None:
         desired = (_robot_desired[0], _robot_desired[1], _robot_desired[2])
@@ -82,9 +91,10 @@ def _handle_my_position(msg):
     if _go_rogue:
 
         # find the closest robot
+        thing = Utilities._get_closest_robot_to_point(opponent1, opponent2, robot[0], robot[1]):
 
         # Pass points to avoid
-        (x_c, y_c) = avoidance.avoid(robot, desired[0:2], opponent)
+        (x_c, y_c) = avoidance.avoid(robot, desired[0:2], thing)
 
         c = Pose2D()
         c.x = x_c
@@ -197,8 +207,8 @@ def main():
 
     # rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
     # rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
-    rospy.Subscriber('opponent1_state', RobotState, _handle_opponent_position)
-    # rospy.Subscriber('opponent2_state', RobotState, _handle_opponent_position)
+    rospy.Subscriber('opponent1_state', RobotState, lambda x: _handle_opponent_position(1, msg))
+    rospy.Subscriber('opponent2_state', RobotState, lambda x: _handle_opponent_position(2, msg))
 
     _go_rogue = rospy.get_param('go_rogue', 'false')
 

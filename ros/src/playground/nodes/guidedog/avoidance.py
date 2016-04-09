@@ -94,16 +94,13 @@ def above_or_below(robot, dest, opp):
 def avoid(me, dest, opp):
     """
     """
-    avoid.printint = -1
     
     perp_point = get_perpendicular_point(me, dest, opp)
 
     if perp_point is None:
-        print 'outside cirlce'
         return dest
 
     if do_i_need_to_avoid(opp, perp_point):
-        print 'INSIDE CIRCLE'
         # not sure what to do right now
         go_above = above_or_below(me, dest, opp)
         # eventually do this
