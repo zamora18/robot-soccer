@@ -6,8 +6,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Vector3.h"
 
-#define FIELD_WIDTH 3.39  // in meters
-#define FIELD_HEIGHT 2.36
+#define FIELD_WIDTH 3.40  // in meters
+#define FIELD_HEIGHT 2.38
 
 namespace gazebo
 {

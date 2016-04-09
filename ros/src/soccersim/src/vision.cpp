@@ -14,8 +14,8 @@
 using namespace std;
 using namespace cv;
 
-#define FIELD_WIDTH     3.39  // in meters
-#define FIELD_HEIGHT    2.36 
+#define FIELD_WIDTH     3.40  // in meters
+#define FIELD_HEIGHT    2.38 
 #define ROBOT_RADIUS    0.10
 #define GUI_NAME        "Soccer Overhead Camera"
 
