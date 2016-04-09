@@ -256,7 +256,7 @@ def pass_to_teammate(me, my_teammate, ball):
 
     desired_setup = Skills.go_behind_ball_facing_target(ball, Constants.distance_behind_ball_for_kick, my_teammate.xhat_future, my_teammate.yhat_future)
     
-    if Utilities.robot_close_to_point(*desired_setup):
+    if Utilities.robot_close_to_point(me, *desired_setup):
         if dist_to_ball <= Constants.kickable_distance:
             Skills.kick()
         return Skills.attack_ball_towards_point(me, ball, my_teammate.xhat_future, my_teammate.yhat_future)
