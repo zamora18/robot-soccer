@@ -14,8 +14,8 @@ using namespace Eigen;
 #define ROBOT_MAX_OMEGA 2*M_PI
 #define CONTROL_K_XY 5
 #define CONTROL_K_OMEGA 2
-#define FIELD_WIDTH 3.39  // in meters
-#define FIELD_HEIGHT 2.36 
+#define FIELD_WIDTH 3.40  // in meters
+#define FIELD_HEIGHT 2.38 
 #define ROBOT_RADIUS 0.10
 
 string team;
