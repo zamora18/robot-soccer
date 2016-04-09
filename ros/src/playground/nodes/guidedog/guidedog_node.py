@@ -4,6 +4,7 @@ This node is a guidedog to the robot (i.e., the robot is blind).
 
 It 
 """
+import sys, os
 from collections import Iterable
 
 import roslib; roslib.load_manifest('playground')
@@ -12,6 +13,9 @@ from geometry_msgs.msg import Pose2D
 from playground.msg import RobotState
 
 import numpy as np
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'ai/'))
+import Utilities
 
 import avoidance
 
