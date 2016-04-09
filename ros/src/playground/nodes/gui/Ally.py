@@ -385,7 +385,7 @@ class Ally(object):
 
     def _btn_step_resp(self):
         if self._step_resp is None:
-            self._step_resp = StepResponse.Dialog()
+            self._step_resp = StepResponse.Dialog(self.ally)
         self._step_resp.show()
 
     def _btn_kick(self):
