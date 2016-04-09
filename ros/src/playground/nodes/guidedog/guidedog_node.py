@@ -207,8 +207,8 @@ def main():
 
     # rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
     # rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
-    rospy.Subscriber('opponent1_state', RobotState, lambda x: _handle_opponent_position(1, msg))
-    rospy.Subscriber('opponent2_state', RobotState, lambda x: _handle_opponent_position(2, msg))
+    rospy.Subscriber('opponent1_state', RobotState, lambda x: _handle_opponent_position(1, x))
+    rospy.Subscriber('opponent2_state', RobotState, lambda x: _handle_opponent_position(2, x))
 
     _go_rogue = rospy.get_param('go_rogue', 'false')
 
