@@ -66,7 +66,7 @@ Things I'm currently/need to work on:
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
-def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
+def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
     global _is_goal_global

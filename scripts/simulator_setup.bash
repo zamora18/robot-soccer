@@ -41,8 +41,12 @@ function killsim() {
 }
 
 # Simulate the "space bar" being pressed on the vision code
-function vision_spacebar() {
+function vision_spacebar_on() {
     rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}";
+}
+
+function vision_spacebar_off() {
+    rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}";
 }
 
 # Simulation Scripts (The user can put in bg with &)
@@ -105,7 +109,7 @@ function sim_go() {
     # Remove env var for next run
     unset SIM_ROBOTS
 
-    vision_spacebar;
+    vision_spacebar_on;
 }
 
 function sim_stop() {

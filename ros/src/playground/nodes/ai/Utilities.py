@@ -2,6 +2,7 @@ from collections import Iterable
 import numpy as np 
 
 import Constants
+from GameObjects import Robot
 
 _ally1_stuck_counter    = 0
 _ALLY1_STUCK_MAX        = 500
@@ -203,8 +204,8 @@ def deg_to_rad(deg):
 #################################################################
 
 def robot_close_to_point(robot, point_x, point_y, theta):
-    return close(point_x, robot.xhat, tolerance = .07) and close(point_y, robot.yhat, tolerance=.07) \
-                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
+    return close(point_x, robot.xhat, tolerance=.07) and close(point_y, robot.yhat, tolerance=.07) \
+                and close(theta, robot.thetahat, tolerance=10) # within 10cm of x and y, and 10 degree tolerance for theta
 
 def close(a, b, tolerance=0.010):
     """
@@ -316,4 +317,3 @@ def i_am_stuck(me):
             else:
                 _ally2_stuck_counter = 0
             return False
-
