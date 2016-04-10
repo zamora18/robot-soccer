@@ -15,8 +15,8 @@ from matplotlib import animation
 
 import StepResponse
 
-FIELD_LENGTH = 4
-FIELD_WIDTH = 3.2
+FIELD_LENGTH = 3.7
+FIELD_WIDTH = 2.65
 MAX_X_VEL = 2
 MAX_Y_VEL = 2
 
