@@ -209,17 +209,12 @@ class AllyUI(object):
         # Don't allow column resizing
         tbl.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
 
-    def update_table(self, tbl, col1, col2, col3=None, rounding=True):
-        if rounding:
-            col1 = round(col1,4)
-            col2 = round(col2,4)
-            if col3 is not None:
-                col3 = round(col3,4)
+    def update_table(self, tbl, cols, rounding=True):
+        for idx, col in enumerate(cols):
+            if rounding:
+                cols[idx] = round(col,4)
 
-        tbl.item(0,0).setText(str(col1))
-        tbl.item(0,1).setText(str(col2))
-        if col3 is not None:
-            tbl.item(0,2).setText(str(col3))
+            tbl.item(0,idx).setText(str(cols[idx]))
 
     def read_table(self, tbl):
         col1 = float(tbl.item(0,0).text())
@@ -344,7 +339,7 @@ class Ally(object):
 
     def _handle_my_state(self, msg):
         tbl = self.ui.tbl_est_pos
-        self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
+        self.ui.update_table(tbl, [msg.xhat, msg.yhat, msg.thetahat])
 
         # Save for later!
         self.last['my_state'] = self.current['my_state']
@@ -368,11 +363,11 @@ class Ally(object):
     def _handle_ball_state(self, msg):
         if self.ui.tbl_ball_pos is not None:
             tbl = self.ui.tbl_ball_pos
-            self.ui.update_table(tbl, msg.xhat, msg.yhat)
+            self.ui.update_table(tbl, [msg.xhat, msg.yhat])
 
         if self.ui.tbl_ball_future is not None:
             tbl = self.ui.tbl_ball_future
-            self.ui.update_table(tbl, msg.xhat_future, msg.yhat_future)
+            self.ui.update_table(tbl, [msg.xhat_future, msg.yhat_future])
 
         # Save for later!
         self.last['ball_state'] = self.current['ball_state']
@@ -380,7 +375,7 @@ class Ally(object):
 
     def _handle_des_pos(self, msg):
         tbl = self.ui.tbl_des_pos
-        self.ui.update_table(tbl, msg.x, msg.y, msg.theta)
+        self.ui.update_table(tbl, [msg.x, msg.y, msg.theta])
 
         # Save for later!
         self.last['desired_position'] = self.current['desired_position']
@@ -393,7 +388,7 @@ class Ally(object):
 
     def _handle_vel(self, msg):
         tbl = self.ui.tbl_vel
-        self.ui.update_table(tbl, msg.linear.x, msg.linear.y, msg.angular.z)
+        self.ui.update_table(tbl, [msg.linear.x, msg.linear.y, msg.angular.z])
 
         # Save for later!
         self.last['velocity'] = self.current['velocity']
@@ -401,7 +396,7 @@ class Ally(object):
 
     def _handle_PID_error(self, msg):
         tbl = self.ui.tbl_PID_error
-        self.ui.update_table(tbl, msg.error.x, msg.error.y, msg.error.theta)
+        self.ui.update_table(tbl, [msg.error.x, msg.error.y, msg.error.theta])
 
         # Save for later!
         self.last['pidinfo'] = self.current['pidinfo']
