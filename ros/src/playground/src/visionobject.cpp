@@ -89,7 +89,7 @@ bool VisionObject::initColor(string color, int* LowH, int* LowS, int* LowV, int*
 	}
 	else if(color == "bc")
 	{
-		colors = (colorarray){77,111,0,87,230,255};
+		colors = (colorarray){77,111,0,45,217,255};
 	}
 	else if(color == "o")
 	{
@@ -101,7 +101,7 @@ bool VisionObject::initColor(string color, int* LowH, int* LowS, int* LowV, int*
 	}
 	else if(color == "p")
 	{
-		colors = (colorarray){125, 164,0,78,200,255};
+		colors = (colorarray){125, 164,0,78,134,255};
 	}
 	else if(color == "r")
 	{
