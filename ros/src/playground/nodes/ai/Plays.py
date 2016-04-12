@@ -92,7 +92,10 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     ### Moore Outputs in states ###
     ###############################
     # go to the desired setup location
-    if(_shoot_state == ShootState.setup):
+    
+    # import ipdb; ipdb.set_trace() 
+    
+    if _shoot_state == ShootState.setup:
         # print "Setup"
         if _ball_stuck_timer >= _BALL_STUCK_MAX:
             _ball_stuck_timer = 0

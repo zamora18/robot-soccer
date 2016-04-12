@@ -22,7 +22,7 @@ _goal_check_counter                 = 0
 _GOAL_COUNTER_MAX                   = 2 # 10 for real life, 2 for simulator
 
 _resume_game_counter                = 0
-_RESUME_GAME_MAX                    = 500 # (5 seconds)
+_RESUME_GAME_MAX                    = 50 # (5 seconds)
 
 """
 THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:

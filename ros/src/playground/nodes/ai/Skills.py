@@ -68,7 +68,7 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
 
 
 def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_y):
-    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y)
+    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y) 
     hypotenuse = Constants.robot_half_width + des_distance_from_ball
     x_c = ball.xhat - hypotenuse*np.cos(theta)
     y_c = ball.yhat - hypotenuse*np.sin(theta)
@@ -78,22 +78,27 @@ def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_
 
 
 def attack_ball_towards_goal(me, ball, goal_y):
-    return attack_ball_towards_point(me, ball, Constants.goal_position_opp[0], goal_y)
+    target_y = goal_y * Constants.goal_box_width/2
+    return attack_ball_towards_point(me, ball, Constants.goal_position_opp[0], target_y)
 
 
 def attack_ball(me, ball):
     """
     Simply pushes the ball along the "vector" from robot to ball
     """
-    return attack_ball_towards_point(me, ball, ball.xhat, ball.yhat)
+    theta = Utilities.get_angle_between_points(me.xhat, me.yhat, ball.xhat, ball.yhat)
+    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)
+    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)
+    theta_c = Utilities.rad_to_deg(theta)
+
+    return(x_c, y_c, theta_c)
 
 
 def attack_ball_towards_point(me, ball, point_x, point_y):
-    theta_c = Utilities.get_angle_between_points(ball.xhat, ball.yhat, point_x, point_y)
-    x_c = ball.xhat + Constants.kick_dist*np.cos(theta_c)
-    y_c = ball.yhat + Constants.kick_dist*np.sin(theta_c)
-    theta_c = Utilities.rad_to_deg(theta_c)
-
+    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, point_x, point_y)
+    x_c = ball.xhat + Constants.kick_dist*np.cos(theta)
+    y_c = ball.yhat + Constants.kick_dist*np.sin(theta)
+    theta_c = Utilities.rad_to_deg(theta)
     return(x_c, y_c, theta_c) 
 
 
