@@ -116,20 +116,17 @@ def lead_me_guide_me():
 
     if _avoid_walls:
         # Are we about to hit the edge of the field?
-        if Utilities.close(_me.xhat, min_x, tolerance=_edge_padding[0]) and _me.x_c < min_x:
-            # print("{} is close to {}".format(_me.xhat,min_x))
-            safe_c[0] = min_x
 
+        # Left and right of field (by goals)
+        if Utilities.close(_me.xhat, min_x, tolerance=_edge_padding[0]) and _me.x_c < min_x:
+            safe_c[0] = min_x
         if Utilities.close(_me.xhat, max_x, tolerance=_edge_padding[0]) and _me.x_c > max_x:
-            # print("{} is close to {}".format(_me.xhat,max_x))
             safe_c[0] = max_x
 
+        # Top and bottom of field
         if Utilities.close(_me.yhat, min_y, tolerance=_edge_padding[1]) and _me.y_c < min_y:
-            # print("{} is close to {}".format(_me.yhat,min_y))
             safe_c[1] = min_y
-
         if Utilities.close(_me.yhat, max_y, tolerance=_edge_padding[1]) and _me.y_c > max_y:
-            # print("{} is close to {}".format(_me.yhat,max_y))
             safe_c[1] = max_y
 
     return safe_c
