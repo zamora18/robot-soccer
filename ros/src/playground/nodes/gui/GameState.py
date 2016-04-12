@@ -39,6 +39,7 @@ class UI(object):
         if play is not None:
             txt = PLAY if play else PAUSED
             self.btn_toggle_spacebar.setText(txt)
+            return
 
         if txt == PAUSED:
             self.btn_toggle_spacebar.setText(PLAY)
