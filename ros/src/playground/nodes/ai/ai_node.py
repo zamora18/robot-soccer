@@ -51,9 +51,11 @@ def _handle_game_state(msg):
     _game_state['us_goal'] = msg.usgoal
     _game_state['them_goal'] = msg.themgoal
 
-    # Since we've gotten our first state message, 'first_time' is False
-    # This means that the robots will hold their place from now on
-    _game_state['first_time'] = False
+    # Since we've gotten our first state message with msg.play 'True',
+    # 'first_time' is False. This means that the robots will hold
+    # their place from now on.
+    if _game_state['first_time'] and msg.play:
+        _game_state['first_time'] = False
 
     if not msg.two_v_two:
          _ally = None
@@ -118,7 +120,7 @@ def main():
         # We didn't name this well ha. So 'not' it
         one_v_one = not _game_state['two_v_two']
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball,\
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, \
                                         was_goal=goal, one_v_one=one_v_one)
 
         # Get a message ready to send

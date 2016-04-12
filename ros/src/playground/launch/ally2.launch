@@ -5,7 +5,6 @@
 
         <!-- Set ROS Params -->
         <param name="robot_estimator_on" type="bool" value="true" />
-        <param name="robot_estimator_on" type="bool" value="true" />
         <param name="go_rogue" type="bool" value="false" />
         <param name="avoid_opponents" type="bool" value="true" />
         <param name="avoid_walls" type="bool" value="true" />

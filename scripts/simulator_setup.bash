@@ -75,6 +75,10 @@ function simulator_1v1() {
     # Prepend roslaunch ... ally1.launch with `ROBOT="fry"` so that, for that
     # single command, everything will be run as that robot. That way, you can
     # load in the yaml file for a specific robot in the simulator
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function simulator_2v2() {
@@ -89,6 +93,10 @@ function simulator_2v2() {
     sleep 2
     ROBOT="fry" roslaunch "$ROBOT_PKG" ally2.launch &
     export SIM_ROBOTS=2
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function sim_go() {
