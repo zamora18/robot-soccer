@@ -61,7 +61,6 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     global _recently_kicked, _kicker_wait_counter, _KICKER_WAIT_MAX
 
     # this is the desired setup point, the whole state machine needs it so it is
-    # calculated here
     desired_setup_position = Skills.set_up_kick_facing_goal(ball, distance_from_center)#!!!!!!should we try and do future? So it predicts
     # get the distance to the ball
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
@@ -70,7 +69,6 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     # We don't want to kicker to actuate so often, so we need to wait for the counter
     # This will happen every time the function is called, to make sure we don't miss a kick in between transitions
     _kicker_wait_counter = _kicker_wait_counter + 1
-    # print "Kicker wait counter: ({})" .format(_kicker_wait_counter)
     if _kicker_wait_counter >= _KICKER_WAIT_MAX:
         _recently_kicked = False
         _kicker_wait_counter = 0
@@ -81,7 +79,6 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     if _shoot_state == ShootState.setup:
         # _recently_kicked = False # Usually if it's in the setup state, we will have enough time to actuate the kicker.
         _ball_stuck_timer = _ball_stuck_timer + 1
-        # _recently_kicked = False
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
         if Utilities.robot_close_to_point(me, *desired_setup_position): 
             if not Utilities.is_ball_behind_robot(me, ball): 
@@ -108,10 +105,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     ###############################
     # go to the desired setup location
     
-    # import ipdb; ipdb.set_trace() 
-    
     if _shoot_state == ShootState.setup:
-        # print "Setup"
         if _ball_stuck_timer >= _BALL_STUCK_MAX:
             _ball_stuck_timer = 0
             return Skills.attack_ball(me, ball)
@@ -120,14 +114,16 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 
     # attack the ball
     elif  _shoot_state == ShootState.attack:
-        return Skills.attack_ball_towards_goal(me, ball, distance_from_center)
+        # return Skills.attack_ball_towards_goal(me, ball, distance_from_center)
+        return Skills.attack_ball(me, ball)
 
     elif _shoot_state == ShootState.shoot:
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
             Skills.kick()
         else:
             print "Opponent too close and could damage our kicker"
-        return Skills.attack_ball_towards_goal(me, ball, distance_from_center) # keep attacking the ball as you kick
+        # return Skills.attack_ball_towards_goal(me, ball, distance_from_center) # keep attacking the ball as you kick
+        return Skills.attack_ball(me, ball)
 
     # wait for state machine to start
     else:
@@ -210,12 +206,14 @@ def steal_ball_from_opponent(me, opponent, ball):
     global _wait_steal_timer, _WAIT_STEAL_MAX
 
     # WE ARE USING FUTURE POSITIONS SO WE WILL BE WHERE THE BALL IS HOPEFULLY BEFORE THE OPPONENT
-    theta_des = Utilities.get_angle_between_points(ball.xhat_future, ball.yhat_future, opponent.xhat, opponent.yhat)
-    x_des = ball.xhat_future - Constants.steal_ball_dist*np.cos(theta_des)
-    y_des = ball.yhat_future - Constants.steal_ball_dist*np.sin(theta_des)
+    theta_des = Utilities.get_angle_between_points(ball.xhat, ball.yhat, opponent.xhat, opponent.yhat)
+    x_des = ball.xhat - Constants.steal_ball_dist*np.cos(theta_des)
+    y_des = ball.yhat - Constants.steal_ball_dist*np.sin(theta_des)
     # but we need the kicker to get the current position so it will kick correctly
     (x,y) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x, y, ball.xhat, ball.yhat)
+
+
 
     #########################
     ### transition states ###

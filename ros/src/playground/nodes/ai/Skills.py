@@ -68,7 +68,7 @@ def set_up_kick_facing_goal(ball, distance_from_center_of_goal):
 
 
 def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_y):
-    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y) 
+    theta = Utilities.get_angle_between_points(ball.xhat, ball.yhat, target_x, target_y)
     hypotenuse = Constants.robot_half_width + des_distance_from_ball
     x_c = ball.xhat - hypotenuse*np.cos(theta)
     y_c = ball.yhat - hypotenuse*np.sin(theta)
@@ -78,7 +78,7 @@ def go_behind_ball_facing_target(ball, des_distance_from_ball, target_x, target_
 
 
 def attack_ball_towards_goal(me, ball, goal_y):
-    target_y = goal_y * Constants.goal_box_width/2
+    target_y = goal_y*Constants.goal_box_width/2
     return attack_ball_towards_point(me, ball, Constants.goal_position_opp[0], target_y)
 
 
@@ -109,8 +109,8 @@ def attack_ball_towards_point(me, ball, point_x, point_y):
 
 def give_my_teammate_some_space(me, my_teammate):
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
-    x_c = my_teammate.xhat_future - (Constants.teammate_gap+0.05)*np.cos(theta)
-    y_c = my_teammate.yhat_future - (Constants.teammate_gap+0.05)*np.cos(theta)
+    x_c = my_teammate.xhat - (Constants.teammate_gap+0.05)*np.cos(theta)
+    y_c = my_teammate.yhat - (Constants.teammate_gap+0.05)*np.cos(theta)
     theta_c = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta_c)
 
