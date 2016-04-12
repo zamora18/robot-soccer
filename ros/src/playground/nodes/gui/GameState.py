@@ -28,6 +28,23 @@ class UI(object):
         self.lbl_us_score = ui.lblUsScore
         self.lbl_them_score = ui.lblThemScore
 
+    def change_toggle_text(self, play=None):
+        # What is the current button text?
+        txt = self.btn_toggle_spacebar.text()
+
+        # What are the'Spacebar Toggle (Pause and Go Home)' text that should be?
+        PLAY = 'Spacebar Toggle (Pause and Go Home)'
+        PAUSED = 'Spacebar Toggle (Turn on AI and play!)'
+
+        if play is not None:
+            txt = PLAY if play else PAUSED
+            self.btn_toggle_spacebar.setText(txt)
+
+        if txt == PAUSED:
+            self.btn_toggle_spacebar.setText(PLAY)
+        else:
+            self.btn_toggle_spacebar.setText(PAUSED)
+
 class GameState(object):
     def __init__(self, ui):
         super(GameState, self).__init__()
@@ -64,6 +81,8 @@ class GameState(object):
         self.game_state['play'] = msg.play
         self.game_state['two_v_two'] = msg.two_v_two
 
+        self.ui.change_toggle_text(play=msg.play)
+
         if not msg.two_v_two:
             self.ui.radio_one_v_one.setChecked(True)
         else:
@@ -82,6 +101,8 @@ class GameState(object):
     def _btn_toggle_spacebar(self):
         # Toggle play
         self.game_state['play'] = not self.game_state['play']
+
+        self.ui.change_toggle_text()
 
         msg = GameStateMsg()
         msg.play = self.game_state['play']

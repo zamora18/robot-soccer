@@ -16,12 +16,7 @@ _percent_time_opponents_in_our_half = 0
 _our_score                          = 0
 _opponent_score                     = 0
 
-_nobody_just_scored                 = 0
-_we_just_scored                     = 1
-_opp_just_scored                    = 2
-
 # For detecting goal 
-_is_goal_global = False
 _goal_check_counter                 = 0
 _GOAL_COUNTER_MAX                   = 2 # 10 for real life, 2 for simulator
 
@@ -80,28 +75,22 @@ Things I'm currently/need to work on:
 def choose_strategy(me, my_teammate, opponent1, opponent2, ball, was_goal=G.NO_ONE, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
-    global _is_goal_global
-    global _we_just_scored, _opp_just_scored, _nobody_just_scored
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
     # Check to see if someone scored a goal
-    if 1 == 2:
-        return (0,0,0)
-    # if goal_scored == _we_just_scored:
-    #     update_score(_we_just_scored)
-    # elif goal_scored == _opp_just_scored:
-    #     update_score(_opp_just_scored)
-    else: # No goal, keep playing
-        opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
-        #for now, we will just focus on aggressive offense
-        if (one_v_one):
-            return one_on_one(me, opponent1, ball)
+    if was_goal is not G.NO_ONE:
+        update_score(was_goal)
+
+    opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
+    #for now, we will just focus on aggressive offense
+    if (one_v_one):
+        return one_on_one(me, opponent1, ball)
+    else:
+        if (_opponent_score > _our_score) or opp_strong_offense:
+            return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
         else:
-            if (_opponent_score > _our_score) or opp_strong_offense:
-                return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
-            else:
-                return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
-                # return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+            return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
+            # return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
 
 
 
@@ -261,11 +250,11 @@ def check_for_goal(ball):
 
 
 def update_score(who_scored):
-    global _we_just_scored, _opp_just_scored
-    if who_scored == _we_just_scored:
+    global _our_score, _opponent_score
+    if who_scored == G.US:
         print "GOOOOOAAAAAAALLLLLLLAAAAASSSSSSSOOOOOOO!!!!"
         _our_score = _our_score + 1
-    elif who_scored == _opp_just_scored:
+    elif who_scored == G.THEM:
         print "NOOOO, They scored =("
         _opponent_score = _opponent_score + 1 
 
