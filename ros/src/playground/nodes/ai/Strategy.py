@@ -91,17 +91,6 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, was_goal=G.NO_O
     #     update_score(_we_just_scored)
     # elif goal_scored == _opp_just_scored:
     #     update_score(_opp_just_scored)
-
-    check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
-
-    if _is_goal_global:
-        if are_robots_in_reset_position(me, my_teammate):
-            if done_waiting_for_resume_game():
-                # Reset variables so that gameplay can continue
-                _is_goal_global = False # this will allow the gameplay to restart again.
-        return reset_positions_after_goal(me)
-
->>>>>>> did spacebar toggling and sending ai_node goal data
     else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
