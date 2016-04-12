@@ -518,6 +518,31 @@ int main(int argc, char *argv[])
 
 			gamestatemsg.play = playgame;
 			gamestatemsg.two_v_two = twovtwo;
+			gamestatemsg.usgoal = false;
+			gamestatemsg.themgoal = false;
+
+			pubstart.publish(gamestatemsg);
+
+		}
+		else if (keypress % 256 == 'u' || keypress == 'u') // we scored
+		{
+			playground::GameState gamestatemsg;
+
+			gamestatemsg.play = playgame;
+			gamestatemsg.two_v_two = twovtwo;
+			gamestatemsg.usgoal = true;
+			gamestatemsg.themgoal = false;
+
+			pubstart.publish(gamestatemsg);
+		}
+		else if (keypress % 256 == 't' || keypress == 't')
+		{
+			playground::GameState gamestatemsg;
+			
+			gamestatemsg.play = playgame;
+			gamestatemsg.two_v_two = twovtwo;
+			gamestatemsg.usgoal = false;
+			gamestatemsg.themgoal = true;
 
 			pubstart.publish(gamestatemsg);
 
