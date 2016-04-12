@@ -94,7 +94,9 @@ def above_or_below(robot, dest, opp):
 def avoid(me, dest, opp):
     """
     """
-    
+    if(me[0] < -(Constants.field_length/4)):
+        return dest
+
     perp_point = get_perpendicular_point(me, dest, opp)
 
     if perp_point is None:

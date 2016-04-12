@@ -30,6 +30,9 @@ function killsim() {
     # must be called in the same terminal you started
     killall roslaunch
 
+    # Remove env var for next run
+    unset SIM_ROBOTS
+
     # Kill all jobs
     # kill $(jobs -p)
 
@@ -42,11 +45,19 @@ function killsim() {
 
 # Simulate the "space bar" being pressed on the vision code
 function vision_spacebar_on() {
-    rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}";
+    if [[ $SIM_ROBOTS -eq 1 ]]; then
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}";
+    else
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': true}";
+    fi;
 }
 
 function vision_spacebar_off() {
-    rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}";
+    if [[ $SIM_ROBOTS -eq 1 ]]; then
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}";
+    else
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': true}";
+    fi;
 }
 
 # Simulation Scripts (The user can put in bg with &)
@@ -104,10 +115,7 @@ function sim_go() {
     fi
 
     # Update for sim_stop
-    export LAST_SIM_ROBOTS=${SIM_ROBOTS}
-
-    # Remove env var for next run
-    unset SIM_ROBOTS
+    # export LAST_SIM_ROBOTS=${SIM_ROBOTS}
 
     vision_spacebar_on;
 }
