@@ -4,3 +4,6 @@ theta_init: 0
 edge_padding:
   x: 0.025
   y: 0.050
+goal_tolerance:
+  x: 0
+  y: 0.2032
