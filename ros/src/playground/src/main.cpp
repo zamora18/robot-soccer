@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	// cap;
 	//cap.open("http://192.168.1.10:8080/stream?topic=/image&dummy=param.mjpg");
 
-	ImageProcessor video = ImageProcessor("http://192.168.1.78:8080/stream?topic=/image&dummy=param.mjpg");
+	ImageProcessor video = ImageProcessor("http://192.168.1.79:8080/stream?topic=/image&dummy=param.mjpg");
 	// ImageProcessor video = ImageProcessor(0); //use for webcam
 
 	/*if(!cap.isOpened())
