@@ -2,8 +2,8 @@ x_init: -1.5
 y_init: 0
 theta_init: 0
 edge_padding:
-  x: 0.025
-  y: 0.050
+  x: 0.050
+  y: 0.075
 goal_tolerance:
   x: 0
   y: 0.2032
