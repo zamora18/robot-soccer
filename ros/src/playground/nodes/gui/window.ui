@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>825</width>
-    <height>906</height>
+    <height>932</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -206,7 +206,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>390</y>
+      <y>380</y>
       <width>811</width>
       <height>391</height>
      </rect>
@@ -382,9 +382,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>780</y>
-      <width>811</width>
-      <height>81</height>
+      <y>760</y>
+      <width>391</width>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -393,8 +393,8 @@
     <widget class="QTableWidget" name="tblBallPosition">
      <property name="geometry">
       <rect>
-       <x>80</x>
-       <y>20</y>
+       <x>100</x>
+       <y>10</y>
        <width>197</width>
        <height>50</height>
       </rect>
@@ -403,11 +403,173 @@
     <widget class="QTableWidget" name="tblBallFuture">
      <property name="geometry">
       <rect>
-       <x>300</x>
-       <y>20</y>
+       <x>100</x>
+       <y>70</y>
        <width>197</width>
        <height>50</height>
       </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>760</y>
+      <width>391</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Game State</string>
+    </property>
+    <widget class="QPushButton" name="btnSpacebarToggle">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>241</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Spacebar Toggle (Pause and Go Home)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>33</y>
+       <width>55</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Us:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>53</y>
+       <width>55</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Them:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblThemScore">
+     <property name="geometry">
+      <rect>
+       <x>93</x>
+       <y>53</y>
+       <width>55</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblUsScore">
+     <property name="geometry">
+      <rect>
+       <x>93</x>
+       <y>33</y>
+       <width>55</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnUsGoal">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>33</y>
+       <width>85</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Goal!</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnThemGoal">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>53</y>
+       <width>85</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Goal!</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radOne">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>40</y>
+       <width>102</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>One vs One</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radTwo">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>60</y>
+       <width>102</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Two vs Two</string>
      </property>
     </widget>
    </widget>
