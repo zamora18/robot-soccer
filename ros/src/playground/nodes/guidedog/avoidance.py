@@ -57,6 +57,9 @@ def point_to_go_through(opp, perp_point):
 
     theta = theta + np.pi
 
+    if theta > 2*np.pi:
+        theta -= 2*np.pi
+
     a = dnew*np.cos(theta)
     b = dnew*np.sin(theta)
 
@@ -99,6 +102,8 @@ def avoid(me, dest, opp):
 
     perp_point = get_perpendicular_point(me, dest, opp)
 
+    # print perp_point
+
     if perp_point is None:
         return dest
 
@@ -117,7 +122,7 @@ def avoid(me, dest, opp):
         b = c*np.sin(angle)
 
         x = me[0] + a
-        y = me[0] + b
+        y = me[1] + b
 
         return (x,y)
 
@@ -152,7 +157,7 @@ def main():
         b = c*np.sin(angle)
 
         x = robot[0] + a
-        y = robot[0] + b
+        y = robot[1] + b
 
         print (x,y)
 
