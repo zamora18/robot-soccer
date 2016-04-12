@@ -3,7 +3,7 @@ import os, sys
 from PyQt4 import QtGui, uic, QtCore
 
 import rospy, rostopic
-from playground.msg import GameState
+from playground.msg import GameState as GameStateMsg
 
 from matplotlib import pyplot as plt
 from matplotlib import animation
@@ -16,7 +16,7 @@ class UI(object):
         super(UI, self).__init__()
 
         # Buttons
-        self.btn_toggle_spacebar = ui.btnToggleSpacebar
+        self.btn_toggle_spacebar = ui.btnSpacebarToggle
         self.btn_us_goal = ui.btnUsGoal
         self.btn_them_goal = ui.btnThemGoal
 
@@ -30,14 +30,14 @@ class UI(object):
 
 class GameState(object):
     def __init__(self, ui):
-        super(Dialog, self).__init__()
+        super(GameState, self).__init__()
 
         # Load and initialize the UI
-        self.ui = UI(ui, ally)
+        self.ui = UI(ui)
 
         # Connect ROS things
-        rospy.Subscriber('/game_state', GameState, self._handle_game_state)
-        self.pub_game_state = rospy.Publisher('/game_state', GameState, queue_size=10)
+        rospy.Subscriber('/game_state', GameStateMsg, self._handle_game_state)
+        self.pub_game_state = rospy.Publisher('/game_state', GameStateMsg, queue_size=10)
 
         # Connect to Qt buttons
         self.ui.btn_toggle_spacebar.clicked.connect(self._btn_toggle_spacebar)
@@ -45,13 +45,13 @@ class GameState(object):
         self.ui.btn_them_goal.clicked.connect(self._btn_them_goal)
 
         # Connect to Qt Radio Buttons
-        # self.ui.radio_one_v_one.toggled.connect()
-        # self.ui.radio_two_v_two.toggled.connect()
+        self.ui.radio_one_v_one.toggled.connect(self._radio_one_v_one)
+        self.ui.radio_two_v_two.toggled.connect(self._radio_two_v_two)
 
         # Initialize Game State
         self.game_state = {
             'play': False,
-            'one_v_one': False,
+            'two_v_two': False,
             'us_score': 0,
             'them_score': 0
         }
@@ -62,12 +62,12 @@ class GameState(object):
 
     def _handle_game_state(self, msg):
         self.game_state['play'] = msg.play
-        self.game_state['one_v_one'] = msg.one_v_one
+        self.game_state['two_v_two'] = msg.two_v_two
 
-        if msg.one_v_one:
-            self.ui.radio_one_v_one.setChecked()
+        if not msg.two_v_two:
+            self.ui.radio_one_v_one.setChecked(True)
         else:
-            self.ui.radio_two_v_two.setChecked()
+            self.ui.radio_two_v_two.setChecked(True)
 
         if msg.usgoal:
             self._increment_our_score()
@@ -83,32 +83,34 @@ class GameState(object):
         # Toggle play
         self.game_state['play'] = not self.game_state['play']
 
-        msg = GameState()
+        msg = GameStateMsg()
         msg.play = self.game_state['play']
-        msg.one_v_one = self.game_state['one_v_one']
+        msg.two_v_two = self.game_state['two_v_two']
         msg.usgoal = False
         msg.themgoal = False
-        self.pub_game_state(msg)
+        self.pub_game_state.publish(msg)
 
     def _btn_us_goal(self):
-        self._increment_our_score()
-
-        msg = GameState()
+        msg = GameStateMsg()
         msg.play = self.game_state['play']
-        msg.one_v_one = self.game_state['one_v_one']
+        msg.two_v_two = self.game_state['two_v_two']
         msg.usgoal = True
         msg.themgoal = False
-        self.pub_game_state(msg)
+        self.pub_game_state.publish(msg)
 
     def _btn_them_goal(self):
-        self._increment_their_score()
-
-        msg = GameState()
+        msg = GameStateMsg()
         msg.play = self.game_state['play']
-        msg.one_v_one = self.game_state['one_v_one']
+        msg.two_v_two = self.game_state['two_v_two']
         msg.usgoal = False
         msg.themgoal = True
-        self.pub_game_state(msg)
+        self.pub_game_state.publish(msg)
+
+    def _radio_one_v_one(self):
+        self.game_state['two_v_two'] = not self.ui.radio_one_v_one.isChecked()
+
+    def _radio_two_v_two(self):
+        self.game_state['two_v_two'] = self.ui.radio_two_v_two.isChecked()
 
     # =========================================================================
     # Other
@@ -116,8 +118,8 @@ class GameState(object):
 
     def _increment_our_score(self):
         self.game_state['us_score'] += 1
-        self.ui.lbl_us_score.setText(self.game_state['us_score'])
+        self.ui.lbl_us_score.setText(str(self.game_state['us_score']))
 
     def _increment_their_score(self):
         self.game_state['them_score'] += 1
-        self.ui.lbl_them_score.setText(self.game_state['them_score'])
+        self.ui.lbl_them_score.setText(str(self.game_state['them_score']))

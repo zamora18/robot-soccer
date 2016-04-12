@@ -11,7 +11,7 @@ from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
 
-import Strategy
+import Strategy, Constants
 from GameObjects import Ball, Robot
 
 _me = None
@@ -21,7 +21,13 @@ _opp2 = None
 
 _ball = None
 
-_game_state = None
+_game_state = {
+    'play': False,
+    'two_v_two': False,
+    'us_goal': False,
+    'them_goal': False,
+    'first_time': True
+}
 
 def _handle_robot_state(msg, which_robot):
     # Update the given robot's current and future positions
@@ -39,9 +45,17 @@ def _handle_ball_state(msg):
 
 def _handle_game_state(msg):
     global _game_state, _ally
-    _game_state = msg
 
-    if not _game_state.two_v_two:
+    _game_state['play'] = msg.play
+    _game_state['two_v_two'] = msg.two_v_two
+    _game_state['us_goal'] = msg.usgoal
+    _game_state['them_goal'] = msg.themgoal
+
+    # Since we've gotten our first state message, 'first_time' is False
+    # This means that the robots will hold their place from now on
+    _game_state['first_time'] = False
+
+    if not msg.two_v_two:
          _ally = None
 
 def _create_robots():
@@ -89,21 +103,46 @@ def main():
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        # Figure out game state stuff
-        if _game_state == None:
-            one_v_one = False # Default to two_v_two
-            play_game = False
+        # Was there a goal to tell Strategy about?
+        if _game_state['us_goal']:
+            goal = Strategy.G.US
+            _game_state['us_goal'] = False
+
+        elif _game_state['them_goal']:
+            goal = Strategy.G.THEM
+            _game_state['them_goal'] = False
+
         else:
-            one_v_one = not _game_state.two_v_two
-            play_game = _game_state.play
+            goal = Strategy.G.NO_ONE
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, one_v_one=one_v_one)
+        # We didn't name this well ha. So 'not' it
+        one_v_one = not _game_state['two_v_two']
 
-        if play_game:
-            msg = Pose2D()
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball,\
+                                        was_goal=goal, one_v_one=one_v_one)
+
+        # Get a message ready to send
+        msg = Pose2D()
+
+        if _game_state['play']:
+            # Run AI as normal
             msg.x = x_c
             msg.y = y_c
             msg.theta = theta_c
+        else:
+            # Send robot to home
+            if _me.ally1:
+                msg.x = Constants.ally1_start_pos[0]
+                msg.y = Constants.ally1_start_pos[1]
+                msg.theta = Constants.ally1_start_pos[2]
+            elif _me.ally2:
+                msg.x = Constants.ally2_start_pos[0]
+                msg.y = Constants.ally2_start_pos[1]
+                msg.theta = Constants.ally2_start_pos[2]
+
+        # If it's not the first time, the robot will 'hold its ground'
+        # even while paused. (See guidedog_node.py)
+        if not _game_state['first_time']:
             pub.publish(msg)
 
         rate.sleep()

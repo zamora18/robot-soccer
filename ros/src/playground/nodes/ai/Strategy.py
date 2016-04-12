@@ -28,6 +28,11 @@ _GOAL_COUNTER_MAX                   = 2 # 10 for real life, 2 for simulator
 _resume_game_counter                = 0
 _RESUME_GAME_MAX                    = 50 # (5 seconds)
 
+class G:
+    NO_ONE = 0
+    US = 1
+    THEM = 2
+
 """
 THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:
     - Strategy.py:      _GOAL_COUNTER_MAX
@@ -72,7 +77,7 @@ Things I'm currently/need to work on:
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
-def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False): #goal_scored
+def choose_strategy(me, my_teammate, opponent1, opponent2, ball, was_goal=G.NO_ONE, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
     global _is_goal_global
@@ -86,6 +91,17 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False
     #     update_score(_we_just_scored)
     # elif goal_scored == _opp_just_scored:
     #     update_score(_opp_just_scored)
+
+    check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
+
+    if _is_goal_global:
+        if are_robots_in_reset_position(me, my_teammate):
+            if done_waiting_for_resume_game():
+                # Reset variables so that gameplay can continue
+                _is_goal_global = False # this will allow the gameplay to restart again.
+        return reset_positions_after_goal(me)
+
+>>>>>>> did spacebar toggling and sending ai_node goal data
     else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense

@@ -113,6 +113,9 @@ def lead_me_guide_me():
         robot_obstacle = Utilities._get_closest_robot_to_point( \
                                         _opp1, _opp2, *_me.get_2d_location())
 
+        # robot_obstacle = Utilities._get_closest_robot_to_point( \
+        #                                 robot_obstacle, _ally, *_me.get_2d_location())
+
         # Pass points to avoid
         (x_c, y_c) = avoidance.avoid(_me.get_2d_location(), _me.get_2d_desired(), \
                                             robot_obstacle.get_2d_location())

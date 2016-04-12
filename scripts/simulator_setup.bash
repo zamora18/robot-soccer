@@ -117,7 +117,7 @@ function sim_go() {
     # Update for sim_stop
     # export LAST_SIM_ROBOTS=${SIM_ROBOTS}
 
-    vision_spacebar_on;
+    # vision_spacebar_on;
 }
 
 function sim_stop() {
