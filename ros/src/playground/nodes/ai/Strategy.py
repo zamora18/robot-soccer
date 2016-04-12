@@ -28,6 +28,8 @@ _RESUME_GAME_MAX                    = 50 # (5 seconds)
 THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:
     - Strategy.py:      _GOAL_COUNTER_MAX
     - Constants.py:     goal_score_threshold
+    - Plays.py:         _KICKER_WAIT_MAX
+                        _BALL_STUCK_MAX
 
 """
  
@@ -87,13 +89,14 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
         if (one_v_one):
-            (x,y,theta) = one_on_one(me, opponent1, ball)
-            (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
-            return (x, y, theta) # TOOK OUT X_C, Y_C
+            return one_on_one(me, opponent1, ball)
         else:
-            (x,y,theta) = aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
-            (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
-            return (x, y, theta) # TOOK OUT X_C, Y_C
+            if (_opponent_score > _our_score) or opp_strong_offense:
+                return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+            else:
+                # return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
+                return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
@@ -128,6 +131,31 @@ def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
 
 def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
+
+    if me.ally1:
+        if section == 1:
+            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 2:
+            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 3:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 4:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        else:
+            return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
+    else:
+        if   section == 1:
+            return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 2:
+            return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball) #This used to be offensive defender, but i want to see the goalie do it's thing
+        elif section == 3:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        elif section == 4:
+            return Roles.offensive_attacker(me, my_teammate, opponent1, opponent2, ball)
+        else:
+            return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
+
+
 
     if me.ally1:
         if   section == 1:
