@@ -24,7 +24,7 @@ goalie_radius       = goal_box_width/2
 
 dribble_distance    = robot_half_width + .05
 kickable_distance   = 0.04
-steal_ball_dist     = robot_half_width + 0.15
+steal_ball_dist     = robot_half_width + 0.12
 
 ally1_start_pos     = [-0.50, 0, 0]
 ally2_start_pos     = [goal_position_home[0]+goalie_radius, 0, 0]

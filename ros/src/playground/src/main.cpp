@@ -127,6 +127,8 @@ int main(int argc, char *argv[])
 
 	gamestatemsginit.play = playgame;
 	gamestatemsginit.two_v_two = twovtwo;
+	gamestatemsginit.usgoal = false;
+	gamestatemsginit.themgoal = false;
 
 	pubstart.publish(gamestatemsginit);
 

@@ -97,6 +97,8 @@ def above_or_below(robot, dest, opp):
 def avoid(me, dest, opp):
     """
     """
+
+    # Don't avoid anything if your near the goal
     if(me[0] < -(Constants.field_length/4)):
         return dest
 

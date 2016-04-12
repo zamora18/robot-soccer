@@ -8,7 +8,7 @@ from collections import Iterable
 import roslib; roslib.load_manifest('playground')
 import rospy
 from geometry_msgs.msg import Pose2D
-from playground.msg import RobotState
+from playground.msg import RobotState, GameState
 
 import numpy as np
 
@@ -33,6 +33,8 @@ _pub = None
 _edge_padding = None
 _goal_y_tolerance = None
 
+_one_v_one = True
+
 def _handle_raw_desired_position(msg):
     _me.update_desired(msg)
 
@@ -43,6 +45,12 @@ def _handle_raw_desired_position(msg):
         unsafe_msg.y = msg.y
         unsafe_msg.theta = msg.theta
         _pub.publish(unsafe_msg)
+
+def _handle_game_state(msg):
+    global _one_v_one
+
+    # Our naming is terrible! Oh well.
+    _one_v_one = not msg.two_v_two
 
 def _handle_robot_state(msg, which_robot):
     # Update the given robot's current and future positions
@@ -110,8 +118,19 @@ def lead_me_guide_me():
     if _avoid_opponents:
 
         # find the closest robot
-        robot_obstacle = Utilities._get_closest_robot_to_point( \
-                                        _opp1, _opp2, *_me.get_2d_location())
+        if _one_v_one:
+            # Well, there may actually be two opponents, but we only 
+            # will avoid opp1 (see main.cpp for vision)
+            robot_obstacle = _opp1
+
+        else:
+            # Choose between the two opponents as to which is closest        
+            robot_obstacle = Utilities._get_closest_robot_to_point( \
+                                            _opp1, _opp2, *_me.get_2d_location())
+
+            # And now compare the closest opponent to the closest ally
+            robot_obstacle = Utilities._get_closest_robot_to_point( \
+                                            _ally, robot_obstacle, *_me.get_2d_location())
 
         # Pass points to avoid
         (x_c, y_c) = avoidance.avoid(_me.get_2d_location(), _me.get_2d_desired(), \
@@ -189,6 +208,8 @@ def main():
     rospy.Subscriber('opponent1_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp1'))
     rospy.Subscriber('opponent2_state', RobotState, lambda msg: _handle_robot_state(msg, 'opp2'))
     rospy.Subscriber('desired_position', Pose2D, _handle_raw_desired_position)
+
+    rospy.Subscriber('/game_state', GameState, _handle_game_state)
 
     print("Woof! Woof!")
 

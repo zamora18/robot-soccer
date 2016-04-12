@@ -29,6 +29,7 @@ source $PATH_TO_REPO/ros/devel/setup.bash
 function killsim() {
     # must be called in the same terminal you started
     killall roslaunch
+    killall rostopic
 
     # Remove env var for next run
     unset SIM_ROBOTS
@@ -46,17 +47,17 @@ function killsim() {
 # Simulate the "space bar" being pressed on the vision code
 function vision_spacebar_on() {
     if [[ $SIM_ROBOTS -eq 1 ]]; then
-        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}";
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}" &
     else
-        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': true}";
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': true}" &
     fi;
 }
 
 function vision_spacebar_off() {
     if [[ $SIM_ROBOTS -eq 1 ]]; then
-        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}";
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}" &
     else
-        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': true}";
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': true}" &
     fi;
 }
 
@@ -75,6 +76,10 @@ function simulator_1v1() {
     # Prepend roslaunch ... ally1.launch with `ROBOT="fry"` so that, for that
     # single command, everything will be run as that robot. That way, you can
     # load in the yaml file for a specific robot in the simulator
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function simulator_2v2() {
@@ -89,6 +94,10 @@ function simulator_2v2() {
     sleep 2
     ROBOT="fry" roslaunch "$ROBOT_PKG" ally2.launch &
     export SIM_ROBOTS=2
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function sim_go() {
@@ -117,7 +126,7 @@ function sim_go() {
     # Update for sim_stop
     # export LAST_SIM_ROBOTS=${SIM_ROBOTS}
 
-    vision_spacebar_on;
+    # vision_spacebar_on;
 }
 
 function sim_stop() {
