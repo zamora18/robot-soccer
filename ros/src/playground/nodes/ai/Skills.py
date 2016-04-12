@@ -41,11 +41,11 @@ def get_unstuck(me):
 # Skills mainly for "attacker" position: #
 ##########################################
 def kick():
-    global _kick_num
     """Kick
 
     Send a service call to kick the ball.
     """
+    global _kick_num
     try:
         kick_srv = rospy.ServiceProxy('kick', Trigger)
         kick_srv()
@@ -109,8 +109,8 @@ def attack_ball_towards_point(me, ball, point_x, point_y):
 
 def give_my_teammate_some_space(me, my_teammate):
     theta = Utilities.get_angle_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
-    x_c = my_teammate.xhat - (Constants.teammate_gap+0.05)*np.cos(theta)
-    y_c = my_teammate.yhat - (Constants.teammate_gap+0.05)*np.cos(theta)
+    x_c = my_teammate.xhat_future - (Constants.teammate_gap+0.05)*np.cos(theta)
+    y_c = my_teammate.yhat_future - (Constants.teammate_gap+0.05)*np.cos(theta)
     theta_c = Utilities.rad_to_deg(theta)
     return (x_c, y_c, theta_c)
 

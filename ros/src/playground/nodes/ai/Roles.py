@@ -99,11 +99,15 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                 else: 
                     return Plays.shoot_on_goal(me, ball, -goal_target, opponent1, opponent2)
             else: # I am ally2
-                if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
-                    return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
-                else:
-                    # return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
-                    return Plays.pass_to_teammate(me, my_teammate, ball) # passes to teammate_future_position
+                if strategy == _offensive:
+                    if (opponent1.xhat < me.xhat and opponent2.xhat < me.xhat):
+                        return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
+                    else:
+                        # return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
+                        return Plays.pass_to_teammate(me, my_teammate, ball) # passes to teammate_future_position
+                else: #Defensive
+                    return Skills.attack_ball_towards_goal(me, ball, goal_target)
+
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
             if Utilities.is_ball_behind_robot(me, ball):
@@ -117,9 +121,14 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
         elif Utilities.is_ball_behind_robot(me, ball):
             return Skills.avoid_own_goal(me, ball)
         else:
-            if me.ally1:
-                return Plays.stay_open_for_pass(me, my_teammate, ball)
-            else: # I am ally2 
+            # offensive only if we are behind in points 
+            if strategy == _offensive:
+                if me.ally1:
+                    return Plays.stay_open_for_pass(me, my_teammate, ball)
+                else: # I am ally2 
+                    return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
+            # The secondary robot will always stay at midfield
+            else:
                 return Plays.stay_at_midfield_follow_ball(me, opponent1, opponent2, ball)
 
 

@@ -25,6 +25,10 @@ _WAIT_STEAL_MAX     = 20
 _ball_stuck_timer   = 0
 _BALL_STUCK_MAX     = 300
 
+_recently_kicked            = False
+_kicker_wait_counter        = 0
+_KICKER_WAIT_MAX            = 75 # 750 ms in between kicks. (3/4 of a second)
+
 _offensive  = 0
 _defensive  = 1
 _neutral    = 2
@@ -54,6 +58,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 
     global _shoot_state
     global _ball_stuck_timer, _BALL_STUCK_MAX
+    global _recently_kicked, _kicker_wait_counter, _KICKER_WAIT_MAX
 
     # this is the desired setup point, the whole state machine needs it so it is
     # calculated here
@@ -62,11 +67,21 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
     (x_pos, y_pos) = Utilities.get_front_of_robot(me)
     distance_from_kicker_to_ball = Utilities.get_distance_between_points(x_pos, y_pos, ball.xhat, ball.yhat)
 
+    # We don't want to kicker to actuate so often, so we need to wait for the counter
+    # This will happen every time the function is called, to make sure we don't miss a kick in between transitions
+    _kicker_wait_counter = _kicker_wait_counter + 1
+    # print "Kicker wait counter: ({})" .format(_kicker_wait_counter)
+    if _kicker_wait_counter >= _KICKER_WAIT_MAX:
+        _recently_kicked = False
+        _kicker_wait_counter = 0
+
     #########################
     ### transition states ###
     #########################
     if _shoot_state == ShootState.setup:
+        # _recently_kicked = False # Usually if it's in the setup state, we will have enough time to actuate the kicker.
         _ball_stuck_timer = _ball_stuck_timer + 1
+        # _recently_kicked = False
         # if the robot is close enough to the correct angle and its in front of the ball change to the attack state
         if Utilities.robot_close_to_point(me, *desired_setup_position): 
             if not Utilities.is_ball_behind_robot(me, ball): 
@@ -81,9 +96,10 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
-        # If the ball is still close to the kicker, we need to kick until it is far away.
+        # We will keep shooting until the ball gets too far away from the kicker distance.
         if distance_from_kicker_to_ball > Constants.kickable_distance:
             _shoot_state = ShootState.setup 
+
     # default state, go to setup
     else:
         _shoot_state = ShootState.setup
@@ -109,7 +125,9 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 
     elif _shoot_state == ShootState.shoot:
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
-            Skills.kick()
+            if not _recently_kicked:
+                Skills.kick()
+                _recently_kicked = True
         else:
             print "Opponent too close and could damage our kicker"
         return Skills.attack_ball_towards_goal(me, ball, distance_from_center) # keep attacking the ball as you kick

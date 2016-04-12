@@ -31,6 +31,7 @@ _avoid_walls = True
 _pub = None
 
 _edge_padding = None
+_goal_y_tolerance = None
 
 def _handle_raw_desired_position(msg):
     _me.update_desired(msg)
@@ -94,6 +95,10 @@ def lead_me_guide_me():
     min_y = -((Constants.field_width/2.0)  - _edge_padding[1])
     max_y =  ((Constants.field_width/2.0)  - _edge_padding[1])
 
+    # Allow x to have less padding in the goal region
+    max_x_in_goal_region = max_x + Constants.goal_box_length
+    min_x_in_goal_region = min_x - Constants.goal_box_length
+
     # If I haven't been given a place to go yet, there is no point
     # in making sure that it is safe...
     if not _me.has_a_desired_position():
@@ -119,9 +124,23 @@ def lead_me_guide_me():
 
         # Left and right of field (by goals)
         if Utilities.close(_me.xhat, min_x, tolerance=_edge_padding[0]) and _me.x_c < min_x:
-            safe_c[0] = min_x
+            # If I'm in the goal region and I'm close to the wall...
+            if in_goal_region():
+                if _me.x_c < min_x_in_goal_region:
+                    safe_c[0] = min_x_in_goal_region
+                else:
+                    pass # i.e., let safe_c[0] be unchanged
+            else:
+                safe_c[0] = min_x
         if Utilities.close(_me.xhat, max_x, tolerance=_edge_padding[0]) and _me.x_c > max_x:
-            safe_c[0] = max_x
+            # If I'm in the goal region and I'm close to the wall...
+            if in_goal_region():
+                if _me.x_c > max_x_in_goal_region:
+                    safe_c[0] = max_x_in_goal_region
+                else:
+                    pass # i.e., let safe_c[0] be unchanged
+            else:
+                safe_c[0] = max_x
 
         # Top and bottom of field
         if Utilities.close(_me.yhat, min_y, tolerance=_edge_padding[1]) and _me.y_c < min_y:
@@ -130,6 +149,13 @@ def lead_me_guide_me():
             safe_c[1] = max_y
 
     return safe_c
+
+def in_goal_region():
+    # Figure out goal top and bottom points (create goal region)
+    goal_top_y =  (Constants.goal_box_width/2.0) + _goal_y_tolerance
+    goal_bot_y = -((Constants.goal_box_width/2.0) + _goal_y_tolerance)
+
+    return (_me.yhat >= goal_bot_y) and (_me.yhat <= goal_top_y)
 
 def main():
     rospy.init_node('guidedog', anonymous=False)
@@ -146,6 +172,10 @@ def main():
     epx = rospy.get_param('edge_padding/x', 0.05)
     epy = rospy.get_param('edge_padding/y', 0.05)
     _edge_padding = (epx, epy)
+
+    # And the goal tolerance?
+    global _goal_y_tolerance
+    _goal_y_tolerance = rospy.get_param('goal_tolerance/y', 0.200)
 
     # How much should the guidedog do?
     global _go_rogue, _avoid_opponents, _avoid_walls

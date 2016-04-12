@@ -59,7 +59,7 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
         return rob2 
 
 def am_i_too_close_to_teammate(me, my_teammate):
-    dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
+    dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat_future, my_teammate.yhat_future)
     if dist_from_each_other < Constants.teammate_gap:
         return True
     else:
