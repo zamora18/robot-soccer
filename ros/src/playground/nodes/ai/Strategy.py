@@ -129,7 +129,7 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
 
     if me.ally1:
         if section == 1:
-            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:

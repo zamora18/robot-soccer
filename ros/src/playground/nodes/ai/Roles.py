@@ -145,6 +145,10 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
     else:
         dist_to_maintain = 0.25
 
+    if strategy == _defensive:
+        return Plays.stay_open_for_pass(me, my_teammate, ball) 
+
+
     if Utilities.am_i_closest_teammate_to_ball(me, my_teammate, ball):
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
