@@ -96,9 +96,8 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
             _shoot_state = ShootState.shoot
 
     elif _shoot_state == ShootState.shoot:
-        # We will keep shooting until the ball gets too far away from the kicker distance.
-        if distance_from_kicker_to_ball > Constants.kickable_distance:
-            _shoot_state = ShootState.setup 
+        # Always go to the setup right after so that it only kicks once.
+        _shoot_state = ShootState.setup 
 
     # default state, go to setup
     else:
@@ -125,9 +124,7 @@ def shoot_on_goal(me, ball, distance_from_center, opponent1, opponent2):
 
     elif _shoot_state == ShootState.shoot:
         if not Utilities.is_opp_too_close_to_kicker(me, opponent1, opponent2, ball):
-            if not _recently_kicked:
-                Skills.kick()
-                _recently_kicked = True
+            Skills.kick()
         else:
             print "Opponent too close and could damage our kicker"
         return Skills.attack_ball_towards_goal(me, ball, distance_from_center) # keep attacking the ball as you kick

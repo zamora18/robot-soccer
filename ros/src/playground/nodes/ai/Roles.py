@@ -93,6 +93,8 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
+            
+
             if me.ally1 or one_v_one:
                 if ball.yhat > 0: 
                     return Plays.shoot_on_goal(me, ball, goal_target, opponent1, opponent2)
@@ -106,7 +108,11 @@ def attacker(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
                         # return Plays.shoot_on_goal(me, ball, middle_of_goal, opponent1, opponent2)
                         return Plays.pass_to_teammate(me, my_teammate, ball) # passes to teammate_future_position
                 else: #Defensive
-                    return Skills.attack_ball_towards_goal(me, ball, goal_target)
+                    if ball.yhat > 0: 
+                        return Plays.shoot_on_goal(me, ball, goal_target, opponent1, opponent2)
+                    else: 
+                        return Plays.shoot_on_goal(me, ball, -goal_target, opponent1, opponent2)
+
 
 
         else: #Basically, we don't have possession and I should be the one to steal the ball
@@ -156,7 +162,7 @@ def defender(me, my_teammate, opponent1, opponent2, ball, strategy, one_v_one=Fa
         if Utilities.am_i_closer_to_ball_than_opponents(me, opponent1, opponent2, ball):
             if Utilities.is_ball_behind_robot(me, ball):
                 return Skills.avoid_own_goal(me, ball)
-            else: #ally2 or 1v1
+            else:
                 return Skills.clear_ball_from_half(me, ball)
         else: # I am in charge of stealing the ball
             if Utilities.is_ball_behind_robot(me, ball):

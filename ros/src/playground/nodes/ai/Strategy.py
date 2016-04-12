@@ -16,6 +16,10 @@ _percent_time_opponents_in_our_half = 0
 _our_score                          = 0
 _opponent_score                     = 0
 
+_nobody_just_scored                 = 0
+_we_just_scored                     = 1
+_opp_just_scored                    = 2
+
 # For detecting goal 
 _is_goal_global = False
 _goal_check_counter                 = 0
@@ -68,23 +72,20 @@ Things I'm currently/need to work on:
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
-def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False):
+def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False): #goal_scored
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
     global _is_goal_global
+    global _we_just_scored, _opp_just_scored, _nobody_just_scored
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
     # Check to see if someone scored a goal
-    check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
-
-
-    if _is_goal_global:
-        if are_robots_in_reset_position(me, my_teammate):
-            if done_waiting_for_resume_game():
-                # Reset variables so that gameplay can continue
-                _is_goal_global = False # this will allow the gameplay to restart again.
-        return reset_positions_after_goal(me)
-
+    if 1 == 2:
+        return (0,0,0)
+    # if goal_scored == _we_just_scored:
+    #     update_score(_we_just_scored)
+    # elif goal_scored == _opp_just_scored:
+    #     update_score(_opp_just_scored)
     else: # No goal, keep playing
         opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
         #for now, we will just focus on aggressive offense
@@ -94,8 +95,8 @@ def choose_strategy(me, my_teammate, opponent1, opponent2, ball, one_v_one=False
             if (_opponent_score > _our_score) or opp_strong_offense:
                 return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
             else:
-                # return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
-                return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+                return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
+                # return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
 
 
 
@@ -254,12 +255,12 @@ def check_for_goal(ball):
                 update_score(ball)
 
 
-def update_score(ball):
-    global _our_score, _opponent_score
-    if ball.xhat > 0:
+def update_score(who_scored):
+    global _we_just_scored, _opp_just_scored
+    if who_scored == _we_just_scored:
         print "GOOOOOAAAAAAALLLLLLLAAAAASSSSSSSOOOOOOO!!!!"
         _our_score = _our_score + 1
-    else:
+    elif who_scored == _opp_just_scored:
         print "NOOOO, They scored =("
         _opponent_score = _opponent_score + 1 
 
