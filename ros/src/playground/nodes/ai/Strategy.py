@@ -17,50 +17,81 @@ _our_score                          = 0
 _opponent_score                     = 0
 
 # For detecting goal 
-_is_goal_global = False
 _goal_check_counter                 = 0
-_GOAL_COUNTER_MAX                   = 10 # 10 for real life, 2 for simulator
+_GOAL_COUNTER_MAX                   = 2 # 10 for real life, 2 for simulator
 
 _resume_game_counter                = 0
-_RESUME_GAME_MAX                    = 500 # (5 seconds)
+_RESUME_GAME_MAX                    = 50 # (5 seconds)
+
+class G:
+    NO_ONE = 0
+    US = 1
+    THEM = 2
+
+"""
+THINGS TO CHANGE WHEN GOING FROM SIMULATOR TO REAL LIFE TESTING:
+    - Strategy.py:      _GOAL_COUNTER_MAX
+    - Constants.py:     goal_score_threshold
+    - Plays.py:         _KICKER_WAIT_MAX
+                        _BALL_STUCK_MAX
+
+"""
+ 
+
+
+"""
+Notes of things I have changed that may need to be changed back:
+    (April 7th)
+    - Constants.py:     distance_behind_ball_for_kick = robot_half_width so the approach is better. With kicker, approach can be smaller
+    -                   kickable_distance = 0.4 from 0.5
+    -                   kick_dist --> SHOULD I make this smaller, so the error after kick is less?                   
+
+    - Utilities.py      robot_close_to_point() Changed tolerances from 0.10 to 0.07 
+
+
+    Changed these to use BALL FUTURE POSITIONS:
+    - Skills.py:        go_behind_ball_facing_target()
+                        attack_ball()
+                        attack_ball_towards_goal()
+
+    - Plays.py          line 66
+                        steal_ball_from_opponent() # lines 201-203 were using future positions of the ball 
+
+    - Utilities.py      get_perpendicular_point_from_ball()
+                        get_own_goal_dist_behind_ball()
+
+
+
+Things I'm currently/need to work on:
+    - Using future positions of ball for attack/shooting
+    - Collision avoidance with our own robots. Fix am_i_too_close_to_teammate to have robot future positions.
+    - Take that survey for this dumb class
+"""
 
 
 
 # ally1 is designated as the "main" attacker, or the robot closest to the opponent's goal at the beginning of the game
 # ally2 is designated as the "main" defender, or the robot closest to our goal at the beginnning of the game
-
-def choose_strategy(me, my_teammate, opponent1, opponent2, ball, goal, one_v_one=False):
+def choose_strategy(me, my_teammate, opponent1, opponent2, ball, was_goal=G.NO_ONE, one_v_one=False):
     global _avg_dist_between_opponents, _averaging_factor, _percent_time_ball_in_our_half, _percent_time_opponents_in_our_half
     global _our_score, _opponent_score
-    global _is_goal_global
     update_opponents_strategy_variables(opponent1, opponent2, ball)
     
-    # one_v_one = True # FOR SIMULATOR I NEED TO UNCOMMENT THIS
-
     # Check to see if someone scored a goal
-    check_for_goal(ball) # This has the goal debouncer in it, will update global variable _is_goal_global, and calls update_score()
-    
-    if _is_goal_global:
-        if are_robots_in_reset_position(me, my_teammate):
-            if done_waiting_for_resume_game():
-                # Reset variables so that gameplay can continue
-                _is_goal_global = False # this will allow the gameplay to restart again.
+    if was_goal is not G.NO_ONE:
+        update_score(was_goal)
 
-            return reset_positions_after_goal(me)
+    opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
+    #for now, we will just focus on aggressive offense
+    if (one_v_one):
+        return one_on_one(me, opponent1, ball)
+    else:
+        if (_opponent_score > _our_score) or opp_strong_offense:
+            return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
         else:
-            # Make sure the robots are going to the positions
-            return reset_positions_after_goal(me)
-    else: # No goal, keep playing
-        opp_strong_offense = (_percent_time_ball_in_our_half >= 0.50 and _avg_dist_between_opponents <=  1.5 )  
-        #for now, we will just focus on aggressive offense
-        if (one_v_one):
-            (x,y,theta) = one_on_one(me, opponent1, ball)
-            (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
-            return (x, y, theta) # TOOK OUT X_C, Y_C
-        else:
-            (x,y,theta) = aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
-            (x_c, y_c) = Utilities.limit_xy_too_close_to_walls(x,y)
-            return (x, y, theta) # TOOK OUT X_C, Y_C
+            return aggressive_defense(me, my_teammate, opponent1, opponent2, ball)
+            # return aggressive_offense(me, my_teammate, opponent1, opponent2, ball)
+
 
 
 def aggressive_offense(me, my_teammate, opponent1, opponent2, ball):
@@ -97,10 +128,10 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
     section = Utilities.get_field_section(ball.xhat)
 
     if me.ally1:
-        if   section == 1:
+        if section == 1:
             return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
             return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
@@ -109,13 +140,13 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
     else:
         if   section == 1:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball) #This used to be offensive defender, but i want to see the goalie do it's thing
         elif section == 3:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 
@@ -151,9 +182,12 @@ def one_on_one(me, opponent1, ball):
     my_teammate = None
     opponent2 = None
     section = Utilities.get_field_section(ball.xhat)
-
-    # if not Plays.beginning_trick_shot_done():
-    #     return Plays.shoot_off_the_wall(me, ball)
+    # print ("section = {}" .format(section))
+    # if Utilities.i_am_stuck(me):
+    #     return Skills.get_unstuck(me)
+    # else:
+        # if not Plays.beginning_trick_shot_done():
+        #     return Plays.shoot_off_the_wall(me, ball)
     if   section == 1:
         return Roles.offensive_goalie(me, my_teammate, opponent1, opponent2, ball, True)
     elif section == 2:
@@ -168,9 +202,9 @@ def one_on_one(me, opponent1, ball):
 
 
 
-################################
-###     Helper Functions     ###
-################################
+################################################################
+###                     Helper Functions                     ###
+################################################################
 
 def check_for_goal(ball):
     global _goal_check_counter, _GOAL_COUNTER_MAX, _is_goal_global
@@ -184,20 +218,18 @@ def check_for_goal(ball):
             # Update counter
             _goal_check_counter = _goal_check_counter + 1
             if _goal_check_counter >= _GOAL_COUNTER_MAX:
-                print "GOAAAALLLL"
-                # GOOOOOAAAAAAALLLLLLL! (hopefully it's our goal)
                 _goal_check_counter = 0
                 _is_goal_global = True
                 # Update the score here, so it only does it once
                 update_score(ball)
 
 
-def update_score(ball):
+def update_score(who_scored):
     global _our_score, _opponent_score
-    if ball.xhat > 0:
+    if who_scored == G.US:
         print "GOOOOOAAAAAAALLLLLLLAAAAASSSSSSSOOOOOOO!!!!"
         _our_score = _our_score + 1
-    else:
+    elif who_scored == G.THEM:
         print "NOOOO, They scored =("
         _opponent_score = _opponent_score + 1 
 

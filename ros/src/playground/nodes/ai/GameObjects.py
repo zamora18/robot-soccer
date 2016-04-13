@@ -10,6 +10,9 @@ class Robot(object):
         self.xhat_future = 0
         self.yhat_future = 0
         self.thetahat_future = 0
+        self.x_c = None
+        self.y_c = None
+        self.theta_c = None
 
     def update_state(self, msg):
         self.xhat = msg.xhat
@@ -19,8 +22,22 @@ class Robot(object):
         self.yhat_future = msg.yhat_future
         self.thetahat_future = msg.thetahat_future
 
+    def update_desired(self, msg):
+        self.x_c = msg.x
+        self.y_c = msg.y
+        self.theta_c = msg.theta
+
     def get_2d_location(self):
         return (self.xhat, self.yhat)
+
+    def get_2d_desired(self):
+        return (self.x_c, self.y_c)
+
+    def has_a_desired_position(self):
+        if self.x_c is None or self.y_c is None or self.theta_c is None:
+            return False
+
+        return True
 
 class Ball(object):
     """docstring for Ball"""

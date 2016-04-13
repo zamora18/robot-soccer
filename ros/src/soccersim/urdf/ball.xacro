@@ -3,7 +3,7 @@
 <robot name="ball" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="mass" value="0.046"/>
-  <xacro:property name="radius" value="0.021"/>
+  <xacro:property name="radius" value="0.03"/>
 
   <!-- Chassis -->
   <link name="ball">

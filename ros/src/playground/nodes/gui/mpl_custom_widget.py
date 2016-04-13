@@ -29,17 +29,23 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
     def format_labels(self):
-        self.ax.set_title(self.PlotTitle)
-        self.ax.title.set_fontsize(10)
-        self.ax.set_xlabel(self.xtitle, fontsize=9)
-        self.ax.set_ylabel(self.ytitle, fontsize=9)
-        labels_x = self.ax.get_xticklabels()
-        labels_y = self.ax.get_yticklabels()
+        if isinstance(self.ax, dict):
+            axes = self.ax.itervalues()
+        else:
+            axes = [self.ax]
 
-        for xlabel in labels_x:
-            xlabel.set_fontsize(8)
-        for ylabel in labels_y:
-            ylabel.set_fontsize(8)
+        for ax in axes:
+            ax.set_title(self.PlotTitle)
+            ax.title.set_fontsize(10)
+            ax.set_xlabel(self.xtitle, fontsize=9)
+            ax.set_ylabel(self.ytitle, fontsize=9)
+            labels_x = ax.get_xticklabels()
+            labels_y = ax.get_yticklabels()
+
+            for xlabel in labels_x:
+                xlabel.set_fontsize(8)
+            for ylabel in labels_y:
+                ylabel.set_fontsize(8)
 
     def sizeHint(self):
         w, h = self.get_width_height()
@@ -57,33 +63,31 @@ class MyMplCanvas(FigureCanvas):
 
 
 class MyNavigationToolbar(NavigationToolbar) :
-    def __init__(self , parent , canvas , direction = 'h' ) :
-        #NavigationToolbar.__init__(self,parent,canevas)
+    def __init__(self, parent, canvas, direction='h') :
+        #NavigationToolbar.__init__(self, parent, canvas)
         #self.layout = QVBoxLayout( self )
 
         self.canvas = canvas
-        QWidget.__init__( self, parent )
+        # QWidget.__init__( self, parent )
 
-        if direction=='h' :
-            self.layout = QHBoxLayout( self )
-        else :
-            self.layout = QVBoxLayout( self )
+        # if direction == 'h':
+        #     self.layout = QHBoxLayout( self )
+        # else:
+        #     self.layout = QVBoxLayout( self )
 
-        self.layout.setMargin( 2 )
-        self.layout.setSpacing( 0 )
+        # self.layout.setMargin( 2 )
+        # self.layout.setSpacing( 0 )
 
-        NavigationToolbar2.__init__( self, canvas )
-    def set_message( self, s ):
-        pass
-
+        super(MyNavigationToolbar, self).__init__(parent, canvas, direction)
 
 class MPL_Widget(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.canvas = MyMplCanvas()
-        #self.toolbar = MyNavigationToolbar(self.canvas, self.canvas, direction = 'v')
+        self.toolbar = MyNavigationToolbar(self.canvas, self.canvas, direction='v')
+        self.toolbar.hide()
         self.hbox = QHBoxLayout()
-        #self.hbox.addWidget(self.toolbar)
+        # self.hbox.addWidget(self.toolbar)
         self.hbox.addWidget(self.canvas)
         self.setLayout(self.hbox)
 

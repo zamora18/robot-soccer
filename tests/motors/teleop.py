@@ -1,5 +1,4 @@
-import time
-import sys
+import sys, os, time
 
 import numpy as np
 
@@ -274,7 +273,20 @@ def main():
     _ctrl_timer = RepeatedTimer(_ctrl_timer_period, _handle_ctrl_timer)
     _ctrl_timer.start()
 
-    w.init()
+    use_rcv3 = os.environ['USE_RCV3'] == 'true'
+    w.init(use_rcv3=use_rcv3)
+
+    # TODO: Okay, so Controller.init(None) will automagically load in some PID 
+    # values for each of the x, y, theta position controllers. However, since
+    # `teleop` is run in real life on different robots, really it should read
+    # the correct YAML robot config file and load in the PID constants and
+    # pass them into Controller.init(gains) as in the controller_node.py.
+    # Two ways to do this: (1) do like os.environ['USE_RCV3'], where the odroid_setup.bash
+    # script loads up the PID constants as environment variables (this seems messy).
+    # (2) find a python YAML reading library and just read the file directly from here
+    # based on which robot this is (you can use os.environ['ROBOT'])
+    Controller.init()
+    
     print 'Started.'
 
 

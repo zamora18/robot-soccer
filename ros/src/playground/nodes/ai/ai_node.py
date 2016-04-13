@@ -11,7 +11,7 @@ from playground.srv import SetBool, SetBoolResponse
 
 import numpy as np
 
-import Strategy, Path
+import Strategy, Constants
 from GameObjects import Ball, Robot
 
 _me = None
@@ -21,10 +21,13 @@ _opp2 = None
 
 _ball = None
 
-_pathplanning_enabled = False
-_game_state = None
-_was_goal = False
-
+_game_state = {
+    'play': False,
+    'two_v_two': False,
+    'us_goal': False,
+    'them_goal': False,
+    'first_time': True
+}
 
 def _handle_robot_state(msg, which_robot):
     # Update the given robot's current and future positions
@@ -38,28 +41,24 @@ def _handle_robot_state(msg, which_robot):
         _opp2.update_state(msg)
 
 def _handle_ball_state(msg):
-    # _ball['xhat'] = msg.xhat
-    # _ball['yhat'] = msg.yhat
-    # _ball['xhat_future'] = msg.xhat_future
-    # _ball['yhat_future'] = msg.yhat_future
-
     _ball.update_state(msg)
-
-def _handle_goal(msg):
-    global _was_goal
-    _was_goal = msg.data
 
 def _handle_game_state(msg):
     global _game_state, _ally
-    _game_state = msg
 
-    if not _game_state.two_v_two:
+    _game_state['play'] = msg.play
+    _game_state['two_v_two'] = msg.two_v_two
+    _game_state['us_goal'] = msg.usgoal
+    _game_state['them_goal'] = msg.themgoal
+
+    # Since we've gotten our first state message with msg.play 'True',
+    # 'first_time' is False. This means that the robots will hold
+    # their place from now on.
+    if _game_state['first_time'] and msg.play:
+        _game_state['first_time'] = False
+
+    if not msg.two_v_two:
          _ally = None
-
-def _set_path_planning(req):
-    global _pathplanning_enabled
-    _pathplanning_enabled = req.data
-    return SetBoolResponse(_pathplanning_enabled, "")
 
 def _create_robots():
     """Create Robots
@@ -90,9 +89,6 @@ def main():
     global _ball
     _ball = Ball()
 
-    # Initialize our path planning world
-    Path.initialize_world()
-
     # Subscribe to Robot States
     rospy.Subscriber('my_state', RobotState, lambda msg: _handle_robot_state(msg, 'me'))
     rospy.Subscriber('ally_state', RobotState, lambda msg: _handle_robot_state(msg, 'ally'))
@@ -101,41 +97,55 @@ def main():
 
     rospy.Subscriber('ball_state', BallState, _handle_ball_state)
 
+    # This message will tell us if we are to be playing or not right now
     rospy.Subscriber('/game_state', GameState, _handle_game_state)
-    rospy.Subscriber('goal', Bool, _handle_goal)
+
     pub = rospy.Publisher('desired_position', Pose2D, queue_size=10)
-
-    rospy.Service('set_path_planning', SetBool, _set_path_planning)
-
-    global _was_goal
 
     rate = rospy.Rate(100) #100 Hz
     while not rospy.is_shutdown():
 
-        # Figure out game state stuff
-        if _game_state == None:
-            one_v_one = False # Default to two_v_two
-            play_game = False
+        # Was there a goal to tell Strategy about?
+        if _game_state['us_goal']:
+            goal = Strategy.G.US
+            _game_state['us_goal'] = False
+
+        elif _game_state['them_goal']:
+            goal = Strategy.G.THEM
+            _game_state['them_goal'] = False
+
         else:
-            one_v_one = not _game_state.two_v_two
-            play_game = _game_state.play
+            goal = Strategy.G.NO_ONE
 
-        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, _was_goal, one_v_one=one_v_one)
+        # We didn't name this well ha. So 'not' it
+        one_v_one = not _game_state['two_v_two']
 
-        if _pathplanning_enabled:
-            (x_c_safe, y_c_safe) = Path.plan(x_c, y_c, _me, _ally, _opp1, _opp2)
-            theta_c_safe = theta_c
+        (x_c, y_c, theta_c) = Strategy.choose_strategy(_me, _ally, _opp1, _opp2, _ball, \
+                                        was_goal=goal, one_v_one=one_v_one)
+
+        # Get a message ready to send
+        msg = Pose2D()
+
+        if _game_state['play']:
+            # Run AI as normal
+            msg.x = x_c
+            msg.y = y_c
+            msg.theta = theta_c
         else:
-            (x_c_safe, y_c_safe, theta_c_safe) = (x_c, y_c, theta_c)
+            # Send robot to home
+            if _me.ally1:
+                msg.x = Constants.ally1_start_pos[0]
+                msg.y = Constants.ally1_start_pos[1]
+                msg.theta = Constants.ally1_start_pos[2]
+            elif _me.ally2:
+                msg.x = Constants.ally2_start_pos[0]
+                msg.y = Constants.ally2_start_pos[1]
+                msg.theta = Constants.ally2_start_pos[2]
 
-        if play_game:
-            msg = Pose2D()
-            msg.x = x_c_safe
-            msg.y = y_c_safe
-            msg.theta = theta_c_safe
+        # If it's not the first time, the robot will 'hold its ground'
+        # even while paused. (See guidedog_node.py)
+        if not _game_state['first_time']:
             pub.publish(msg)
-
-        _was_goal = False
 
         rate.sleep()
 

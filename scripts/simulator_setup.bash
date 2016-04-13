@@ -29,6 +29,10 @@ source $PATH_TO_REPO/ros/devel/setup.bash
 function killsim() {
     # must be called in the same terminal you started
     killall roslaunch
+    killall rostopic
+
+    # Remove env var for next run
+    unset SIM_ROBOTS
 
     # Kill all jobs
     # kill $(jobs -p)
@@ -40,26 +44,60 @@ function killsim() {
     # kill `ps aux | grep python | grep ros | awk '{ print $2;}'`
 }
 
+# Simulate the "space bar" being pressed on the vision code
+function vision_spacebar_on() {
+    if [[ $SIM_ROBOTS -eq 1 ]]; then
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': false}" &
+    else
+        rostopic pub /game_state playground/GameState -- "{'play': true, 'two_v_two': true}" &
+    fi;
+}
+
+function vision_spacebar_off() {
+    if [[ $SIM_ROBOTS -eq 1 ]]; then
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': false}" &
+    else
+        rostopic pub /game_state playground/GameState -- "{'play': false, 'two_v_two': true}" &
+    fi;
+}
+
 # Simulation Scripts (The user can put in bg with &)
 function simulator_1v1() {
+    # Set up localhost as my master
+    master_sim;
+
     # To launch the simulation environment in the background, with ally1
     # ready to go (delete home2 and away2 robots)
     roslaunch "$ROBOT_PKG" simulator.launch &
     sleep 6 # Otherwise there is a race condition
 
-    roslaunch "$ROBOT_PKG" ally1.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally1.launch &
     export SIM_ROBOTS=1
+    # Prepend roslaunch ... ally1.launch with `ROBOT="fry"` so that, for that
+    # single command, everything will be run as that robot. That way, you can
+    # load in the yaml file for a specific robot in the simulator
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function simulator_2v2() {
+    # Set up localhost as my master
+    master_sim;
+
     # To launch the simulation environment in the background,
     # with ally1 and ally2 ready to go.
     roslaunch "$ROBOT_PKG" simulator.launch &
     sleep 6 # Otherwise there is a race condition
-    roslaunch "$ROBOT_PKG" ally1.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally1.launch &
     sleep 2
-    roslaunch "$ROBOT_PKG" ally2.launch &
+    ROBOT="fry" roslaunch "$ROBOT_PKG" ally2.launch &
     export SIM_ROBOTS=2
+
+    # Don't turn on AI yet, but tell the simulator
+    # if it's one_v_one or not
+    vision_spacebar_off;
 }
 
 function sim_go() {
@@ -86,10 +124,9 @@ function sim_go() {
     fi
 
     # Update for sim_stop
-    export LAST_SIM_ROBOTS=${SIM_ROBOTS}
+    # export LAST_SIM_ROBOTS=${SIM_ROBOTS}
 
-    # Remove env var for next run
-    unset SIM_ROBOTS
+    # vision_spacebar_on;
 }
 
 function sim_stop() {
@@ -112,4 +149,22 @@ function sim_stop() {
     fi
 
     unset LAST_SIM_ROBOTS
+}
+
+function master_ronald() {
+    export ROS_MASTER_URI=http://ronald:11311
+}
+
+function master_sim() {
+    export ROS_MASTER_URI=http://localhost:11311
+}
+
+function command_center() {
+    master_ronald;
+    rosrun "$ROBOT_PKG" gui.py
+}
+
+function sim_command_center() {
+    master_sim;
+    rosrun "$ROBOT_PKG" gui.py
 }

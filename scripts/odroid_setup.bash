@@ -1,6 +1,10 @@
 # Add this file to the bottom of your ~/.bashrc to include all of this goodness:
 # i.e.,     `source /path/to/repo/scripts/odroid_setup.bash`
 
+# Which robot am I?
+# (Make sure to put `export ROBOT=<robot-name>` in your ~/.bashrc)
+# That way you can access the ROBOT env var
+
 # Where is your ROS Core?
 ROS_MASTER=ronald
 
@@ -16,6 +20,21 @@ PATH_TO_REPO="$DIR/.."
 # My IP Address
 # See: http://stackoverflow.com/a/13322549
 MY_IP=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
+
+# include parse_yaml function
+source "$PATH_TO_REPO/scripts/parse_yaml.sh"
+
+# read Robot YAML file to get configuration settings (whether or not to use rcv3 or rcv5)
+eval $(parse_yaml "$PATH_TO_REPO/ros/src/$ROBOT_PKG/param/$ROBOT.yaml" "robot_config_")
+
+# Tell the world about using rcv3 or rcv5
+robot_config_use_rcv3="$(echo "$robot_config_use_rcv3" | tr '[:upper:]' '[:lower:]')"
+if [[ "$robot_config_use_rcv3" == *"true"* ]]
+then
+    export USE_RCV3=true;
+else
+    export USE_RCV3=false;
+fi
 
 # Aliases
 alias ll='ls -lh --color'
@@ -50,3 +69,13 @@ function killbot() {
 #echo 200 > /sys/class/gpio/export
 #echo out > /sys/class/gpio/gpio200/direction
 #echo 0 > /sys/class/gpio/gpio200/value
+
+function ally1() {
+	roslaunch "$ROBOT_PKG" ally1.launch &
+	roslaunch "$ROBOT_PKG" ai_ally1.launch &
+}
+
+function ally2() {
+	roslaunch "$ROBOT_PKG" ally2.launch &
+	roslaunch "$ROBOT_PKG" ai_ally2.launch &
+}

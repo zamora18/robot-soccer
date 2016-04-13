@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os, sys
 from PyQt4 import QtGui, uic, QtCore
 
@@ -7,6 +8,7 @@ import roslib; roslib.load_manifest('playground')
 import rospy
 
 from Ally import Ally
+from GameState import GameState
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -32,13 +34,23 @@ class MainWindow(QtGui.QMainWindow):
         ally1 = Ally(self, ally=1, active=ally1_active, interval=update_period)
         ally2 = Ally(self, ally=2, active=ally2_active, interval=update_period)
 
+        # Setup Game State stuff
+        game_state = GameState(self)
+
 if __name__ == '__main__':
     # Set up Qt Application Window
     # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
     app = QtGui.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+
+    # Run the app
+    app.exec_()
+
+    # Manually send ROS the shutdown signal so it cleans up nicely
+    rospy.signal_shutdown("User closed the GUI")
+    
+    sys.exit(0)
 
 # from PyQt4.QtCore import pyqtRemoveInputHook; pyqtRemoveInputHook()
 # import ipdb; ipdb.set_trace()

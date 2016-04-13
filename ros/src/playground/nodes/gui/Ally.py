@@ -13,8 +13,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
-FIELD_LENGTH = 4
-FIELD_WIDTH = 3.2
+import StepResponse
+
+FIELD_LENGTH = 3.7
+FIELD_WIDTH = 2.65
 MAX_X_VEL = 2
 MAX_Y_VEL = 2
 
@@ -26,6 +28,13 @@ class AllyUI(object):
 
         if ally is None:
             return False
+
+        if ally == 1:
+            self.tbl_ball_pos = ui.tblBallPosition
+            self.tbl_ball_future = ui.tblBallFuture
+        else:
+            self.tbl_ball_pos = None
+            self.tbl_ball_future = None
 
         # Group thing
         self.groupbox = getattr(ui, 'groupAlly{}'.format(ally))
@@ -96,8 +105,11 @@ class AllyUI(object):
         # Create an artist for the current position (estimate) of the ally bot
         self.artists_field['position'] = canvas.ax.plot([],[], linewidth=0.6, animated=False)[0]
 
-        # Create an artist for the current position (estimate) of the ally bot
+        # Create an artist for the desired position (unsafe) of the ally bot
         self.artists_field['desired'] = canvas.ax.plot([],[],'x',mfc='none',mec='g',mew=1.3,ms=7,animated=False)[0]
+
+        # Create an artist for the desired position (safe) of the ally bot
+        self.artists_field['desired_safe'] = canvas.ax.plot([],[],'2',mfc='none',mec='m',mew=1.3,ms=6,animated=False)[0]
 
         # Create an artist for the current position (estimate) of the ally bot
         self.artists_field['position_vision'] = canvas.ax.plot([],[],'d',mfc='none',mec='b',mew=0.75,ms=4,animated=False)[0]
@@ -157,6 +169,14 @@ class AllyUI(object):
         self._init_generic_table(self.tbl_des_pos, editable=True, \
                                 header_labels=['xhat_c', 'yhat_c', 'thetahat_c'])
 
+        if self.tbl_ball_pos is not None:
+            self._init_generic_table(self.tbl_ball_pos, \
+                                    header_labels=['xhat', 'yhat'], cols=2, col_width=97)
+
+        if self.tbl_ball_future is not None:
+            self._init_generic_table(self.tbl_ball_future, \
+                                    header_labels=['xhat_future', 'yhat_future'], cols=2, col_width=97)
+
     def _init_generic_table(self, tbl, header_labels=None, rows=1, cols=3, row_height=25, col_width=65, editable=False):
         tbl.setRowCount(rows)
         tbl.setRowHeight(0, row_height)
@@ -189,15 +209,12 @@ class AllyUI(object):
         # Don't allow column resizing
         tbl.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
 
-    def update_table(self, tbl, col1, col2, col3, rounding=True):
-        if rounding:
-            col1 = round(col1,4)
-            col2 = round(col2,4)
-            col3 = round(col3,4)
+    def update_table(self, tbl, cols, rounding=True):
+        for idx, col in enumerate(cols):
+            if rounding:
+                cols[idx] = round(col,4)
 
-        tbl.item(0,0).setText(str(col1))
-        tbl.item(0,1).setText(str(col2))
-        tbl.item(0,2).setText(str(col3))
+            tbl.item(0,idx).setText(str(cols[idx]))
 
     def read_table(self, tbl):
         col1 = float(tbl.item(0,0).text())
@@ -231,6 +248,7 @@ class Ally(object):
             'ball_state': None,
             'pidinfo': None,
             'desired_position': None,
+            'desired_position_safe': None,
             'other_opponent_state': None,
             'other_ally_state': None
         }
@@ -249,6 +267,9 @@ class Ally(object):
         if not active:
             self.ui.append_title('Inactive')
             return
+
+        # Placeholders for child windows
+        self._step_resp = None
 
         # Figure out my namespace based on who I am
         ns = '/ally{}'.format(ally)
@@ -270,6 +291,8 @@ class Ally(object):
                             BallState, self._handle_ball_state)
         rospy.Subscriber('{}/desired_position'.format(ns), \
                             Pose2D, self._handle_des_pos)
+        rospy.Subscriber('{}/desired_position_safe'.format(ns), \
+                            Pose2D, self._handle_des_pos_safe)
         rospy.Subscriber('{}/vel_cmds'.format(ns), \
                             Twist, self._handle_vel)
         rospy.Subscriber('{}/pidinfo'.format(ns), \
@@ -284,6 +307,7 @@ class Ally(object):
         self.ui.btn_battery.clicked.connect(self._btn_battery)
         self.ui.btn_set_des_pos.clicked.connect(self._btn_des_pos)
         self.ui.btn_stop_moving.clicked.connect(self._btn_stop_moving)
+        self.ui.btn_step_resp.clicked.connect(self._btn_step_resp)
 
         # Connect Plot Mouse events
         self.ui.plot_field.canvas.mpl_connect('button_press_event', self._plot_field_mouse_down)
@@ -315,7 +339,7 @@ class Ally(object):
 
     def _handle_my_state(self, msg):
         tbl = self.ui.tbl_est_pos
-        self.ui.update_table(tbl, msg.xhat, msg.yhat, msg.thetahat)
+        self.ui.update_table(tbl, [msg.xhat, msg.yhat, msg.thetahat])
 
         # Save for later!
         self.last['my_state'] = self.current['my_state']
@@ -337,21 +361,34 @@ class Ally(object):
         self.current['other_ally_state'] = msg
 
     def _handle_ball_state(self, msg):
+        if self.ui.tbl_ball_pos is not None:
+            tbl = self.ui.tbl_ball_pos
+            self.ui.update_table(tbl, [msg.xhat, msg.yhat])
+
+        if self.ui.tbl_ball_future is not None:
+            tbl = self.ui.tbl_ball_future
+            self.ui.update_table(tbl, [msg.xhat_future, msg.yhat_future])
+
         # Save for later!
         self.last['ball_state'] = self.current['ball_state']
         self.current['ball_state'] = msg
 
     def _handle_des_pos(self, msg):
         tbl = self.ui.tbl_des_pos
-        self.ui.update_table(tbl, msg.x, msg.y, msg.theta)
+        self.ui.update_table(tbl, [msg.x, msg.y, msg.theta])
 
         # Save for later!
         self.last['desired_position'] = self.current['desired_position']
         self.current['desired_position'] = msg
 
+    def _handle_des_pos_safe(self, msg):
+        # Save for later!
+        self.last['desired_position_safe'] = self.current['desired_position_safe']
+        self.current['desired_position_safe'] = msg
+
     def _handle_vel(self, msg):
         tbl = self.ui.tbl_vel
-        self.ui.update_table(tbl, msg.linear.x, msg.linear.y, msg.angular.z)
+        self.ui.update_table(tbl, [msg.linear.x, msg.linear.y, msg.angular.z])
 
         # Save for later!
         self.last['velocity'] = self.current['velocity']
@@ -359,11 +396,15 @@ class Ally(object):
 
     def _handle_PID_error(self, msg):
         tbl = self.ui.tbl_PID_error
-        self.ui.update_table(tbl, msg.error.x, msg.error.y, msg.error.theta)
+        self.ui.update_table(tbl, [msg.error.x, msg.error.y, msg.error.theta])
 
         # Save for later!
         self.last['pidinfo'] = self.current['pidinfo']
         self.current['pidinfo'] = msg
+
+        # if step_resp is active, add to the plot
+        if self._step_resp is not None and self._step_resp.isVisible():
+            self._step_resp.add_sample(msg)
 
     # =========================================================================
     # Qt Event Callbacks (buttons, plots, etc)
@@ -372,6 +413,11 @@ class Ally(object):
     def _btn_clear(self):
         self._animate_init_field()
         # self._animate_init_vel() # There's no real need to clear this one
+
+    def _btn_step_resp(self):
+        if self._step_resp is None:
+            self._step_resp = StepResponse.Dialog(self.ally)
+        self._step_resp.show()
 
     def _btn_kick(self):
         try:
@@ -513,6 +559,17 @@ class Ally(object):
             x, y = 0, 0
 
         self._update_point(self.ui.artists_field['desired'], x, y)
+
+        # ---------------------------------------------------------------------
+        # -------------------- Desired Position Safe --------------------------
+        # ---------------------------------------------------------------------
+        if self.current['desired_position_safe'] is not None:
+            x = self.current['desired_position_safe'].x
+            y = self.current['desired_position_safe'].y
+        else:
+            x, y = 0, 0
+
+        self._update_point(self.ui.artists_field['desired_safe'], x, y)
 
         # ---------------------------------------------------------------------
         # -------------------------- Opponent ---------------------------------

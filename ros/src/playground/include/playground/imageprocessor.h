@@ -6,7 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 
-#define CIRCLE_DIAMETER_IN_M .50
+#define CIRCLE_DIAMETER_IN_M .505
 
 
 using namespace cv;

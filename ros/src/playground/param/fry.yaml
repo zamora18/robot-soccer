@@ -1,3 +1,17 @@
 M1QPPS: 217949
 M2QPPS: 287323
 M3QPPS: 381121
+gains:
+  x:
+    P: 2.5
+    I: 0
+    D: 0
+  y:
+    P: 2.5
+    I: 0
+    D: 0
+  theta:
+    P: 2.5
+    I: 0
+    D: 0
+use_rcv3: true

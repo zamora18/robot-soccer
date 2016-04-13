@@ -2,6 +2,7 @@ from collections import Iterable
 import numpy as np 
 
 import Constants
+from GameObjects import Robot
 
 _ally1_stuck_counter    = 0
 _ALLY1_STUCK_MAX        = 500
@@ -10,9 +11,10 @@ _ALLY2_STUCK_MAX        = 500
 _ally1_prev_pos         = (Constants.ally1_start_pos[0], Constants.ally1_start_pos[1])
 _ally2_prev_pos         = (Constants.ally2_start_pos[0], Constants.ally2_start_pos[1])
 
+_stuck                  = False
+
 
 def get_front_of_robot(robot):
-    ### thetahat is in degrees, so we should change from degree to radians?? ----------
     theta = deg_to_rad(robot.thetahat)
     x_pos = robot.xhat+Constants.robot_half_width*np.cos(theta) 
     y_pos = robot.yhat+Constants.robot_half_width*np.sin(theta)
@@ -57,7 +59,7 @@ def _get_closest_robot_to_point(rob1, rob2, point_x, point_y):
         return rob2 
 
 def am_i_too_close_to_teammate(me, my_teammate):
-    dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat, my_teammate.yhat)
+    dist_from_each_other = get_distance_between_points(me.xhat, me.yhat, my_teammate.xhat_future, my_teammate.yhat_future)
     if dist_from_each_other < Constants.teammate_gap:
         return True
     else:
@@ -130,17 +132,21 @@ def is_ball_close_to_edges(ball):
 #################################################################
 #################################################################
 def get_perpendicular_point_from_ball(me, ball):
-    x_c = ball.xhat_future
+    x_c = ball.xhat - 0.15
+    direction_toggle = 1 # This will switch the side the robot will approach if the ball is too close to a wall.
+    if (abs(ball.yhat) > Constants.field_width/2 - Constants.robot_width*0.60): # A little more than half width
+        direction_toggle = -1
+
     if me.yhat > ball.yhat:
-        y_c = ball.yhat + Constants.own_goal_y_dist
+        y_c = ball.yhat + Constants.own_goal_y_dist*direction_toggle # CHANGED THE SIGN OF SUBTRACTIN FROM ADDING, TO SEE IF IT WOULD FIX IT!
     else:
-        y_c = ball.yhat - Constants.own_goal_y_dist
+        y_c = ball.yhat - Constants.own_goal_y_dist*direction_toggle
     theta_c = 0
     return (x_c, y_c, theta_c)
 
 def get_own_goal_dist_behind_ball(me, ball):
-    x_c = ball.xhat_future - Constants.own_goal_x_dist
-    y_c = ball.yhat_future
+    x_c = ball.xhat - Constants.own_goal_x_dist
+    y_c = ball.yhat
     theta_c = 0
     return (x_c, y_c, theta_c)
 
@@ -198,8 +204,8 @@ def deg_to_rad(deg):
 #################################################################
 
 def robot_close_to_point(robot, point_x, point_y, theta):
-    return close(point_x, robot.xhat, tolerance = .10) and close(point_y, robot.yhat, tolerance=.10) \
-                and close(theta, robot.thetahat, tolerance = 10) # within 10cm of x and y, and 10 degree tolerance for theta
+    return close(point_x, robot.xhat, tolerance=.07) and close(point_y, robot.yhat, tolerance=.07) \
+                and close(theta, robot.thetahat, tolerance=10) # within 10cm of x and y, and 10 degree tolerance for theta
 
 def close(a, b, tolerance=0.010):
     """
@@ -278,10 +284,12 @@ def limit_xy_passing(x,y):
     return (x,y)
 
 
+# Update this. It won't work because it will only return true for one second....
 def i_am_stuck(me):
     global _ally1_stuck_counter, _ALLY1_STUCK_MAX
     global _ally2_stuck_counter, _ALLY2_STUCK_MAX 
     global _ally1_prev_pos, _ally2_prev_pos 
+    global _stuck
     
     if me.ally1:
         if _ally1_stuck_counter >= _ALLY1_STUCK_MAX: #Counter expired, so reset counter and return True

@@ -62,6 +62,13 @@ def main():
     # Services
     rospy.Service('/controller/toggle', Trigger, _toggle)
 
+    # Get the correct PID stuff
+    gains = rospy.get_param('gains') # returns as a dict
+    # {'x': {'P': 0, 'I': 0, 'D': 0}, ... }
+
+    # initialize the controller
+    Controller.init(gains)
+
     rate = rospy.Rate(int(1/_ctrl_period))
     while not rospy.is_shutdown():
 

@@ -105,7 +105,7 @@ class Graph:
         # print self.convert_node_to_coord(current)
 
         if current == end:
-            print ('found end')
+            # print ('found end')
             return  self._find_path(closedict, end)
 
         adjacent = self.get_adjacent_nodes(current)
