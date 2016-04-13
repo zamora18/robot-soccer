@@ -129,7 +129,7 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
 
     if me.ally1:
         if section == 1:
-            return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
+            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 2:
             return Roles.offensive_defender(me, my_teammate, opponent1, opponent2, ball)
         elif section == 3:
@@ -147,31 +147,6 @@ def aggressive_defense(me, my_teammate, opponent1, opponent2, ball):
             return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
         elif section == 4:
             return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        else:
-            return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
-
-
-
-    if me.ally1:
-        if   section == 1:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 2:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 3:
-            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:
-            return Roles.defensive_attacker(me, my_teammate, opponent1, opponent2, ball)
-        else:
-            return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
-    else:
-        if   section == 1:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 2:
-            return Roles.defensive_goalie(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 3:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
-        elif section == 4:
-            return Roles.defensive_defender(me, my_teammate, opponent1, opponent2, ball)
         else:
             return (me.xhat, me.yhat, me.thetahat) #default, returns current pos
 

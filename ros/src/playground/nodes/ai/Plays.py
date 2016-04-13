@@ -259,7 +259,7 @@ def stay_open_for_pass(me, my_teammate, ball):
         r_l_toggle = 1
 
     y_c = my_teammate.yhat + Constants.open_for_pass_y_dist*r_l_toggle
-    x_c = ball.xhat_future + 0.50
+    x_c = ball.xhat + 0.50
 
     (x_c, y_c) = Utilities.limit_xy_passing(x_c, y_c)
     theta_c = -45*r_l_toggle
