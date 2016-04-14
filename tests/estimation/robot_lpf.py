@@ -75,7 +75,7 @@ def rerun(alpha, tau, update_type, filename):
 
 def main():
     # Choose file
-    data_dir = '../../gui/data/'
+    data_dir = '../../matlab/gui/data/'
     filename = data_dir + 'ally08'
 
     # Choose LPF parameters

@@ -1,6 +1,12 @@
 MATLAB Command Center GUI
 =========================
 
+![MATLAB GUI](https://github.com/zamora18/robot-soccer/wiki/images/matlab_gui.png)
+
+**This is abandoned code. For the current PyQt Command Center, see the `gui` node in the `playground` package.**
+
+### Getting Things Setup ###
+
 Getting bi-directional communication with MATLAB's ROS: http://www.mathworks.com/matlabcentral/answers/119559-why-is-the-ros-subscriber-callback-in-matlab-not-triggered-when-messages-are-published-from-an-exter
 
 Alternatively, add the correct hosts to your `/etc/hosts` file
