@@ -13,13 +13,14 @@ The Electrical and Computer Engineering Department at Brigham Young University a
   - Nugget v2.0
   - Fry
 
+#### Resources
+
+  - [Our Wiki](https://github.com/zamora18/robot-soccer/wiki)
+  - [BYU Class Wiki](http://rwbclasses.groups.et.byu.net/doku.php?id=robot_soccer:2016:start)
+
 #### Contact
 
   - [Parker Lusk](https://github.com/plusk01), motion control
   - [Chris Frame](https://github.com/cwframe), vision
   - [Troy Ellis](https://github.com/robo-hobojoe), hardware
   - [Jake Zamora](https://github.com/zamora18), AI and strategy
-
-#### Resources
-
-  - [BYU Class Wiki](http://rwbclasses.groups.et.byu.net/doku.php?id=robot_soccer:2016:start)

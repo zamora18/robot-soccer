@@ -69,6 +69,7 @@ function killbot() {
 #echo 200 > /sys/class/gpio/export
 #echo out > /sys/class/gpio/gpio200/direction
 #echo 0 > /sys/class/gpio/gpio200/value
+# Try putting in /etc/bash.bashrc for setup on turn on
 
 function ally1() {
 	roslaunch "$ROBOT_PKG" ally1.launch &

@@ -45,3 +45,25 @@ touch robot-soccer/ros/src/soccersim/CATKIN_IGNORE
 ```
 
 This file is ignored by git. By simply creating it, `catkin_make` will no longer try to build it.
+
+#### Features Added ####
+
+- Changed ball friction and size
+- Changed field size
+- Click on `Overhead Vision Camera` view to place ball
+- Allow connection to actual ROS code so that everything can be simulated, not just AI
+- Allow rostopic remapping on most topics/services
+- Kicker
+- Camera speed changed to 30fps
+- Vision scaling properly between simulation-world and Gazebo-world
+
+#### Features Wish-list ####
+
+- Be able to move robots by clicking as well as ball
+- Add a circle to middle of field so that vision code can dynamically size everything
+
+See the branch `sim_move_bots` for the code.
+
+#### How to Run ####
+
+See the `scripts/simulator_setup.bash` file to understand more about the suite of commands that can be used to control the simulator.
