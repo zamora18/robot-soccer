@@ -9,6 +9,8 @@ We also added the ability to click on the vision screen and place the ball, or c
 
 A naive kicker was also implemented to help us simulate our actual robot.
 
+See an demo of the simulator [here](https://youtu.be/bMZNFNGh_Pk).
+
 #### Setting Up Gazebo ####
 
 Assuming you installed `ros-*-desktop-full`, you should already have Gazebo installed. Now, you just need to make sure you have some ROS packages installed that allow Gazebo and ROS to be friends.
