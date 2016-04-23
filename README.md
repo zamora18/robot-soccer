@@ -24,3 +24,5 @@ The Electrical and Computer Engineering Department at Brigham Young University a
   - [Chris Frame](https://github.com/cwframe), vision
   - [Troy Ellis](https://github.com/robo-hobojoe), hardware
   - [Jake Zamora](https://github.com/zamora18), AI and strategy
+
+To see what has become of us, view our [credits](https://www.youtube.com/watch?v=zJYsS5C2Bes)!
